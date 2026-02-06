@@ -1,0 +1,35 @@
+{
+  "name": "smoke",
+  "displayName": "Smoke",
+  "type": "particle",
+  "author": "drippycatcs",
+  "description": "Rising smoke clouds",
+  "visuals": {
+    "type": "smoke",
+    "shape": "smoke",
+    "colors": ["#555555", "#666666", "#777777", "#888888", "#444444"],
+    "particleCount": 3,
+    "size": {
+      "min": 16,
+      "max": 26
+    },
+    "lifetime": 2000,
+    "emissionRate": 4,
+    "physics": {
+      "gravity": -0.08,
+      "velocityX": {
+        "min": -8,
+        "max": 8
+      },
+      "velocityY": {
+        "min": -20,
+        "max": -8
+      }
+    },
+    "effects": {
+      "glow": false,
+      "fadeOut": true,
+      "expand": true
+    }
+  }
+}

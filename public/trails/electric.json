@@ -1,0 +1,35 @@
+{
+  "name": "electric",
+  "displayName": "Electric",
+  "type": "particle",
+  "author": "drippycatcs",
+  "description": "Crackling lightning bolts",
+  "visuals": {
+    "type": "electric",
+    "shape": "electric",
+    "colors": ["#00ffff", "#00ddff", "#00bbff", "#ffffff", "#88ffff"],
+    "particleCount": 4,
+    "size": {
+      "min": 10,
+      "max": 16
+    },
+    "lifetime": 450,
+    "emissionRate": 8,
+    "physics": {
+      "gravity": 0,
+      "velocityX": {
+        "min": -50,
+        "max": 50
+      },
+      "velocityY": {
+        "min": -50,
+        "max": 50
+      }
+    },
+    "effects": {
+      "glow": true,
+      "glowIntensity": 2.5,
+      "fadeOut": true
+    }
+  }
+}

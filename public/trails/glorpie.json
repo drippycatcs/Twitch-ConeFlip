@@ -1,0 +1,38 @@
+{
+    "name": "glorpie",
+    "displayName": "Glorpie",
+    "type": "particle",
+    "author": "drippycatcs",
+    "description": "Make it rain",
+    "visuals": {
+      "type": "custom",
+      "shape": "image",
+      "image": "../trails/content/glorpie.avif",
+      "colors": [],
+      "particleCount": 0.5,
+      "size": {
+        "min": 25,
+        "max": 30
+      },
+      "lifetime": 1400,
+      "emissionRate": 4,
+      "physics": {
+        "gravity": 0.05,
+        "velocityX": {
+          "min": 10,
+          "max": 30
+        },
+        "velocityY": {
+          "min": 50,
+          "max": 60
+        }
+      },
+      "effects": {
+        "glow": false,
+        "glowIntensity": 0,
+        "fadeOut": true,
+        "rotate": true,
+        "spin": true
+      }
+    }
+  } 

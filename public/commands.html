@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ConeFlip Commands</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/site.webmanifest">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Light mode colors */
+            --bg-gradient: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #f0fdf4 100%);
+            --text-primary: #1f2937;
+            --text-secondary: #4b5563;
+            --text-tertiary: #6b7280;
+            --text-link: #3b82f6;
+            --text-code: #1f2937;
+            --card-bg: rgba(255, 255, 255, 0.4);
+            --card-border: rgba(255, 255, 255, 0.3);
+            --input-bg: rgba(255, 255, 255, 0.6);
+            --input-border: rgba(156, 163, 175, 0.3);
+            --status-bg: rgba(255, 255, 255, 0.3);
+            --status-border: rgba(0, 0, 0, 0.1);
+            --pre-bg: rgba(255, 255, 255, 0.4);
+            --scrollbar-track: rgba(255, 255, 255, 0.2);
+            --scrollbar-thumb: #4b5563;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] {
+            /* Dark mode colors */
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f1419 100%);
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-tertiary: #94a3b8;
+            --text-link: #60a5fa;
+            --text-code: #e2e8f0;
+            --card-bg: rgba(30, 41, 59, 0.4);
+            --card-border: rgba(51, 65, 85, 0.5);
+            --input-bg: rgba(30, 41, 59, 0.6);
+            --input-border: rgba(71, 85, 105, 0.5);
+            --status-bg: rgba(30, 41, 59, 0.3);
+            --status-border: rgba(51, 65, 85, 0.3);
+            --pre-bg: rgba(15, 23, 42, 0.6);
+            --scrollbar-track: rgba(30, 41, 59, 0.3);
+            --scrollbar-thumb: #64748b;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+        }
+
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            padding: 25px 30px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 8px 32px var(--shadow-color);
+            position: relative;
+        }
+
+        .header h1 {
+            color: var(--text-primary);
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 4px var(--shadow-color);
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .theme-toggle {
+            background: var(--card-bg);
+            border: 2px solid var(--card-border);
+            border-radius: 50px;
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: absolute;
+            top: 25px;
+            right: 30px;
+        }
+
+        .theme-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px var(--shadow-color);
+        }
+
+        .commands-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 30px;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 8px 32px var(--shadow-color);
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .commands-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px var(--shadow-color);
+        }
+
+        .card-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid var(--input-border);
+            padding-bottom: 15px;
+        }
+
+        .commands-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .commands-table th,
+        .commands-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--input-border);
+        }
+
+        .commands-table th {
+            background: var(--status-bg);
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .commands-table td {
+            color: var(--text-secondary);
+        }
+
+        .command-name {
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            background: var(--pre-bg);
+            padding: 4px 8px;
+            border-radius: 6px;
+            color: var(--text-code);
+            font-size: 0.9rem;
+        }
+
+        .warning-box {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            color: #ef4444;
+            font-weight: 500;
+        }
+
+        .info-box {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            color: var(--text-link);
+        }
+
+        .info-box h3 {
+            margin-bottom: 10px;
+            color: var(--text-link);
+        }
+
+        .info-box ul {
+            margin-left: 20px;
+        }
+
+        .info-box li {
+            margin-bottom: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .header {
+                padding: 20px;
+                text-align: center;
+            }
+
+            .theme-toggle {
+                position: static;
+                margin-top: 15px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .commands-table {
+                font-size: 0.9rem;
+            }
+
+            .commands-table th,
+            .commands-table td {
+                padding: 8px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+
+        <div class="commands-card">
+            <h2 class="card-title">🛠️ User Commands</h2>
+            <table class="commands-table">
+                <thead>
+                    <tr>
+                        <th>Command</th>
+                        <th>Description</th>
+                        <th>Usage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="command-name">!leaderboard</span></td>
+                        <td>View the cone leaderboard</td>
+                        <td><span class="command-name">!leaderboard</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="command-name">!coneflip [@user]</span></td>
+                        <td>Check someone's coneflipping stats</td>
+                        <td><span class="command-name">!coneflip</span> or <span class="command-name">!coneflip @username</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="command-name">!conestats</span></td>
+                        <td>View average leaderboard stats</td>
+                        <td><span class="command-name">!conestats</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="command-name">!myskins [@user]</span></td>
+                        <td>See all skins owned by you or another user, and their currently selected skin</td>
+                        <td><span class="command-name">!myskins</span> or <span class="command-name">!myskins @username</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="command-name">!setskin &lt;skin_name&gt;</span></td>
+                        <td>Change your current skin</td>
+                        <td><span class="command-name">!setskin skin_name</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="command-name">!coneskins</span></td>
+                        <td>View all available skins and their drop rates</td>
+                        <td><span class="command-name">!coneskins</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="command-name">!contest</span></td>
+                        <td>Check current contest status and view contest page</td>
+                        <td><span class="command-name">!contest</span></td>
+                    </tr>
+                                        <tr>
+                        <td><span class="command-name">!settrail &lt;trail_name&gt;</span></td>
+                        <td>Change your current trail</td>
+                        <td><span class="command-name">!settrail trail_name</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="command-name">!coneshuffle</span></td>
+                        <td>Toggle skin shuffle - randomly picks a skin from your inventory each cone flip or duel</td>
+                        <td><span class="command-name">!coneshuffle</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="commands-card">
+            <h2 class="card-title">🔧 Admin Commands</h2>
+            <table class="commands-table">
+                <thead>
+                    <tr>
+                        <th>Command</th>
+                        <th>Description</th>
+                        <th>Usage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="command-name">!giveskin &lt;username&gt; &lt;skin&gt;</span></td>
+                        <td>Grant a skin to a user</td>
+                        <td><span class="command-name">!giveskin @username skin_name</span></td>
+                    </tr>
+                                        <tr>
+                        <td><span class="command-name">!givetrail &lt;username&gt; &lt;trail&gt;</span></td>
+                        <td>Grant a trail to a user</td>
+                        <td><span class="command-name">!givetrail @username trail_name</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="command-name">!simcone &lt;username&gt;</span></td>
+                        <td>Simulate a cone drop for a user</td>
+                        <td><span class="command-name">!simcone @username</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="command-name">!simduel &lt;username&gt; [target]</span></td>
+                        <td>Simulate a duel between two users</td>
+                        <td><span class="command-name">!simduel @username [@target]</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="command-name">!refreshcones</span></td>
+                        <td>Refresh the view (THIS WILL STOP ONGOING CONEFLIPS)</td>
+                        <td><span class="command-name">!refreshcones</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="command-name">!conestuck</span></td>
+                        <td>Trigger cone spamming for CONESTUCK event</td>
+                        <td><span class="command-name">!conestuck</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="info-box">
+            <h3>ℹ️ How to Use</h3>
+            <ul>
+                <li>Commands must be typed <strong>exactly</strong> as shown</li>
+                <li>Optional arguments are shown in <strong>[square brackets]</strong></li>
+                <li>Required arguments are shown in <strong>&lt;angle brackets&gt;</strong></li>
+            </ul>
+        </div>
+
+        <div class="warning-box">
+            <strong>⚠️ WARNING:</strong> Any typos will result in lost channel points.
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/shared-components.js"></script>
+    <script>
+        // Theme initialization will be handled by shared components
+    </script>
+</body>
+</html> 

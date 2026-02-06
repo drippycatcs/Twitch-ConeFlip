@@ -1,0 +1,37 @@
+{
+  "name": "xp-orb",
+  "displayName": "xp-orb",
+  "type": "particle",
+  "author": "drippycatcs",
+  "description": "XP Orb",
+  "visuals": {
+    "type": "custom",
+    "shape": "image",
+    "image": "../trails/content/orb.webp",
+    "colors": ["#4FB801","#B8B800"],
+    "particleCount": 3,
+    "size": {
+      "min": 12,
+      "max": 20
+    },
+    "lifetime": 1600,
+    "emissionRate": 5,
+    "physics": {
+      "gravity": 0.15,
+      "velocityX": {
+        "min": -15,
+        "max": 15
+      },
+      "velocityY": {
+        "min": -50,
+        "max": 12
+      }
+    },
+    "effects": {
+      "glow": true,
+      "glowIntensity": 1.2,
+      "fadeOut": true,
+      "rotate": true
+    }
+  }
+} 

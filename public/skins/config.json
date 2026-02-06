@@ -1,0 +1,257 @@
+[
+    {
+        "name": "default",
+        "visuals": "cone_default.png",
+        "canUnbox": false,
+        "author": "drippycatcs",
+        "specialdesc": "Default skin"
+    },
+    {
+        "name": "gold",
+        "visuals": "cone_gold.webp",
+        "canUnbox": false,
+        "author": "avesuire and drippycatcs",
+        "specialdesc": "#1 on the Leaderboard"
+    },
+    {
+        "name": "obsidian",
+        "visuals": "cone_obsidian.webp",
+        "canUnbox": false,
+        "author": "Kaczer1",
+        "specialdesc": "Highest XP player"
+    },
+    {
+        "name": "glorp",
+        "visuals": "cone_glorp.png",
+        "canUnbox": true,
+        "unboxWeight": 30,
+        "author": "aquaismissing"
+    },
+    {
+        "name": "inverted",
+        "visuals": "cone_inverted.png",
+        "canUnbox": true,
+        "unboxWeight": 30,
+        "author": "Syberiak"
+    },
+    {
+        "name": "cheese",
+        "visuals": "cone_cheese.png",
+        "canUnbox": true,
+        "unboxWeight": 30,
+        "author": "gigxbit"
+    },
+    {
+        "name": "poorlydrawn",
+        "visuals": "cone_poorlydrawn.png",
+        "canUnbox": true,
+        "unboxWeight": 30,
+        "author": "drippycatcs"
+    },
+    {
+        "name": "negative",
+        "visuals": "cone_negative.png",
+        "canUnbox": true,
+        "unboxWeight": 30,
+        "author": "Syberiak"
+    },
+    {
+        "name": "comic",
+        "visuals": "cone_comic.png",
+        "canUnbox": true,
+        "unboxWeight": 30,
+        "author": "likedom_"
+    },
+    {
+        "name": "casehardened",
+        "visuals": "cone_casehardened.png",
+        "canUnbox": true,
+        "unboxWeight": 30,
+        "author": "likedom_"
+    },
+    {
+        "name": "rust",
+        "visuals": "cone_rust.png",
+        "canUnbox": true,
+        "unboxWeight": 30,
+        "author": "avesuire"
+    },
+    {
+        "name": "tigertooth",
+        "visuals": "cone_tigertooth.png",
+        "canUnbox": true,
+        "unboxWeight": 15,
+        "author": "likedom_"
+    },
+    {
+        "name": "ahegao",
+        "visuals": "cone_ahegao.png",
+        "canUnbox": true,
+        "unboxWeight": 15,
+        "author": "drippycatcs"
+    },
+    {
+        "name": "rtxcone",
+        "visuals": "cone_rtx.png",
+        "canUnbox": true,
+        "unboxWeight": 15,
+        "author": "drippycatcs"
+    },
+    {
+        "name": "fade",
+        "visuals": "cone_fade.png",
+        "canUnbox": true,
+        "unboxWeight": 15,
+        "author": "likedom_"
+    },
+    {
+        "name": "printstream",
+        "visuals": "cone_printstream.png",
+        "canUnbox": true,
+        "unboxWeight": 15,
+        "author": "likedom_"
+    },
+    {
+        "name": "rainbow",
+        "visuals": "cone_rainbow.webp",
+        "canUnbox": true,
+        "unboxWeight": 9,
+        "author": "likedom_"
+    },
+    {
+        "name": "alarm",
+        "visuals": "cone_alarm.webp",
+        "canUnbox": true,
+        "unboxWeight": 9,
+        "author": "likedom_"
+    },
+    {
+        "name": "darkmatter",
+        "visuals": "holo_darkmatter.jpg",
+        "canUnbox": true,
+        "unboxWeight": 5,
+        "author": "aquaismissing"
+    },
+    {
+        "name": "doppler",
+        "visuals": "holo_doppler",
+        "canUnbox": true,
+        "unboxWeight": 5,
+        "author": "drippycatcs"
+    },
+    {
+        "name": "heat",
+        "visuals": "holo_heat.jpg",
+        "canUnbox": true,
+        "unboxWeight": 5,
+        "author": "drippycatcs"
+    },
+    {
+        "name": "iridescent",
+        "visuals": "holo_iridescent.jpg",
+        "canUnbox": true,
+        "unboxWeight": 5,
+        "author": "drippycatcs"
+    },
+    {
+        "name": "mongolia",
+        "visuals": "cone_mongolia.webp",
+        "canUnbox": true,
+        "unboxWeight": 9,
+        "author": "likedom_"
+    },
+    {
+        "name": "subcone",
+        "visuals": "cone_sub.webp",
+        "canUnbox": false,
+        "author": "likedom_",
+        "specialdesc": "Sub on Twitch to get this skin"
+    },
+    {
+        "name": "lavalamp",
+        "visuals": "cone_lavalamp.webp",
+        "canUnbox": true,
+        "unboxWeight": 9,
+        "author": "likedom_"
+    },
+    {
+        "name": "om",
+        "visuals": "cone_om.webp",
+        "canUnbox": false,
+        "author": "likedom_",
+        "specialdesc": "It's a setup"
+    },
+    {
+        "name": "glitch",
+        "visuals": "cone_glitch.webp",
+        "canUnbox": true,
+        "unboxWeight": 9,
+        "author": "Kam3l"
+    },
+    {
+        "name": "icecream",
+        "visuals": "cone_icecream.png",
+        "canUnbox": true,
+        "unboxWeight": 30,
+        "author": "stofeyxd"
+    },
+    {
+        "name": "skateboard",
+        "visuals": "cone_skatecone.png",
+        "canUnbox": true,
+        "unboxWeight": 30,
+        "author": "Kaczer1"
+    },
+    {
+        "name": "jellybean",
+        "visuals": "cone_jellybean.png",
+        "canUnbox": true,
+        "unboxWeight": 30,
+        "author": "stofeyxd"
+    },
+    {
+        "name": "easter",
+        "visuals": "cone_easter.webp",
+        "canUnbox": false,
+        "unboxWeight": 0,
+        "author": "avesuire & likedom_",
+        "specialdesc": "Seasonal skin (Easter)"
+    },
+    {
+        "name": "christmas",
+        "visuals": "cone_christmas.webp",
+        "canUnbox": false,
+        "unboxWeight": 0,
+        "author": "likedom_",
+        "specialdesc": "Seasonal skin (Christmas)"
+    },
+    {
+        "name": "pride",
+        "visuals": "cone_pride.webp",
+        "canUnbox": false,
+        "unboxWeight": 0,
+        "author": "likedom_",
+        "specialdesc": "Seasonal skin (Pride month)"
+    },
+    {
+        "name": "matrix",
+        "visuals": "cone_matrix.webp",
+        "canUnbox": true,
+        "unboxWeight": 9,
+        "author": "SyberiaK"
+    },
+    {
+        "name": "8bit",
+        "visuals": "cone_8bit.png",
+        "canUnbox": true,
+        "unboxWeight": 15,
+        "author": "Kaczer1"
+    },
+    {
+        "name": "crystal",
+        "visuals": "cone_crystal.webp",
+        "canUnbox": true,
+        "unboxWeight": 9,
+        "author": "Kaczer1"
+    }
+]

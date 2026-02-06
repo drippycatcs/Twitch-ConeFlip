@@ -1,0 +1,28 @@
+{
+  "name": "laser",
+  "displayName": "Laser",
+  "type": "particle",
+  "author": "drippycatcs",
+  "description": "A bright red laser beam that traces the cone's movement",
+  "visuals": {
+    "type": "line",
+    "shape": "line",
+    "colors": ["#ff0040"],
+    "lineWidth": 2,
+    "lineLength": 60,
+    "neonIntensity": 3,
+    "lifetime": 2500,
+    "fadeEffect": true,
+    "physics": {
+      "gravity": 0,
+      "velocityX": { "min": 0, "max": 0 },
+      "velocityY": { "min": 0, "max": 0 }
+    },
+    "effects": {
+      "glow": true,
+      "glowIntensity": 3,
+      "laser": true,
+      "bright": true
+    }
+  }
+} 

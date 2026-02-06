@@ -1,0 +1,36 @@
+{
+  "name": "fire",
+  "displayName": "Fire",
+  "type": "particle",
+  "author": "drippycatcs",
+  "description": "Blazing flames",
+  "visuals": {
+    "type": "fire",
+    "shape": "circle",
+    "colors": ["#ff4500", "#ff6600", "#ff8800", "#ffaa00", "#ffcc00"],
+    "particleCount": 5,
+    "size": {
+      "min": 8,
+      "max": 16
+    },
+    "lifetime": 800,
+    "emissionRate": 8,
+    "physics": {
+      "gravity": -0.3,
+      "velocityX": {
+        "min": -8,
+        "max": 8
+      },
+      "velocityY": {
+        "min": -40,
+        "max": -15
+      }
+    },
+    "effects": {
+      "glow": true,
+      "glowIntensity": 2.0,
+      "fadeOut": true,
+      "flicker": true
+    }
+  }
+}

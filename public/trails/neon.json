@@ -1,0 +1,28 @@
+{
+  "name": "neon",
+  "displayName": "Neon",
+  "type": "particle",
+  "author": "drippycatcs",
+  "description": "Neon lazer",
+  "visuals": {
+    "type": "line",
+    "shape": "line",
+    "colors": ["#00ffff"],
+    "lineWidth": 4,
+    "lineLength": 40,
+    "neonIntensity": 2,
+    "lifetime": 3000,
+    "fadeEffect": true,
+    "physics": {
+      "gravity": 0,
+      "velocityX": { "min": 0, "max": 0 },
+      "velocityY": { "min": 0, "max": 0 }
+    },
+    "effects": {
+      "glow": true,
+      "glowIntensity": 2.5,
+      "neon": true,
+      "smooth": true
+    }
+  }
+} 

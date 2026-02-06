@@ -1,0 +1,36 @@
+{
+  "name": "jellybean",
+  "displayName": "jellybean",
+  "type": "particle",
+  "author": "drippycatcs",
+  "description": "Whats with the jellybeans?!",
+  "visuals": {
+    "type": "custom",
+    "shape": "image",
+    "image": ["../trails/content/jellybean_rainbow_1.png","../trails/content/jellybean_rainbow_2.png","../trails/content/jellybean_rainbow_3.png","../trails/content/jellybean_rainbow_4.png","../trails/content/jellybean_rainbow_5.png","../trails/content/jellybean_rainbow_6.png"],
+    "colors": [],
+    "particleCount": 6,
+    "size": {
+      "min": 20,
+      "max": 25
+    },
+    "lifetime": 1400,
+    "emissionRate": 0.2,
+    "physics": {
+      "gravity": 0.25,
+      "velocityX": {
+        "min": -50,
+        "max": 10
+      },
+      "velocityY": {
+        "min": 25,
+        "max": 25
+      }
+    },
+    "effects": {
+      "glow": true,
+      "glowIntensity": 0,
+      "fadeOut": true
+    }
+  }
+} 

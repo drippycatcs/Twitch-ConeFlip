@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+
+# Environment and secrets
+.env
+data/setup.json
+data/auth_token.json
+data/reward-ids.json
+data/drippy.json
+
+# Databases
+data/*.db
+data/*.db-wal
+data/*.db-shm
+
+# Sessions
+data/sessions/
+
+# Runtime
+logs/
+uploads/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+nul
+
+# IDE
+.vscode/
+.idea/
+
+# Misc
+*.tmp
+*.bak

@@ -1,0 +1,1819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ConeFlip Mod Panel</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-gradient: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #f0fdf4 100%);
+            --text-primary: #1f2937;
+            --text-secondary: #4b5563;
+            --card-bg: rgba(255, 255, 255, 0.4);
+            --card-border: rgba(255, 255, 255, 0.3);
+            --input-bg: rgba(255, 255, 255, 0.6);
+            --input-border: rgba(156, 163, 175, 0.3);
+            --status-bg: rgba(255, 255, 255, 0.3);
+            --pre-bg: rgba(255, 255, 255, 0.4);
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
+        [data-theme="dark"] {
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f1419 100%);
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --card-bg: rgba(30, 41, 59, 0.4);
+            --card-border: rgba(51, 65, 85, 0.5);
+            --input-bg: rgba(30, 41, 59, 0.6);
+            --input-border: rgba(71, 85, 105, 0.5);
+            --status-bg: rgba(30, 41, 59, 0.3);
+            --pre-bg: rgba(15, 23, 42, 0.6);
+            --shadow-color: rgba(0, 0, 0, 0.3);
+        }
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        .header {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            padding: 25px 30px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 8px 32px var(--shadow-color);
+        }
+        .header h1 { font-size: 2.2rem; font-weight: 700; margin-bottom: 8px; }
+        .header p { color: var(--text-secondary); font-size: 1rem; }
+        .auth-section {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 50px;
+            text-align: center;
+            max-width: 450px;
+            margin: 150px auto;
+            border: 1px solid var(--card-border);
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 25px;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 8px 32px var(--shadow-color);
+        }
+        .card-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--input-border);
+            padding-bottom: 15px;
+        }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-secondary); }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid var(--input-border);
+            border-radius: 10px;
+            font-size: 1rem;
+            background: var(--input-bg);
+            color: var(--text-primary);
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #10b981;
+        }
+        .btn {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .btn:hover { transform: translateY(-2px); }
+        .btn-secondary { background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%); }
+        .btn-danger { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); }
+        .btn-success { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+        .btn-warning { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+        .btn-small { padding: 8px 16px; font-size: 0.875rem; }
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            background: var(--card-bg);
+            padding: 10px;
+            border-radius: 12px;
+            border: 1px solid var(--card-border);
+        }
+        .tab {
+            padding: 12px 20px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            border-radius: 8px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+        }
+        .tab:hover { background: var(--status-bg); color: var(--text-primary); }
+        .tab.active { background: #3b82f6; color: white; }
+        .tab-content { display: block; }
+        .tab-content.hidden { display: none; }
+        .status-display {
+            background: var(--status-bg);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        .status-display h4 { margin-bottom: 10px; font-size: 0.9rem; color: var(--text-secondary); }
+        .status-display pre {
+            background: var(--pre-bg);
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.85rem;
+            color: var(--text-primary);
+        }
+        .flex-wrap { display: flex; flex-wrap: wrap; gap: 10px; }
+        .hidden { display: none !important; }
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 500;
+            z-index: 10000;
+            animation: slideIn 0.3s ease;
+        }
+        .notification.success { background: #10b981; }
+        .notification.error { background: #ef4444; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .skin-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .skin-item {
+            background: var(--status-bg);
+            border-radius: 10px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .skin-item:hover { transform: scale(1.05); }
+        .skin-item.selected { border: 2px solid #10b981; }
+        .skin-item img { width: 80px; height: 80px; object-fit: contain; }
+        .skin-item .name { font-size: 0.75rem; margin-top: 5px; color: var(--text-secondary); }
+        .submission-item {
+            padding: 15px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            margin-bottom: 15px;
+            backdrop-filter: blur(10px);
+        }
+        .submission-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .submission-info h4 { margin: 0; color: var(--text-primary); }
+        .submission-info p { margin: 2px 0; font-size: 0.85rem; color: var(--text-secondary); }
+        .submission-preview {
+            width: 80px;
+            height: 80px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            border-radius: 8px;
+            border: 1px solid var(--input-border);
+            margin: 10px 0;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        .submission-preview:hover { transform: scale(1.05); }
+        .submission-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background: var(--card-bg);
+            border-radius: 16px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 1px solid var(--card-border);
+        }
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--card-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-header h3 { margin: 0; }
+        .modal-body { padding: 20px; }
+        .modal-footer {
+            padding: 20px;
+            border-top: 1px solid var(--card-border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        .skins-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .trails-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .skin-item, .trail-item {
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            gap: 15px;
+        }
+        .skin-info, .trail-info {
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+        }
+        .skin-preview {
+            width: 60px;
+            height: 60px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            border-radius: 8px;
+            border: 1px solid var(--input-border);
+            flex-shrink: 0;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        .skin-preview:hover { transform: scale(1.05); }
+        .skin-details, .trail-details {
+            flex: 1;
+        }
+        .skin-details h4, .trail-details h4 {
+            margin: 0 0 8px 0;
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        .skin-details p, .trail-details p {
+            margin: 3px 0;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+        .skin-actions, .trail-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        .skin-actions .btn, .trail-actions .btn {
+            flex: 1;
+            min-width: 70px;
+            font-size: 0.85rem;
+        }
+        .btn-info { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
+        .trail-preview {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            border: 1px solid var(--input-border);
+            flex-shrink: 0;
+        }
+        .announcement-preview {
+            background: var(--status-bg);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 15px;
+        }
+        .theme-toggle {
+            background: var(--card-bg);
+            border: 2px solid var(--card-border);
+            border-radius: 50px;
+            padding: 8px 16px;
+            cursor: pointer;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            margin-right: 10px;
+        }
+        .header-actions { display: flex; align-items: center; margin-top: 15px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Login Section -->
+        <div id="login-section" class="auth-section">
+            <h2 style="margin-bottom: 20px;">Mod Panel Login</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 30px;">Please log in with Twitch to access the mod panel.</p>
+            <button class="btn btn-full" onclick="loginWithTwitch()">Login with Twitch</button>
+        </div>
+
+        <!-- Dashboard -->
+        <div id="dashboard" class="hidden">
+            <div class="header">
+                <h1>Mod Panel</h1>
+                <p>Manage game testing, skins, trails, announcements, and contests</p>
+                <div class="header-actions">
+                    <button class="theme-toggle" onclick="toggleTheme()">Toggle Theme</button>
+                    <span id="user-info" style="color: var(--text-secondary);"></span>
+                    <button class="btn btn-secondary btn-small" onclick="logout()" style="margin-left: 15px;">Logout</button>
+                </div>
+            </div>
+
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab(0)">Game Testing</button>
+                <button class="tab" onclick="switchTab(1)">Skins</button>
+                <button class="tab" onclick="switchTab(2)">Trails</button>
+                <button class="tab" onclick="switchTab(3)">Announcements</button>
+                <button class="tab" onclick="switchTab(4)">Contest</button>
+                <button class="tab" onclick="switchTab(5)">Players</button>
+            </div>
+
+            <!-- Game Testing Tab -->
+            <div id="tab-0" class="tab-content">
+                <div class="grid">
+                    <div class="card">
+                        <h3 class="card-title">Game Simulation</h3>
+
+                        <div class="form-group">
+                            <label for="test-player-name">Player Name:</label>
+                            <input type="text" id="test-player-name" value="test_user" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="test-skin">Skin (optional):</label>
+                            <input type="text" id="test-skin" placeholder="e.g., gold, rainbow" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="duel-target">Duel Target (for duels):</label>
+                            <input type="text" id="duel-target" value="test_opponent" placeholder="Opponent username" />
+                        </div>
+
+                        <div class="flex-wrap">
+                            <button class="btn" onclick="simulateCone()">Simulate Cone</button>
+                            <button class="btn btn-secondary" onclick="simulateDuel()">Simulate Duel</button>
+                        </div>
+
+                        <div class="status-display">
+                            <h4>Game Results:</h4>
+                            <pre id="game-results">No tests run yet</pre>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="card-title">Bulk Testing</h3>
+
+                        <div class="form-group">
+                            <label for="bulk-count">Number of Tests:</label>
+                            <input type="number" id="bulk-count" value="10" min="1" max="100" />
+                        </div>
+
+                        <div class="flex-wrap">
+                            <button class="btn" onclick="bulkConeFlips()">Bulk Cones</button>
+                            <button class="btn btn-secondary" onclick="stressTest()">Stress Test</button>
+                        </div>
+
+                        <div class="status-display">
+                            <h4>Bulk Test Results:</h4>
+                            <pre id="bulk-results">No bulk tests run</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Skins Tab -->
+            <div id="tab-1" class="tab-content hidden">
+                <!-- Top 4 cards in a row -->
+                <div class="grid">
+                    <div class="card">
+                        <h3 class="card-title">Skin Testing</h3>
+
+                        <div class="form-group">
+                            <label for="skin-username">Username:</label>
+                            <input type="text" id="skin-username" value="test_user" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="unbox-count">Unbox Count:</label>
+                            <input type="number" id="unbox-count" value="1" min="1" max="10" />
+                        </div>
+
+                        <div class="flex-wrap">
+                            <button class="btn" onclick="simulateUnbox()">Simulate Unbox</button>
+                            <button class="btn btn-secondary" onclick="getUserSkins()">Get User Skins</button>
+                            <button class="btn btn-secondary" onclick="getAllSkins()">Get All Skins</button>
+                        </div>
+
+                        <div class="status-display">
+                            <h4>Skin Results:</h4>
+                            <pre id="skin-results">No skin tests run yet</pre>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="card-title">Gift Skin</h3>
+
+                        <div class="form-group">
+                            <label for="gift-username">Username:</label>
+                            <input type="text" id="gift-username" placeholder="Enter username" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="gift-skin">Skin:</label>
+                            <select id="gift-skin">
+                                <option value="">Select a skin...</option>
+                            </select>
+                        </div>
+
+                        <button class="btn btn-success btn-full" onclick="giftSkin()">
+                            Gift Skin
+                        </button>
+
+                        <div class="status-display">
+                            <h4>Gift Results:</h4>
+                            <pre id="gift-results">No gifts sent yet</pre>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="card-title">Submission Queue</h3>
+
+                        <div class="flex-wrap">
+                            <button class="btn btn-secondary" onclick="loadSubmissions()">Load Submissions</button>
+                            <button class="btn btn-success" onclick="window.open('/skins/submissions', '_blank')">Open Submission Page</button>
+                        </div>
+
+                        <div id="submissions-container">
+                            <div style="text-align: center; color: #6b7280; padding: 20px;">
+                                Click "Load Submissions" to view pending submissions
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="card-title">Seasonal Skin</h3>
+
+                        <div class="form-group">
+                            <label for="seasonal-skin-select">Active Seasonal Skin:</label>
+                            <select id="seasonal-skin-select">
+                                <option value="">None (disabled)</option>
+                            </select>
+                        </div>
+
+                        <div class="flex-wrap">
+                            <button class="btn btn-success" onclick="setSeasonalSkin()">Set Seasonal</button>
+                            <button class="btn btn-danger" onclick="clearSeasonalSkin()">Clear</button>
+                        </div>
+
+                        <p id="seasonal-skin-status" style="margin-top: 10px; color: var(--text-secondary); font-size: 0.875rem;"></p>
+                    </div>
+                </div>
+
+                <!-- Full width skin management card -->
+                <div class="card" style="margin-top: 20px;">
+                    <h3 class="card-title">Skin Management</h3>
+
+                    <div class="flex-wrap">
+                        <button class="btn" onclick="loadAllSkins()">Refresh Skins</button>
+                        <button class="btn btn-warning" onclick="reloadSkinSystem()">Reload System</button>
+                    </div>
+
+                    <div id="skins-container" class="skins-grid" style="margin-top: 20px;">
+                        <div style="text-align: center; color: #6b7280; padding: 20px;">
+                            Loading skins...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trails Tab -->
+            <div id="tab-2" class="tab-content hidden">
+                <div class="grid">
+                    <div class="card">
+                        <h3 class="card-title">Trail System Controls</h3>
+
+                        <div class="flex-wrap">
+                            <button class="btn" onclick="loadAllTrails()">Refresh Trails</button>
+                            <button class="btn btn-warning" onclick="reloadTrailSystem()">Reload System</button>
+                            <button class="btn btn-info" onclick="previewAllTrails()">Preview All</button>
+                        </div>
+
+                        <div class="status-display">
+                            <h4>Trail System Status:</h4>
+                            <pre id="trail-system-status">Loading...</pre>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="card-title">Give Trail to User</h3>
+
+                        <div class="form-group">
+                            <label for="trail-gift-username">Username:</label>
+                            <input type="text" id="trail-gift-username" placeholder="Enter username" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="trail-gift-select">Trail:</label>
+                            <select id="trail-gift-select">
+                                <option value="">Select a trail...</option>
+                            </select>
+                        </div>
+
+                        <button class="btn btn-success btn-full" onclick="giveTrailToUser()">Give Trail</button>
+
+                        <div class="status-display">
+                            <h4>Trail Actions:</h4>
+                            <pre id="trail-actions-results">No actions performed</pre>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Full width trail management card -->
+                <div class="card" style="margin-top: 20px;">
+                    <h3 class="card-title">Available Trails</h3>
+
+                    <div id="trails-container" class="trails-grid" style="margin-top: 20px;">
+                        <div style="text-align: center; color: #6b7280; padding: 20px;">
+                            Loading trails...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Announcements Tab -->
+            <div id="tab-3" class="tab-content hidden">
+                <div class="grid">
+                    <div class="card">
+                        <h3 class="card-title">Site Announcement</h3>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="announcement-enabled" onchange="updateAnnouncementPreview()" />
+                                Enable Announcement Banner
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label for="announcement-content">Announcement Content (HTML supported):</label>
+                            <textarea id="announcement-content" rows="4" placeholder="Enter announcement text..." oninput="updateAnnouncementPreview()"></textarea>
+                        </div>
+                        <div class="flex-wrap">
+                            <button class="btn btn-success" onclick="saveAnnouncement()">Save Announcement</button>
+                            <button class="btn btn-secondary" onclick="loadAnnouncement()">Load Current</button>
+                        </div>
+                        <div class="announcement-preview">
+                            <h4 style="margin-bottom: 10px; color: var(--text-secondary);">Preview:</h4>
+                            <div id="announcement-preview-content" style="padding: 10px; background: #fef3c7; border-radius: 8px; color: #92400e;">
+                                Preview will appear here
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contest Tab -->
+            <div id="tab-4" class="tab-content hidden">
+                <div class="grid">
+                    <div class="card">
+                        <h3 class="card-title">Contest Management</h3>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="contest-enabled" />
+                                Enable Contest System
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="contest-submissions" />
+                                Allow Submissions
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label for="contest-prize">Prize Description:</label>
+                            <input type="text" id="contest-prize" placeholder="e.g., Custom Cone Skin" />
+                        </div>
+                        <div class="form-group">
+                            <label for="contest-description">Contest Description:</label>
+                            <textarea id="contest-description" rows="3" placeholder="Describe the contest..."></textarea>
+                        </div>
+                        <div class="flex-wrap">
+                            <button class="btn btn-success" onclick="saveContestSettings()">Save Settings</button>
+                            <button class="btn btn-secondary" onclick="loadContestSettings()">Load Settings</button>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3 class="card-title">Contest Entries</h3>
+                        <button class="btn" onclick="loadContestEntries()">Load Entries</button>
+                        <div class="status-display">
+                            <h4>Entries:</h4>
+                            <pre id="contest-entries">No entries loaded</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Players Tab -->
+            <div id="tab-5" class="tab-content hidden">
+                <div class="grid">
+                    <div class="card">
+                        <h3 class="card-title">Search Players</h3>
+                        <div class="form-group">
+                            <label for="player-search">Search by username:</label>
+                            <input type="text" id="player-search" placeholder="Enter username..." onkeyup="handlePlayerSearchKeyup(event)" />
+                        </div>
+                        <div class="flex-wrap">
+                            <button class="btn" onclick="searchPlayers()">Search</button>
+                            <button class="btn btn-secondary" onclick="loadAllPlayers()">Load All Players</button>
+                        </div>
+                        <div class="status-display">
+                            <h4>Search Results:</h4>
+                            <div id="player-search-results">
+                                <p style="color: var(--text-secondary);">Enter a username to search</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="card-title">Quick Actions</h3>
+                        <div class="form-group">
+                            <label for="quick-player-name">Player Name:</label>
+                            <input type="text" id="quick-player-name" placeholder="Enter exact username" />
+                        </div>
+                        <div class="flex-wrap">
+                            <button class="btn btn-info" onclick="loadPlayerForEdit()">Load Player</button>
+                            <button class="btn btn-danger" onclick="quickDeletePlayer()">Delete Player</button>
+                        </div>
+                        <div class="status-display">
+                            <h4>Action Results:</h4>
+                            <pre id="player-action-results">No actions performed</pre>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Full width player list -->
+                <div class="card" style="margin-top: 20px;">
+                    <h3 class="card-title">Player List</h3>
+                    <div id="players-container" style="max-height: 500px; overflow-y: auto;">
+                        <p style="color: var(--text-secondary); text-align: center; padding: 20px;">
+                            Click "Load All Players" or search to view players
+                        </p>
+                    </div>
+                    <div id="players-pagination" style="margin-top: 15px; display: flex; justify-content: center; gap: 10px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Approval Configuration Modal -->
+    <div id="approvalModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Configure Skin Approval</h3>
+                <button class="btn btn-small btn-secondary" onclick="closeApprovalModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Submission Name:</label>
+                    <input type="text" id="approvalSubmissionName" placeholder="Enter skin name..." />
+                </div>
+                <div class="form-group">
+                    <label for="approvalCanUnbox">
+                        <input type="checkbox" id="approvalCanUnbox" onchange="toggleApprovalWeightField()" />
+                        Can be unboxed
+                    </label>
+                </div>
+                <div class="form-group" id="approvalWeightGroup" style="display: none;">
+                    <label for="approvalUnboxWeight">Unbox Weight (rarity):</label>
+                    <input type="number" id="approvalUnboxWeight" min="1" max="100" value="15" />
+                    <small style="color: #6b7280;">Higher = more common. Tier ranges: >=30 Mil-Spec, >=15 Restricted, >=9 Classified, >=5 Covert, <5 Gold</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeApprovalModal()">Cancel</button>
+                <button class="btn btn-success" onclick="confirmApproval()">Approve Skin</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fullscreen Image Modal -->
+    <div id="fullscreenModal" class="modal hidden" onclick="closeFullscreenModal()">
+        <div class="modal-content" style="max-width: 90vw; max-height: 90vh; padding: 0; background: transparent; box-shadow: none;">
+            <img id="fullscreenImage" src="" alt="Fullscreen Preview" style="max-width: 100%; max-height: 90vh; object-fit: contain; border-radius: 8px;">
+        </div>
+    </div>
+
+    <!-- Edit Player Modal -->
+    <div id="editPlayerModal" class="modal hidden">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3>Edit Player Stats: <span id="editPlayerName"></span></h3>
+                <button class="btn btn-small btn-secondary" onclick="closeEditPlayerModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label for="editPoints">Points:</label>
+                        <input type="number" id="editPoints" min="0" />
+                    </div>
+                    <div class="form-group">
+                        <label for="editLevel">Level:</label>
+                        <input type="number" id="editLevel" min="1" />
+                    </div>
+                    <div class="form-group">
+                        <label for="editXp">XP:</label>
+                        <input type="number" id="editXp" min="0" />
+                    </div>
+                    <div class="form-group">
+                        <label for="editWins">Total Wins:</label>
+                        <input type="number" id="editWins" min="0" />
+                    </div>
+                    <div class="form-group">
+                        <label for="editFails">Total Fails:</label>
+                        <input type="number" id="editFails" min="0" />
+                    </div>
+                    <div class="form-group">
+                        <label for="editDuelWins">Duel Wins:</label>
+                        <input type="number" id="editDuelWins" min="0" />
+                    </div>
+                    <div class="form-group">
+                        <label for="editDuelLosses">Duel Losses:</label>
+                        <input type="number" id="editDuelLosses" min="0" />
+                    </div>
+                    <div class="form-group">
+                        <label for="editConeflipWins">Coneflip Wins:</label>
+                        <input type="number" id="editConeflipWins" min="0" />
+                    </div>
+                    <div class="form-group">
+                        <label for="editConeflipLosses">Coneflip Losses:</label>
+                        <input type="number" id="editConeflipLosses" min="0" />
+                    </div>
+                    <div class="form-group">
+                        <label for="editCurrentStreak">Current Streak:</label>
+                        <input type="number" id="editCurrentStreak" min="0" />
+                    </div>
+                    <div class="form-group">
+                        <label for="editHighestStreak">Highest Streak:</label>
+                        <input type="number" id="editHighestStreak" min="0" />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeEditPlayerModal()">Cancel</button>
+                <button class="btn btn-danger" onclick="deletePlayerFromModal()">Delete Player</button>
+                <button class="btn btn-success" onclick="savePlayerStats()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let selectedGiftSkin = null;
+        let allSkins = [];
+        let currentApprovalId = null;
+
+        // Check auth on load
+        document.addEventListener('DOMContentLoaded', checkAuthStatus);
+
+        async function checkAuthStatus() {
+            try {
+                const response = await fetch('/auth/user', { credentials: 'include' });
+                const data = await response.json();
+
+                if (data.status === 'success' && data.data && data.data.is_moderator) {
+                    currentUser = data.data;
+                    document.getElementById('login-section').classList.add('hidden');
+                    document.getElementById('dashboard').classList.remove('hidden');
+                    document.getElementById('user-info').textContent = `Logged in as: ${currentUser.display_name || currentUser.login}`;
+
+                    // Load saved theme
+                    const savedTheme = localStorage.getItem('theme') || 'light';
+                    document.documentElement.setAttribute('data-theme', savedTheme);
+                } else if (data.data && !data.data.is_moderator) {
+                    showNotification('You do not have moderator access', 'error');
+                }
+            } catch (error) {
+                console.error('Auth check failed:', error);
+            }
+        }
+
+        function loginWithTwitch() {
+            window.location.href = '/auth/login';
+        }
+
+        async function logout() {
+            try {
+                await fetch('/auth/logout', { method: 'POST', credentials: 'include' });
+                window.location.reload();
+            } catch (error) {
+                console.error('Logout failed:', error);
+            }
+        }
+
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme') || 'light';
+            const newTheme = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        }
+
+        function switchTab(index) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.getElementById(`tab-${index}`).classList.remove('hidden');
+            document.querySelectorAll('.tab')[index].classList.add('active');
+
+            // Auto-load data for specific tabs
+            if (index === 1) { // Skins tab
+                loadAllSkins();
+                loadSeasonalSkinStatus();
+            }
+            if (index === 2) { // Trails tab
+                loadAllTrails();
+            }
+            if (index === 3) { // Announcements tab
+                loadAnnouncement();
+            }
+            if (index === 4) { // Contest tab
+                loadContestSettings();
+            }
+        }
+
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 3000);
+        }
+
+        async function apiRequest(endpoint, method = 'GET', body = null) {
+            const options = {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include'
+            };
+            if (body) options.body = JSON.stringify(body);
+
+            const response = await fetch(endpoint, options);
+            if (response.status === 401 || response.status === 403) {
+                showNotification('Access denied', 'error');
+                return null;
+            }
+            return await response.json();
+        }
+
+        // Game Testing
+        async function simulateCone() {
+            const name = document.getElementById('test-player-name').value || 'test_user';
+            const skin = document.getElementById('test-skin').value;
+            try {
+                const url = skin ? `/api/game/cone/add?name=${name}&skin=${skin}` : `/api/game/cone/add?name=${name}`;
+                const result = await apiRequest(url);
+                document.getElementById('game-results').textContent = JSON.stringify(result, null, 2);
+                showNotification('Cone simulated!', 'success');
+            } catch (error) {
+                showNotification('Failed to simulate cone', 'error');
+            }
+        }
+
+        async function simulateDuel() {
+            const name = document.getElementById('test-player-name').value || 'test_user';
+            const target = document.getElementById('duel-target').value || 'test_opponent';
+            try {
+                const result = await apiRequest(`/api/game/cone/duel?name=${name}&target=${target}`);
+                document.getElementById('game-results').textContent = JSON.stringify(result, null, 2);
+                showNotification('Duel simulated!', 'success');
+            } catch (error) {
+                showNotification('Failed to simulate duel', 'error');
+            }
+        }
+
+        async function bulkConeFlips() {
+            const count = document.getElementById('bulk-count').value;
+            try {
+                const promises = [];
+                for (let i = 0; i < parseInt(count); i++) {
+                    promises.push(apiRequest(`/api/game/cone/add?name=BulkTest_${i}`));
+                }
+                const results = await Promise.all(promises);
+                document.getElementById('bulk-results').textContent = JSON.stringify({ count: results.length, results }, null, 2);
+                showNotification(`Added ${count} cones`, 'success');
+            } catch (error) {
+                showNotification('Bulk test failed', 'error');
+            }
+        }
+
+        async function stressTest() {
+            const count = document.getElementById('bulk-count').value || 10;
+            try {
+                document.getElementById('bulk-results').textContent = 'Running stress test...';
+                const startTime = Date.now();
+                const promises = [];
+                for (let i = 0; i < parseInt(count); i++) {
+                    promises.push(apiRequest(`/api/game/cone/add?name=StressTest_${i}`));
+                }
+                const results = await Promise.all(promises);
+                const endTime = Date.now();
+                const duration = endTime - startTime;
+                document.getElementById('bulk-results').textContent = JSON.stringify({
+                    totalTests: results.length,
+                    duration: `${duration}ms`,
+                    avgPerTest: `${(duration / results.length).toFixed(2)}ms`
+                }, null, 2);
+                showNotification(`Stress test completed in ${duration}ms`, 'success');
+            } catch (error) {
+                showNotification('Stress test failed', 'error');
+            }
+        }
+
+        // Skins
+        async function simulateUnbox() {
+            const username = document.getElementById('skin-username').value || 'test_user';
+            const count = parseInt(document.getElementById('unbox-count').value) || 1;
+            try {
+                const results = [];
+                for (let i = 0; i < count; i++) {
+                    const result = await apiRequest(`/api/skins/unbox?name=${username}`);
+                    results.push(result);
+                }
+                document.getElementById('skin-results').textContent = JSON.stringify(results, null, 2);
+                showNotification(`Simulated ${count} unbox(es)`, 'success');
+            } catch (error) {
+                showNotification('Failed to simulate unbox', 'error');
+            }
+        }
+
+        async function getUserSkins() {
+            const username = document.getElementById('skin-username').value;
+            try {
+                const result = await apiRequest(`/api/skins/user/${username}`);
+                document.getElementById('skin-results').textContent = JSON.stringify(result, null, 2);
+                showNotification(`Retrieved skins for ${username}`, 'success');
+            } catch (error) {
+                showNotification('Failed to get user skins', 'error');
+            }
+        }
+
+        async function getAllSkins() {
+            try {
+                const result = await apiRequest('/api/skins/available');
+                document.getElementById('skin-results').textContent = JSON.stringify(result, null, 2);
+                showNotification('Retrieved all available skins', 'success');
+            } catch (error) {
+                showNotification('Failed to get all skins', 'error');
+            }
+        }
+
+        function getTierFromWeight(weight) {
+            if (weight >= 30) return 'Mil-Spec (72.54%)';
+            if (weight >= 15) return 'Restricted (18%)';
+            if (weight >= 9) return 'Classified (6.8%)';
+            if (weight >= 5) return 'Covert (2.4%)';
+            return 'Gold (0.26%)';
+        }
+
+        async function loadAllSkins() {
+            try {
+                const result = await apiRequest('/api/debug/skins/list');
+                const container = document.getElementById('skins-container');
+                const giftSelect = document.getElementById('gift-skin');
+
+                if (result.data && result.data.length > 0) {
+                    // Sort skins by tier
+                    const sortedSkins = result.data.sort((a, b) => {
+                        const getTierOrder = (weight, canUnbox) => {
+                            if (!canUnbox) return 0;
+                            if (weight < 5) return 1;
+                            if (weight < 9) return 2;
+                            if (weight < 15) return 3;
+                            if (weight < 30) return 4;
+                            return 5;
+                        };
+                        const aTier = getTierOrder(a.unboxWeight || 0, a.canUnbox);
+                        const bTier = getTierOrder(b.unboxWeight || 0, b.canUnbox);
+                        if (aTier !== bTier) return aTier - bTier;
+                        return a.name.localeCompare(b.name);
+                    });
+
+                    // Populate skin management list
+                    container.innerHTML = sortedSkins.map(skin => `
+                        <div class="skin-item">
+                            <div class="skin-info">
+                                <div class="skin-preview" style="background-image: url('/skins/${skin.filename}')" onclick="openFullscreenModal('/skins/${skin.filename}', '${skin.name}')"></div>
+                                <div class="skin-details">
+                                    <h4>${skin.name} ${skin.isHolo ? '(Holo)' : '(Cone)'}</h4>
+                                    <p>File: ${skin.filename}</p>
+                                    <p>Unboxable: ${skin.canUnbox ? 'Yes' : 'No'}</p>
+                                    ${skin.canUnbox ? `<p>Weight: ${skin.unboxWeight || 0} (${getTierFromWeight(skin.unboxWeight || 0)})</p>` : ''}
+                                    <p>Status: ${skin.enabled ? 'Enabled' : 'Disabled'}</p>
+                                </div>
+                            </div>
+                            <div class="skin-actions">
+                                <button class="btn btn-small btn-secondary" onclick="editSkin('${skin.originalName || skin.name}')">
+                                    Edit
+                                </button>
+                                <button class="btn btn-small ${skin.enabled ? 'btn-secondary' : 'btn-success'}"
+                                        onclick="toggleSkin('${skin.originalName || skin.name}', ${!skin.enabled})">
+                                    ${skin.enabled ? 'Disable' : 'Enable'}
+                                </button>
+                                <button class="btn btn-small btn-danger" onclick="deleteSkin('${skin.originalName || skin.name}')">
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
+                    `).join('');
+
+                    // Populate gift skin dropdown
+                    giftSelect.innerHTML = '<option value="">Select a skin...</option>' +
+                        result.data.map(skin => `
+                            <option value="${skin.originalName || skin.name}">${skin.name} ${skin.isHolo ? '(Holo)' : '(Cone)'}</option>
+                        `).join('');
+
+                    // Populate seasonal skin dropdown
+                    const seasonalSelect = document.getElementById('seasonal-skin-select');
+                    if (seasonalSelect) {
+                        seasonalSelect.innerHTML = '<option value="">None (disabled)</option>' +
+                            result.data.map(skin => `
+                                <option value="${skin.originalName || skin.name}">${skin.name} ${skin.isHolo ? '(Holo)' : '(Cone)'}</option>
+                            `).join('');
+                    }
+                } else {
+                    container.innerHTML = '<div style="text-align: center; color: #6b7280; padding: 20px;">No skins found</div>';
+                    giftSelect.innerHTML = '<option value="">No skins available</option>';
+                }
+
+                showNotification('Skins loaded successfully', 'success');
+            } catch (error) {
+                showNotification('Failed to load skins', 'error');
+                document.getElementById('skins-container').innerHTML = '<div style="text-align: center; color: #6b7280; padding: 20px;">Failed to load skins</div>';
+            }
+        }
+
+        async function toggleSkin(skinName, enable) {
+            try {
+                await apiRequest('/api/debug/skins/toggle', 'POST', { name: skinName, enabled: enable });
+                showNotification(`Skin ${enable ? 'enabled' : 'disabled'} successfully`, 'success');
+                loadAllSkins();
+            } catch (error) {
+                showNotification(`Failed to ${enable ? 'enable' : 'disable'} skin`, 'error');
+            }
+        }
+
+        async function editSkin(skinName) {
+            const newWeight = prompt(`Enter new unbox weight for "${skinName}" (higher = more common):\n\nTier ranges:\n>=30 Mil-Spec\n>=15 Restricted\n>=9 Classified\n>=5 Covert\n<5 Gold\n\nEnter 0 to make non-unboxable:`);
+
+            if (newWeight === null) return;
+
+            const weight = parseInt(newWeight);
+            if (isNaN(weight) || weight < 0) {
+                showNotification('Invalid weight value', 'error');
+                return;
+            }
+
+            try {
+                await apiRequest('/api/debug/skins/config/update', 'POST', {
+                    name: skinName,
+                    canUnbox: weight > 0,
+                    unboxWeight: weight
+                });
+                showNotification('Skin updated successfully', 'success');
+                loadAllSkins();
+            } catch (error) {
+                showNotification('Failed to update skin', 'error');
+            }
+        }
+
+        async function deleteSkin(skinName) {
+            if (!confirm(`Are you sure you want to delete the skin "${skinName}"? This cannot be undone.`)) return;
+
+            try {
+                await apiRequest('/api/debug/skins/delete', 'POST', { name: skinName });
+                showNotification('Skin deleted successfully', 'success');
+                loadAllSkins();
+            } catch (error) {
+                showNotification('Failed to delete skin', 'error');
+            }
+        }
+
+        async function reloadSkinSystem() {
+            if (!confirm('Reload the skin system? This will apply any config changes.')) return;
+            try {
+                await apiRequest('/api/debug/skins/reload', 'POST');
+                showNotification('Skin system reloaded successfully', 'success');
+                loadAllSkins();
+            } catch (error) {
+                showNotification('Failed to reload skin system', 'error');
+            }
+        }
+
+        async function giftSkin() {
+            const username = document.getElementById('gift-username').value;
+            const skinName = document.getElementById('gift-skin').value;
+            if (!username || !skinName) {
+                showNotification('Username and skin are required', 'error');
+                return;
+            }
+            try {
+                const result = await apiRequest(`/api/skins/give?name=${username}&skin=${skinName}`);
+                document.getElementById('gift-results').textContent = JSON.stringify(result, null, 2);
+                showNotification(`Gifted ${skinName} to ${username}`, 'success');
+            } catch (error) {
+                showNotification('Failed to gift skin', 'error');
+            }
+        }
+
+        // Submissions
+        async function loadSubmissions() {
+            try {
+                const result = await apiRequest('/api/debug/skins/submissions');
+                const container = document.getElementById('submissions-container');
+
+                if (result.data && result.data.length > 0) {
+                    container.innerHTML = result.data.map(submission => `
+                        <div class="submission-item">
+                            <div class="submission-header">
+                                <div class="submission-info">
+                                    <h4>${submission.name} ${submission.isHolo ? '(Holo)' : '(Cone)'}</h4>
+                                    <p>Author: ${submission.author}</p>
+                                    <p>Uploaded: ${new Date(submission.uploadedAt).toLocaleString()}</p>
+                                </div>
+                            </div>
+                            <div class="submission-preview" style="background-image: url('/uploads/submissions/${submission.filename}')" onclick="openFullscreenModal('/uploads/submissions/${submission.filename}', '${submission.name}')"></div>
+                            <div class="submission-actions">
+                                <button class="btn btn-small btn-success" onclick="approveSubmission('${submission.id}')">Approve</button>
+                                <button class="btn btn-small btn-danger" onclick="rejectSubmission('${submission.id}')">Reject</button>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = '<div style="text-align: center; color: #6b7280; padding: 20px;">No pending submissions</div>';
+                }
+
+                showNotification('Submissions loaded', 'success');
+            } catch (error) {
+                showNotification('Failed to load submissions', 'error');
+            }
+        }
+
+        async function getCurrentSubmissions() {
+            try {
+                const result = await apiRequest('/api/debug/skins/submissions');
+                return result.data || [];
+            } catch (error) {
+                return [];
+            }
+        }
+
+        async function approveSubmission(submissionId) {
+            const submissions = await getCurrentSubmissions();
+            const submission = submissions.find(s => s.id === submissionId);
+
+            if (!submission) {
+                showNotification('Submission not found', 'error');
+                return;
+            }
+
+            currentApprovalId = submissionId;
+            document.getElementById('approvalSubmissionName').value = submission.name;
+            document.getElementById('approvalCanUnbox').checked = false;
+            document.getElementById('approvalUnboxWeight').value = 15;
+            document.getElementById('approvalWeightGroup').style.display = 'none';
+            document.getElementById('approvalModal').classList.remove('hidden');
+        }
+
+        function closeApprovalModal() {
+            document.getElementById('approvalModal').classList.add('hidden');
+            currentApprovalId = null;
+        }
+
+        function toggleApprovalWeightField() {
+            const canUnbox = document.getElementById('approvalCanUnbox').checked;
+            document.getElementById('approvalWeightGroup').style.display = canUnbox ? 'block' : 'none';
+        }
+
+        async function confirmApproval() {
+            if (!currentApprovalId) return;
+
+            try {
+                const newName = document.getElementById('approvalSubmissionName').value.trim();
+                const canUnbox = document.getElementById('approvalCanUnbox').checked;
+                const unboxWeight = parseInt(document.getElementById('approvalUnboxWeight').value);
+
+                if (!newName) {
+                    showNotification('Please enter a valid skin name', 'error');
+                    return;
+                }
+
+                const submissions = await getCurrentSubmissions();
+                const submission = submissions.find(s => s.id === currentApprovalId);
+
+                if (submission && submission.name !== newName) {
+                    await apiRequest('/api/debug/skins/submissions/update-name', 'POST', {
+                        id: currentApprovalId,
+                        newName: newName
+                    });
+                }
+
+                await apiRequest('/api/debug/skins/submissions/approve', 'POST', {
+                    id: currentApprovalId,
+                    canUnbox: canUnbox,
+                    unboxWeight: canUnbox ? unboxWeight : 0
+                });
+
+                showNotification('Submission approved', 'success');
+                closeApprovalModal();
+                loadSubmissions();
+                loadAllSkins();
+            } catch (error) {
+                showNotification('Failed to approve submission', 'error');
+            }
+        }
+
+        async function rejectSubmission(submissionId) {
+            if (!confirm('Are you sure you want to reject this submission?')) return;
+
+            try {
+                await apiRequest('/api/debug/skins/submissions/reject', 'POST', { id: submissionId });
+                showNotification('Submission rejected', 'success');
+                loadSubmissions();
+            } catch (error) {
+                showNotification('Failed to reject submission', 'error');
+            }
+        }
+
+        // Fullscreen Modal
+        function openFullscreenModal(imageSrc, imageName) {
+            const modal = document.getElementById('fullscreenModal');
+            const image = document.getElementById('fullscreenImage');
+            image.src = imageSrc;
+            image.alt = `Preview of ${imageName}`;
+            modal.classList.remove('hidden');
+        }
+
+        function closeFullscreenModal() {
+            document.getElementById('fullscreenModal').classList.add('hidden');
+        }
+
+        // Seasonal Skin Functions
+        async function loadSeasonalSkinStatus() {
+            const statusEl = document.getElementById('seasonal-skin-status');
+            const selectEl = document.getElementById('seasonal-skin-select');
+            try {
+                const result = await apiRequest('/api/debug/skins/seasonal');
+                if (result.data) {
+                    const { seasonalSkin, isActive } = result.data;
+                    statusEl.textContent = isActive
+                        ? `Currently active: "${seasonalSkin}" - all users have this skin`
+                        : 'No seasonal skin active';
+
+                    if (selectEl && seasonalSkin) {
+                        selectEl.value = seasonalSkin;
+                    }
+                }
+            } catch (error) {
+                statusEl.textContent = 'Could not load status';
+            }
+        }
+
+        async function setSeasonalSkin() {
+            const skinName = document.getElementById('seasonal-skin-select').value;
+
+            try {
+                const result = await apiRequest('/api/debug/skins/seasonal', 'POST', {
+                    skinName: skinName || null
+                });
+                showNotification(result.message || 'Seasonal skin updated', 'success');
+                loadSeasonalSkinStatus();
+            } catch (error) {
+                showNotification('Failed to set seasonal skin', 'error');
+            }
+        }
+
+        async function clearSeasonalSkin() {
+            if (!confirm('Clear seasonal skin? Users who have it selected will be reset to default.')) {
+                return;
+            }
+
+            try {
+                const result = await apiRequest('/api/debug/skins/seasonal', 'DELETE');
+                document.getElementById('seasonal-skin-select').value = '';
+                showNotification(result.message || 'Seasonal skin cleared', 'success');
+                loadSeasonalSkinStatus();
+            } catch (error) {
+                showNotification('Failed to clear seasonal skin', 'error');
+            }
+        }
+
+        // Trails
+        function getTrailPreviewColor(trailName) {
+            const colorMap = {
+                'default': 'linear-gradient(45deg, #6b7280, #9ca3af)',
+                'sparkle': 'linear-gradient(45deg, #ffd700, #ffed4e)',
+                'fire': 'linear-gradient(45deg, #ff4500, #ff6347, #ffd700)',
+                'ice': 'linear-gradient(45deg, #87ceeb, #b0e0e6, #ffffff)',
+                'rainbow': 'linear-gradient(45deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3)',
+                'electric': 'linear-gradient(45deg, #00ffff, #0080ff, #ffffff)',
+                'cosmic': 'linear-gradient(45deg, #800080, #4b0082, #9400d3, #ff1493)',
+                'shadow': 'linear-gradient(45deg, #2f2f2f, #1c1c1c, #000000)',
+                'golden': 'linear-gradient(45deg, #ffd700, #ffa500, #ffff00)'
+            };
+            return colorMap[trailName] || 'linear-gradient(45deg, #8b5cf6, #06b6d4)';
+        }
+
+        function formatTrailName(trailName) {
+            if (!trailName) return 'Unknown';
+            return trailName.split(/[_-]/).map(word =>
+                word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+            ).join(' ');
+        }
+
+        async function loadAllTrails() {
+            try {
+                const [configResponse, usersResponse] = await Promise.all([
+                    fetch('/api/trails/config'),
+                    fetch('/api/trails/users')
+                ]);
+
+                const trailConfigs = await configResponse.json();
+                const userTrails = await usersResponse.json();
+
+                const container = document.getElementById('trails-container');
+                const giftSelect = document.getElementById('trail-gift-select');
+
+                if (trailConfigs && trailConfigs.length > 0) {
+                    // Populate trail management list
+                    container.innerHTML = trailConfigs.map(trail => {
+                        const usersWithTrail = userTrails.data ? userTrails.data.filter(u => u.trail === trail.name).length : 0;
+
+                        return `
+                            <div class="trail-item">
+                                <div class="trail-info">
+                                    <div class="trail-preview" style="background: ${getTrailPreviewColor(trail.name)}">✨</div>
+                                    <div class="trail-details">
+                                        <h4>${formatTrailName(trail.name)}</h4>
+                                        <p>Type: ${trail.type || 'particle'}</p>
+                                        <p>Tier: ${trail.tier || 'unknown'}</p>
+                                        <p>Available: Yes</p>
+                                        <p>Users with trail: ${usersWithTrail}</p>
+                                        ${trail.author ? `<p>Author: ${trail.author}</p>` : ''}
+                                    </div>
+                                </div>
+                                <div class="trail-actions">
+                                    <button class="btn btn-small btn-info" onclick="viewTrailDetails('${trail.name}')">
+                                        View Config
+                                    </button>
+                                    <button class="btn btn-small btn-success" onclick="previewTrail('${trail.name}')">
+                                        Preview
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+
+                    // Populate gift select
+                    giftSelect.innerHTML = '<option value="">Select a trail...</option>' +
+                        trailConfigs.map(trail => `<option value="${trail.name}">${formatTrailName(trail.name)}</option>`).join('');
+
+                    // Update status
+                    document.getElementById('trail-system-status').textContent = `${trailConfigs.length} trails configured`;
+                } else {
+                    container.innerHTML = '<div style="text-align: center; color: var(--text-secondary); padding: 20px;">No trails configured</div>';
+                }
+
+                showNotification('Trails loaded successfully', 'success');
+            } catch (error) {
+                console.error('Error loading trails:', error);
+                document.getElementById('trails-container').innerHTML = '<div style="text-align: center; color: #ef4444; padding: 20px;">Error loading trails</div>';
+                showNotification('Failed to load trails', 'error');
+            }
+        }
+
+        async function giveTrailToUser() {
+            const username = document.getElementById('trail-gift-username').value.trim();
+            const trailName = document.getElementById('trail-gift-select').value;
+
+            if (!username) {
+                showNotification('Please enter a username', 'error');
+                return;
+            }
+
+            if (!trailName) {
+                showNotification('Please select a trail', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/trails/give?name=${encodeURIComponent(username)}&skin=${encodeURIComponent(trailName)}`, {
+                    credentials: 'include'
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.status === 'success') {
+                    showNotification(`Gave ${formatTrailName(trailName)} trail to ${username}`, 'success');
+                    document.getElementById('trail-gift-username').value = '';
+                    document.getElementById('trail-gift-select').value = '';
+                    document.getElementById('trail-actions-results').textContent = JSON.stringify(result, null, 2);
+                    loadAllTrails();
+                } else {
+                    showNotification(result.message || 'Failed to give trail', 'error');
+                }
+            } catch (error) {
+                console.error('Error giving trail:', error);
+                showNotification('Error giving trail', 'error');
+            }
+        }
+
+        async function viewTrailDetails(trailName) {
+            try {
+                const response = await fetch('/api/trails/config');
+                const trailConfigs = await response.json();
+                const trail = trailConfigs.find(t => t.name === trailName);
+
+                if (trail) {
+                    document.getElementById('trail-actions-results').textContent = JSON.stringify(trail, null, 2);
+                    showNotification(`Loaded config for ${formatTrailName(trailName)}`, 'success');
+                } else {
+                    showNotification('Trail configuration not found', 'error');
+                }
+            } catch (error) {
+                console.error('Error viewing trail details:', error);
+                showNotification('Error loading trail details', 'error');
+            }
+        }
+
+        function previewTrail(trailName) {
+            showNotification(`Trail preview feature coming soon for ${formatTrailName(trailName)}`, 'info');
+        }
+
+        async function reloadTrailSystem() {
+            try {
+                await loadAllTrails();
+                showNotification('Trail system reloaded', 'success');
+            } catch (error) {
+                console.error('Error reloading trail system:', error);
+                showNotification('Failed to reload trail system', 'error');
+            }
+        }
+
+        function previewAllTrails() {
+            showNotification('Preview all trails feature coming soon', 'info');
+        }
+
+        // Announcements
+        function updateAnnouncementPreview() {
+            const content = document.getElementById('announcement-content').value;
+            const enabled = document.getElementById('announcement-enabled').checked;
+            const preview = document.getElementById('announcement-preview-content');
+            preview.innerHTML = enabled ? (content || 'No content') : '<em>Announcement disabled</em>';
+            preview.style.opacity = enabled ? '1' : '0.5';
+        }
+
+        async function saveAnnouncement() {
+            const enabled = document.getElementById('announcement-enabled').checked;
+            const content = document.getElementById('announcement-content').value;
+            try {
+                const result = await apiRequest('/api/debug/announcement', 'POST', { enabled, content });
+                if (result && result.status === 'success') {
+                    showNotification('Announcement saved', 'success');
+                } else {
+                    showNotification('Failed to save announcement', 'error');
+                }
+            } catch (error) {
+                showNotification('Failed to save announcement', 'error');
+            }
+        }
+
+        async function loadAnnouncement() {
+            try {
+                const result = await apiRequest('/api/debug/announcement');
+                if (result && result.data) {
+                    document.getElementById('announcement-enabled').checked = result.data.enabled;
+                    document.getElementById('announcement-content').value = result.data.content || '';
+                    updateAnnouncementPreview();
+                    showNotification('Announcement loaded', 'success');
+                }
+            } catch (error) {
+                showNotification('Failed to load announcement', 'error');
+            }
+        }
+
+        // Contest
+        async function saveContestSettings() {
+            const settings = {
+                enabled: document.getElementById('contest-enabled').checked,
+                allowSubmissions: document.getElementById('contest-submissions').checked,
+                prize: document.getElementById('contest-prize').value,
+                description: document.getElementById('contest-description').value
+            };
+            try {
+                const result = await apiRequest('/api/debug/contest', 'POST', settings);
+                if (result && result.status === 'success') {
+                    showNotification('Contest settings saved', 'success');
+                } else {
+                    showNotification('Failed to save settings', 'error');
+                }
+            } catch (error) {
+                showNotification('Failed to save settings', 'error');
+            }
+        }
+
+        async function loadContestSettings() {
+            try {
+                const result = await apiRequest('/api/debug/contest');
+                if (result && result.data) {
+                    document.getElementById('contest-enabled').checked = result.data.enabled;
+                    document.getElementById('contest-submissions').checked = result.data.allowSubmissions;
+                    document.getElementById('contest-prize').value = result.data.prize || '';
+                    document.getElementById('contest-description').value = result.data.description || '';
+                    showNotification('Settings loaded', 'success');
+                }
+            } catch (error) {
+                showNotification('Failed to load settings', 'error');
+            }
+        }
+
+        async function loadContestEntries() {
+            try {
+                const result = await apiRequest('/api/contest/entries');
+                document.getElementById('contest-entries').textContent = JSON.stringify(result, null, 2);
+                showNotification('Entries loaded', 'success');
+            } catch (error) {
+                showNotification('Failed to load entries', 'error');
+            }
+        }
+
+        // Player Management
+        let currentEditPlayer = null;
+        let currentPlayersPage = 1;
+
+        function handlePlayerSearchKeyup(event) {
+            if (event.key === 'Enter') {
+                searchPlayers();
+            }
+        }
+
+        async function searchPlayers() {
+            const searchTerm = document.getElementById('player-search').value.trim();
+            if (!searchTerm) {
+                showNotification('Please enter a search term', 'error');
+                return;
+            }
+
+            try {
+                const result = await apiRequest(`/api/debug/players/search?q=${encodeURIComponent(searchTerm)}&limit=20`);
+                displayPlayerResults(result.data || [], 'player-search-results');
+                showNotification(`Found ${(result.data || []).length} players`, 'success');
+            } catch (error) {
+                showNotification('Failed to search players', 'error');
+            }
+        }
+
+        async function loadAllPlayers(page = 1) {
+            currentPlayersPage = page;
+            try {
+                const result = await apiRequest(`/api/debug/players?page=${page}&limit=25`);
+                displayPlayerResults(result.data || [], 'players-container');
+                displayPagination(result.pagination);
+                showNotification(`Loaded ${(result.data || []).length} players`, 'success');
+            } catch (error) {
+                showNotification('Failed to load players', 'error');
+            }
+        }
+
+        function displayPlayerResults(players, containerId) {
+            const container = document.getElementById(containerId);
+
+            if (!players || players.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 20px;">No players found</p>';
+                return;
+            }
+
+            container.innerHTML = `
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid var(--input-border);">
+                            <th style="text-align: left; padding: 10px;">Rank</th>
+                            <th style="text-align: left; padding: 10px;">Name</th>
+                            <th style="text-align: center; padding: 10px;">Points</th>
+                            <th style="text-align: center; padding: 10px;">Level</th>
+                            <th style="text-align: center; padding: 10px;">Wins/Fails</th>
+                            <th style="text-align: center; padding: 10px;">Winrate</th>
+                            <th style="text-align: center; padding: 10px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${players.map(player => `
+                            <tr style="border-bottom: 1px solid var(--input-border);">
+                                <td style="padding: 10px;">#${player.rank || '-'}</td>
+                                <td style="padding: 10px; font-weight: 500;">${player.name}</td>
+                                <td style="text-align: center; padding: 10px;">${player.points || 0}</td>
+                                <td style="text-align: center; padding: 10px;">${player.level || 1}</td>
+                                <td style="text-align: center; padding: 10px;">${player.wins || 0}/${player.fails || 0}</td>
+                                <td style="text-align: center; padding: 10px;">${(player.winrate || 0).toFixed(1)}%</td>
+                                <td style="text-align: center; padding: 10px;">
+                                    <button class="btn btn-small btn-info" onclick="openEditPlayerModal('${player.name}')">Edit</button>
+                                    <button class="btn btn-small btn-danger" onclick="deletePlayer('${player.name}')">Delete</button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function displayPagination(pagination) {
+            const container = document.getElementById('players-pagination');
+            if (!pagination || pagination.totalPages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let html = '';
+            if (pagination.hasPrev) {
+                html += `<button class="btn btn-small btn-secondary" onclick="loadAllPlayers(${pagination.page - 1})">Previous</button>`;
+            }
+            html += `<span style="padding: 8px 16px; color: var(--text-secondary);">Page ${pagination.page} of ${pagination.totalPages}</span>`;
+            if (pagination.hasNext) {
+                html += `<button class="btn btn-small btn-secondary" onclick="loadAllPlayers(${pagination.page + 1})">Next</button>`;
+            }
+            container.innerHTML = html;
+        }
+
+        async function openEditPlayerModal(playerName) {
+            try {
+                const result = await apiRequest(`/api/debug/players/${encodeURIComponent(playerName)}`);
+                const player = result.data;
+
+                if (!player || !player.hasPlayed) {
+                    showNotification('Player not found', 'error');
+                    return;
+                }
+
+                currentEditPlayer = player.name;
+                document.getElementById('editPlayerName').textContent = player.name;
+                document.getElementById('editPoints').value = player.points || 0;
+                document.getElementById('editLevel').value = player.level || 1;
+                document.getElementById('editXp').value = player.xp || 0;
+                document.getElementById('editWins').value = player.wins || 0;
+                document.getElementById('editFails').value = player.fails || 0;
+                document.getElementById('editDuelWins').value = player.duelWins || 0;
+                document.getElementById('editDuelLosses').value = player.duelLosses || 0;
+                document.getElementById('editConeflipWins').value = player.coneflipWins || 0;
+                document.getElementById('editConeflipLosses').value = player.coneflipLosses || 0;
+                document.getElementById('editCurrentStreak').value = player.currentStreak || 0;
+                document.getElementById('editHighestStreak').value = player.highestStreak || 0;
+
+                document.getElementById('editPlayerModal').classList.remove('hidden');
+            } catch (error) {
+                showNotification('Failed to load player data', 'error');
+            }
+        }
+
+        function closeEditPlayerModal() {
+            document.getElementById('editPlayerModal').classList.add('hidden');
+            currentEditPlayer = null;
+        }
+
+        async function savePlayerStats() {
+            if (!currentEditPlayer) return;
+
+            const stats = {
+                points: parseInt(document.getElementById('editPoints').value) || 0,
+                level: parseInt(document.getElementById('editLevel').value) || 1,
+                xp: parseInt(document.getElementById('editXp').value) || 0,
+                wins: parseInt(document.getElementById('editWins').value) || 0,
+                fails: parseInt(document.getElementById('editFails').value) || 0,
+                duel_wins: parseInt(document.getElementById('editDuelWins').value) || 0,
+                duel_losses: parseInt(document.getElementById('editDuelLosses').value) || 0,
+                coneflip_wins: parseInt(document.getElementById('editConeflipWins').value) || 0,
+                coneflip_losses: parseInt(document.getElementById('editConeflipLosses').value) || 0,
+                current_streak: parseInt(document.getElementById('editCurrentStreak').value) || 0,
+                highest_streak: parseInt(document.getElementById('editHighestStreak').value) || 0
+            };
+
+            try {
+                const result = await apiRequest('/api/debug/players/edit', 'POST', {
+                    name: currentEditPlayer,
+                    stats: stats
+                });
+
+                if (result.status === 'success') {
+                    showNotification(`Stats updated for ${currentEditPlayer}`, 'success');
+                    closeEditPlayerModal();
+                    // Refresh the player list
+                    loadAllPlayers(currentPlayersPage);
+                } else {
+                    showNotification(result.message || 'Failed to update stats', 'error');
+                }
+            } catch (error) {
+                showNotification('Failed to save player stats', 'error');
+            }
+        }
+
+        async function deletePlayer(playerName) {
+            if (!confirm(`Are you sure you want to delete player "${playerName}"? This action cannot be undone.`)) {
+                return;
+            }
+
+            try {
+                const result = await apiRequest('/api/debug/players/delete', 'POST', { name: playerName });
+
+                if (result.status === 'success') {
+                    showNotification(`Player ${playerName} deleted`, 'success');
+                    loadAllPlayers(currentPlayersPage);
+                } else {
+                    showNotification(result.message || 'Failed to delete player', 'error');
+                }
+            } catch (error) {
+                showNotification('Failed to delete player', 'error');
+            }
+        }
+
+        async function deletePlayerFromModal() {
+            if (!currentEditPlayer) return;
+            await deletePlayer(currentEditPlayer);
+            closeEditPlayerModal();
+        }
+
+        async function loadPlayerForEdit() {
+            const playerName = document.getElementById('quick-player-name').value.trim();
+            if (!playerName) {
+                showNotification('Please enter a player name', 'error');
+                return;
+            }
+
+            await openEditPlayerModal(playerName);
+        }
+
+        async function quickDeletePlayer() {
+            const playerName = document.getElementById('quick-player-name').value.trim();
+            if (!playerName) {
+                showNotification('Please enter a player name', 'error');
+                return;
+            }
+
+            await deletePlayer(playerName);
+            document.getElementById('player-action-results').textContent = `Deleted player: ${playerName}`;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+{
+  "name": "cosmic",
+  "displayName": "Cosmic",
+  "type": "particle",
+  "author": "drippycatcs",
+  "description": "Nebula and stars",
+  "visuals": {
+    "type": "cosmic",
+    "shape": "cosmic",
+    "colors": ["#9b59b6", "#8e44ad", "#3498db", "#e74c3c", "#f39c12", "#1abc9c"],
+    "particleCount": 3,
+    "size": {
+      "min": 14,
+      "max": 22
+    },
+    "lifetime": 1400,
+    "emissionRate": 5,
+    "physics": {
+      "gravity": 0,
+      "velocityX": {
+        "min": -20,
+        "max": 20
+      },
+      "velocityY": {
+        "min": -20,
+        "max": 20
+      }
+    },
+    "effects": {
+      "glow": true,
+      "glowIntensity": 1.5,
+      "fadeOut": true
+    }
+  }
+}

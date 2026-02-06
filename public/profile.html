@@ -1,0 +1,2169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ConeFlip Profiles</title>
+    
+    <!-- Web Embed Metadata -->
+    <meta name="description" content="👤 ConeFlip Player Profiles - View detailed stats, achievements, skins, and performance history for any player. Check win rates, streaks, and more!">
+    <meta name="keywords" content="ConeFlip, profiles, player stats, gaming, achievements, win rate, streaks, skins">
+    <meta name="author" content="@drippycatcs">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://coneflip.com/profile.html">
+    <meta property="og:title" content="👤 ConeFlip Player Profiles">
+    <meta property="og:description" content="View detailed ConeFlip player profiles with stats, achievements, skins, and performance history. Check win rates, streaks, and more!">
+    <meta property="og:image" content="https://coneflip.com/fight.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:site_name" content="ConeFlip">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://coneflip.com/profile.html">
+    <meta property="twitter:title" content="👤 ConeFlip Player Profiles">
+    <meta property="twitter:description" content="View detailed ConeFlip player profiles with stats, achievements, skins, and performance history. Check win rates, streaks, and more!">
+    <meta property="twitter:image" content="https://coneflip.com/fight.png">
+    <meta property="twitter:creator" content="@drippycatcs">
+    
+    <!-- Discord -->
+    <meta name="theme-color" content="#3b82f6">
+    <meta name="color-scheme" content="light dark">
+    
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/site.webmanifest">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Light mode colors - EXACT SAME AS ADMIN PANEL */
+            --bg-gradient: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #f0fdf4 100%);
+            --text-primary: #1f2937;
+            --text-secondary: #4b5563;
+            --text-tertiary: #6b7280;
+            --text-link: #3b82f6;
+            --text-code: #1f2937;
+            --card-bg: rgba(255, 255, 255, 0.4);
+            --card-border: rgba(255, 255, 255, 0.3);
+            --input-bg: rgba(255, 255, 255, 0.6);
+            --input-border: rgba(156, 163, 175, 0.3);
+            --status-bg: rgba(255, 255, 255, 0.3);
+            --status-border: rgba(0, 0, 0, 0.1);
+            --pre-bg: rgba(255, 255, 255, 0.4);
+            --scrollbar-track: rgba(255, 255, 255, 0.2);
+            --scrollbar-thumb: #4b5563;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --danger-color: #ef4444;
+        }
+
+        [data-theme="dark"] {
+            /* Dark mode colors - EXACT SAME AS ADMIN PANEL */
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f1419 100%);
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-tertiary: #94a3b8;
+            --text-link: #60a5fa;
+            --text-code: #e2e8f0;
+            --card-bg: rgba(30, 41, 59, 0.4);
+            --card-border: rgba(51, 65, 85, 0.5);
+            --input-bg: rgba(30, 41, 59, 0.6);
+            --input-border: rgba(71, 85, 105, 0.5);
+            --status-bg: rgba(30, 41, 59, 0.3);
+            --status-border: rgba(51, 65, 85, 0.3);
+            --pre-bg: rgba(15, 23, 42, 0.6);
+            --scrollbar-track: rgba(30, 41, 59, 0.3);
+            --scrollbar-thumb: #64748b;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+            --danger-color: #f87171;
+        }
+
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            padding: 25px 30px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 8px 32px var(--shadow-color);
+            position: relative;
+            text-align: left!important;
+        }
+
+        .header h1 {
+            color: var(--text-primary);
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 4px var(--shadow-color);
+            text-align: left!important;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            text-align: left!important;
+        }
+
+        .theme-toggle {
+            background: var(--card-bg);
+            border: 2px solid var(--card-border);
+            border-radius: 50px;
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: absolute;
+            top: 25px;
+            right: 30px;
+        }
+
+        .theme-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px var(--shadow-color);
+        }
+
+        .search-section {
+            z-index: 1000;
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 25px;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 8px 32px var(--shadow-color);
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .search-container {
+            position: relative;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .search-input {
+            z-index: 1000;
+            width: 100%;
+            padding: 16px 50px 16px 20px;
+            border: 2px solid var(--input-border);
+            border-radius: 12px;
+            font-size: 1.1rem;
+            background: var(--input-bg);
+            backdrop-filter: blur(5px);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+        }
+
+        .autocomplete-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px var(--shadow-color);
+            z-index: 99999;
+            margin-top: 5px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .autocomplete-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--input-border);
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+
+        .autocomplete-item:hover,
+        .autocomplete-item.selected {
+            background: var(--status-bg);
+            transform: translateX(5px);
+        }
+
+        .autocomplete-item .player-name {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .autocomplete-item .player-stats {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .profile-container {
+            display: none;
+        }
+
+        .profile-container.show {
+            display: block;
+        }
+
+        .profile-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 30px;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 8px 32px var(--shadow-color);
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .profile-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px var(--shadow-color);
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--input-border);
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid var(--card-border);
+            object-fit: cover;
+        }
+
+        .profile-info h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: var(--text-primary);
+        }
+
+        .profile-rank {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .current-skin {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .current-skin img {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 20px;
+            background: var(--status-bg);
+            border-radius: 12px;
+            border: 1px solid var(--status-border);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .winrate-excellent {
+            color: #10b981;
+        }
+
+        .winrate-good {
+            color: #3b82f6;
+        }
+
+        .winrate-poor {
+            color: #ef4444;
+        }
+
+        /* XP Progress Bar Styles */
+        .xp-section {
+            margin-bottom: 30px;
+            padding: 25px;
+            background: var(--status-bg);
+            border-radius: 16px;
+            border: 1px solid var(--status-border);
+        }
+
+        .xp-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .xp-section h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin: 0;
+            color: var(--text-primary);
+        }
+
+        .xp-tooltip {
+            position: relative;
+            display: inline-flex;
+            cursor: help;
+        }
+
+        .xp-tooltip-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--input-border);
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .xp-tooltip:hover .xp-tooltip-icon {
+            background: #10b981;
+            color: white;
+        }
+
+        .xp-tooltip-content {
+            position: absolute;
+            bottom: calc(100% + 10px);
+            left: 50%;
+            transform: translateX(-50%);
+            width: 280px;
+            padding: 15px;
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px var(--shadow-color);
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s ease;
+            z-index: 100;
+        }
+
+        .xp-tooltip-content::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 8px solid transparent;
+            border-top-color: var(--card-border);
+        }
+
+        .xp-tooltip:hover .xp-tooltip-content {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .xp-tooltip-content strong {
+            color: var(--text-primary);
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .xp-tooltip-content ul {
+            margin: 0;
+            padding-left: 18px;
+        }
+
+        .xp-tooltip-content li {
+            margin-bottom: 4px;
+        }
+
+        .level-display {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .current-level, .next-level {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #10b981;
+            min-width: 45px;
+            text-align: center;
+        }
+
+        .xp-progress-container {
+            flex: 1;
+            height: 24px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--card-border);
+            position: relative;
+        }
+
+        .xp-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+            border-radius: 12px;
+            transition: width 0.5s ease;
+            position: relative;
+        }
+
+        .xp-progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .xp-text {
+            text-align: center;
+            margin-top: 12px;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .xp-text span {
+            font-weight: 600;
+            color: #10b981;
+        }
+
+        .skins-section h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--input-border);
+            padding-bottom: 10px;
+        }
+
+        .skins-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .shuffle-toggle {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            user-select: none;
+        }
+
+        .shuffle-toggle.visible {
+            display: flex;
+        }
+
+        .shuffle-switch {
+            position: relative;
+            width: 40px;
+            height: 22px;
+            background: var(--input-border);
+            border-radius: 11px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .shuffle-switch.active {
+            background: #10b981;
+        }
+
+        .shuffle-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 18px;
+            height: 18px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+
+        .shuffle-switch.active::after {
+            transform: translateX(18px);
+        }
+
+        .skin-item.shuffle-disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .skins-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .skin-item {
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            gap: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .skin-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px var(--shadow-color);
+        }
+
+        .skin-item.selected {
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+
+        .skin-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex: 1;
+        }
+
+        .skin-preview {
+            width: 60px;
+            height: 60px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            border-radius: 8px;
+            border: 1px solid var(--input-border);
+            flex-shrink: 0;
+        }
+
+        .skin-details {
+            flex: 1;
+        }
+
+        .skin-details h4 {
+            margin: 0 0 8px 0;
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .skin-details p {
+            margin: 3px 0;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+
+
+        .rarity-mil-spec {
+            background: rgba(74, 105, 255, 0.2);
+            color: #4A69FF;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .rarity-restricted {
+            background: rgba(136, 71, 255, 0.2);
+            color: #8847ff;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .rarity-classified {
+            background: rgba(211, 44, 230, 0.2);
+            color: #d32ce6;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .rarity-covert {
+            background: rgba(235, 75, 75, 0.2);
+            color: #eb4b4b;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .rarity-seasonal {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .link-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 20px;
+            background: var(--status-bg);
+            border: 1px solid var(--status-border);
+            border-radius: 12px;
+            text-decoration: none;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .link-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--shadow-color);
+            border-color: #10b981;
+        }
+
+        .link-icon {
+            font-size: 2rem;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--card-border);
+        }
+
+        .link-details h4 {
+            margin: 0 0 5px 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .link-details p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .skin-item.selected {
+            border-color: #10b981 !important;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3), 0 8px 25px var(--shadow-color) !important;
+            background: rgba(16, 185, 129, 0.1) !important;
+            transform: translateY(-2px);
+        }
+
+        /* Trail Collection Styles */
+        .trails-section {
+            margin-top: 40px;
+        }
+
+        .trails-section h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--input-border);
+            padding-bottom: 10px;
+        }
+
+        .trails-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .trail-item {
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            gap: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .trail-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px var(--shadow-color);
+        }
+
+        .trail-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .trail-preview {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            font-size: 20px;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .trail-preview img {
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+
+        .trail-details {
+            flex: 1;
+        }
+
+        .unset-trail-btn {
+            background: var(--danger-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .unset-trail-btn:hover {
+            background: #dc2626;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .trail-item.selected {
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+        }
+
+        .trail-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex: 1;
+        }
+
+        .trail-preview {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(45deg, #8b5cf6, #06b6d4);
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .trail-preview.sparkle {
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            animation: sparkle-preview 2s infinite;
+        }
+
+        .trail-preview.fire {
+            background: linear-gradient(45deg, #ff4500, #ff6347, #ffd700);
+            animation: fire-preview 1.5s infinite;
+        }
+
+        .trail-preview.ice {
+            background: linear-gradient(45deg, #87ceeb, #b0e0e6, #ffffff);
+            animation: ice-preview 2s infinite;
+        }
+
+        .trail-preview.rainbow {
+            background: linear-gradient(45deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3);
+            animation: rainbow-preview 3s infinite;
+        }
+
+        .trail-preview.cosmic {
+            background: linear-gradient(45deg, #800080, #4b0082, #9400d3, #ff1493);
+            animation: cosmic-preview 2s infinite;
+        }
+
+        .trail-preview.golden {
+            background: linear-gradient(45deg, #ffd700, #ffa500, #ffff00);
+            animation: golden-preview 1s infinite;
+        }
+
+        @keyframes sparkle-preview {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 15px #ffd700; }
+            50% { transform: scale(1.1); box-shadow: 0 0 25px #ffd700; }
+        }
+
+        @keyframes fire-preview {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.05) rotate(5deg); }
+        }
+
+        @keyframes ice-preview {
+            0%, 100% { transform: scale(1); filter: brightness(1); }
+            50% { transform: scale(1.05); filter: brightness(1.2); }
+        }
+
+        @keyframes rainbow-preview {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes cosmic-preview {
+            0%, 100% { transform: scale(1) rotate(0deg); box-shadow: 0 0 20px #800080; }
+            50% { transform: scale(1.1) rotate(180deg); box-shadow: 0 0 30px #ff1493; }
+        }
+
+        @keyframes golden-preview {
+            0%, 100% { transform: scale(1); filter: brightness(1); }
+            50% { transform: scale(1.15); filter: brightness(1.5); }
+        }
+
+        .trail-details {
+            flex: 1;
+        }
+
+        .trail-details h4 {
+            margin: 0 0 8px 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .trail-details p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .no-profile {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .no-profile h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+
+        .error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+
+
+        /* Responsive design for skin items */
+        @media (max-width: 1024px) {
+            .skins-grid {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: left
+            }
+
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .skins-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .skins-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .skin-item {
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+
+        <div class="search-section">
+            <div class="search-container">
+                <input type="text" class="search-input" placeholder="Search for a player..." autocomplete="off">
+                <div class="search-icon">🔍</div>
+                <div class="autocomplete-dropdown" style="display: none;"></div>
+            </div>
+        </div>
+
+        <div class="profile-container">
+            <div class="profile-card">
+                <div class="profile-header">
+                    <img class="profile-avatar" src="/Placeholder.webp" alt="Avatar">
+                    <div class="profile-info">
+                        <h2 class="profile-name">Player Name</h2>
+                        <div class="profile-rank">Rank #0</div>
+
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="wins">0</div>
+                        <div class="stat-label">Wins</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="losses">0</div>
+                        <div class="stat-label">Losses</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="total-games">0</div>
+                        <div class="stat-label">Total Games</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="winrate">0%</div>
+                        <div class="stat-label">Win Rate</div>
+                    </div>
+                </div>
+
+                <!-- XP Progress Section -->
+                <div class="xp-section">
+                    <div class="xp-header">
+                        <h3>Level Progress</h3>
+                        <div class="xp-tooltip">
+                            <div class="xp-tooltip-icon">?</div>
+                            <div class="xp-tooltip-content">
+                                <strong>How XP Works</strong>
+                                <ul>
+                                    <li>Coneflip Win: +70 XP</li>
+                                    <li>Coneflip Loss: +20 XP</li>
+                                    <li>Duel Win: +70 XP</li>
+                                    <li>Duel Loss: +20 XP</li>
+                                    <li>3+ Streak Bonus: +70 XP</li>
+                                    <li>5+ Streak Bonus: +100 XP</li>
+                                    <li>Unbox: +50-500 XP (by tier)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="level-display">
+                        <span class="current-level" id="current-level">1</span>
+                        <div class="xp-progress-container">
+                            <div class="xp-progress-bar" id="xp-progress-bar" style="width: 0%"></div>
+                        </div>
+                        <span class="next-level" id="next-level">2</span>
+                    </div>
+                    <div class="xp-text">
+                        <span id="current-xp">0</span> / <span id="xp-needed">100</span> XP
+                    </div>
+                </div>
+
+                <div class="skins-section">
+                    <div class="skins-header">
+                        <h3>Skin Collection (<span id="skin-count">0</span>)</h3>
+                        <div class="shuffle-toggle" id="shuffle-toggle">
+                            <span id="shuffle-label">Shuffle</span>
+                            <div class="shuffle-switch" id="shuffle-switch"></div>
+                        </div>
+                    </div>
+                    <div class="skins-grid" id="skins-grid">
+                        <!-- Skins will be populated here -->
+                    </div>
+                </div>
+
+                <div class="trails-section">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h3>Trail Collection (<span id="trail-count">0</span>)</h3>
+                        <button id="unset-trail-btn" class="unset-trail-btn" style="display: none;">
+                            Unset Trail
+                        </button>
+                    </div>
+                    <div class="trails-grid" id="trails-grid">
+                        <!-- Trails will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="profile-card">
+            <h3 class="card-title">Quick Links</h3>
+            <div class="links-grid">
+                <a href="/skins-submissions.html" class="link-item">
+                    <div class="link-icon">📝</div>
+                    <div class="link-details">
+                        <h4>Submit Skins</h4>
+                        <p>Submit your own skin designs</p>
+                    </div>
+                </a>
+                <a href="/leaderboard-public" class="link-item">
+                    <div class="link-icon">🏆</div>
+                    <div class="link-details">
+                        <h4>Leaderboard</h4>
+                        <p>View global rankings</p>
+                    </div>
+                </a>
+                <a href="/commands" class="link-item">
+                    <div class="link-icon">⌨️</div>
+                    <div class="link-details">
+                        <h4>Commands</h4>
+                        <p>Learn game commands</p>
+                    </div>
+                </a>
+                <a href="/skins" class="link-item">
+                    <div class="link-icon">🎨</div>
+                    <div class="link-details">
+                        <h4>All Skins</h4>
+                        <p>Browse all available skins</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="no-profile">
+            <h3>👤 No Profile Selected</h3>
+            <p>Search for a player above to view their profile and stats.</p>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/shared-components.js"></script>
+    <script>
+        class ProfileManager {
+            constructor() {
+                this.searchInput = document.querySelector('.search-input');
+                this.dropdown = document.querySelector('.autocomplete-dropdown');
+                this.profileContainer = document.querySelector('.profile-container');
+                this.noProfile = document.querySelector('.no-profile');
+                
+                this.searchTimeout = null;
+                this.selectedIndex = -1;
+                this.currentResults = [];
+                this.currentUser = null; // Current authenticated user
+                this.profileData = null; // Current profile being viewed
+                
+                this.init();
+            }
+
+            async init() {
+                // Check current user authentication status first
+                await this.checkCurrentUser();
+                
+                this.setupEventListeners();
+                this.handleInitialLoad();
+            }
+
+            async checkCurrentUser() {
+                try {
+                    const response = await fetch('/auth/user', {
+                        credentials: 'include'
+                    });
+                    const result = await response.json();
+                    
+                    if (result.status === 'success' && result.data) {
+                        this.currentUser = result.data;
+                    }
+                } catch (error) {
+                    console.error('Error checking current user:', error);
+                }
+            }
+
+            handleInitialLoad() {
+                const path = window.location.pathname;
+                const match = path.match(/^\/u\/(.+)$/);
+                
+                if (match) {
+                    const playerName = decodeURIComponent(match[1]);
+                    this.searchInput.value = playerName;
+                    this.loadProfile(playerName);
+                } else {
+                    this.showNoProfile();
+                }
+            }
+
+            setupEventListeners() {
+                this.searchInput.addEventListener('input', (e) => {
+                    this.handleSearch(e.target.value);
+                });
+
+                this.searchInput.addEventListener('keydown', (e) => {
+                    this.handleKeyDown(e);
+                });
+
+                this.searchInput.addEventListener('blur', () => {
+                    setTimeout(() => this.hideDropdown(), 150);
+                });
+
+                this.searchInput.addEventListener('focus', () => {
+                    if (this.searchInput.value && this.currentResults.length > 0) {
+                        this.showDropdown();
+                    }
+                });
+
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('.search-container')) {
+                        this.hideDropdown();
+                    }
+                });
+            }
+
+            handleSearch(query) {
+                clearTimeout(this.searchTimeout);
+                
+                if (!query.trim()) {
+                    this.hideDropdown();
+                    this.showNoProfile();
+                    history.pushState(null, '', '/u/');
+                    return;
+                }
+
+                this.searchTimeout = setTimeout(() => {
+                    this.fetchSearchResults(query);
+                }, 300);
+            }
+
+            async fetchSearchResults(query) {
+                try {
+                    const response = await fetch(`/api/leaderboard/search?q=${encodeURIComponent(query)}&limit=8`);
+                    const responseData = await response.json();
+                    const results = responseData.data || responseData;
+                    
+                    this.currentResults = results;
+                    this.selectedIndex = -1;
+                    this.updateDropdown(results);
+                    
+                    if (results.length > 0) {
+                        this.showDropdown();
+                    } else {
+                        this.hideDropdown();
+                    }
+                } catch (error) {
+                    console.error('Search failed:', error);
+                    this.hideDropdown();
+                }
+            }
+
+            updateDropdown(results) {
+                this.dropdown.innerHTML = '';
+                
+                results.forEach((player, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'autocomplete-item';
+                    item.innerHTML = `
+                        <div>
+                            <div class="player-name">${player.name}</div>
+                            <div class="player-stats">Rank #${player.rank} • ${player.wins}W ${player.fails}L • ${Math.round(player.winrate * 100) / 100}%</div>
+                        </div>
+                    `;
+                    
+                    item.addEventListener('click', () => {
+                        this.selectPlayer(player.name, index);
+                    });
+                    
+                    this.dropdown.appendChild(item);
+                });
+            }
+
+            handleKeyDown(e) {
+                if (!this.currentResults.length) return;
+
+                switch (e.key) {
+                    case 'ArrowDown':
+                        e.preventDefault();
+                        this.selectedIndex = Math.min(this.selectedIndex + 1, this.currentResults.length - 1);
+                        this.updateSelection();
+                        break;
+                    case 'ArrowUp':
+                        e.preventDefault();
+                        this.selectedIndex = Math.max(this.selectedIndex - 1, -1);
+                        this.updateSelection();
+                        break;
+                    case 'Enter':
+                        e.preventDefault();
+                        if (this.selectedIndex >= 0) {
+                            this.selectPlayer(this.currentResults[this.selectedIndex].name, this.selectedIndex);
+                        }
+                        break;
+                    case 'Escape':
+                        this.hideDropdown();
+                        this.searchInput.blur();
+                        break;
+                }
+            }
+
+            updateSelection() {
+                const items = this.dropdown.querySelectorAll('.autocomplete-item');
+                items.forEach((item, index) => {
+                    item.classList.toggle('selected', index === this.selectedIndex);
+                });
+            }
+
+            selectPlayer(playerName, index) {
+                this.searchInput.value = playerName;
+                this.hideDropdown();
+                this.loadProfile(playerName);
+                history.pushState(null, '', `/u/${encodeURIComponent(playerName)}`);
+            }
+
+            async loadProfile(playerName) {
+                try {
+                    this.showLoading();
+                    
+                    // Fetch player data and inventory in parallel
+                    const [playerResponse, inventoryResponse] = await Promise.all([
+                        fetch(`/api/leaderboard/player/${encodeURIComponent(playerName)}`),
+                        fetch(`/api/skins/user/${encodeURIComponent(playerName)}`)
+                    ]);
+                    
+                    const playerResponse_json = await playerResponse.json();
+                    const inventoryResponse_json = await inventoryResponse.json();
+                    
+                    // Extract data from API response format
+                    const playerData = playerResponse_json.data;
+                    const inventoryData = inventoryResponse_json.data || inventoryResponse_json;
+                    
+                    if (playerData && playerData.name) {
+                        await this.displayProfile(playerData, inventoryData);
+                    } else {
+                        this.showError('Player not found');
+                    }
+                } catch (error) {
+                    console.error('Failed to load profile:', error);
+                    this.showError('Failed to load profile data');
+                }
+            }
+
+            async displayProfile(playerData, inventoryData) {
+                this.showProfile();
+                
+                // Store profile data for skin selection
+                this.profileData = playerData;
+                
+                // Remove loading/error overlays
+                const loadingDiv = document.querySelector('.profile-loading');
+                const errorDiv = document.querySelector('.profile-error');
+                if (loadingDiv) loadingDiv.remove();
+                if (errorDiv) errorDiv.remove();
+                
+                // Check if the player is an emote first
+                const emoteData = await this.checkIfEmote(playerData.name);
+                
+                // Update profile info with emote support
+                const nameElement = document.querySelector('.profile-name');
+                if (nameElement) {
+                    if (emoteData.isEmote && emoteData.url) {
+                        // Display emote name with emote tag
+                        nameElement.innerHTML = `${playerData.name} <span style="color: var(--text-secondary); font-size: 0.8em; font-weight: normal;">(emote)</span>`;
+                    } else {
+                        nameElement.textContent = playerData.name;
+                    }
+                }
+                
+                // Update rank
+                const rankElement = document.querySelector('.profile-rank');
+                if (rankElement) {
+                    rankElement.textContent = `Rank #${playerData.rank || 'Unranked'}`;
+                }
+                
+                // Update avatar (with emote support)
+                await this.handleProfileAvatar(playerData, emoteData);
+                
+                // Update stats
+                const winsElement = document.getElementById('wins');
+                const lossesElement = document.getElementById('losses');
+                const totalGamesElement = document.getElementById('total-games');
+                const winrateElement = document.getElementById('winrate');
+                
+                if (winsElement) winsElement.textContent = playerData.wins || 0;
+                if (lossesElement) lossesElement.textContent = playerData.fails || 0;
+                if (totalGamesElement) totalGamesElement.textContent = (playerData.wins || 0) + (playerData.fails || 0);
+                
+                if (winrateElement) {
+                    const winrate =  Math.round(playerData.winrate  * 100) / 100|| 0;
+                    winrateElement.textContent = `${winrate}%`;
+
+                    // Style winrate based on performance
+                    winrateElement.className = 'stat-value';
+                    if (winrate >= 50) {
+                        winrateElement.classList.add('winrate-excellent');
+                    } else if (winrate >= 15) {
+                        winrateElement.classList.add('winrate-good');
+                    } else {
+                        winrateElement.classList.add('winrate-poor');
+                    }
+                }
+
+                // Update XP progress bar
+                this.updateXPProgress(playerData);
+
+                // Update skin collection
+                await this.updateSkinCollection(inventoryData);
+
+                // Update trail collection
+                await this.updateTrailCollection(playerData.name);
+            }
+
+            updateXPProgress(playerData) {
+                const currentLevelEl = document.getElementById('current-level');
+                const nextLevelEl = document.getElementById('next-level');
+                const progressBar = document.getElementById('xp-progress-bar');
+                const currentXPEl = document.getElementById('current-xp');
+                const xpNeededEl = document.getElementById('xp-needed');
+
+                const level = playerData.level || 1;
+                const currentLevelXP = playerData.currentLevelXP || 0;
+                const xpToNextLevel = playerData.xpToNextLevel || 100;
+                const progressPercent = playerData.progressPercent || 0;
+
+                if (currentLevelEl) currentLevelEl.textContent = level;
+                if (nextLevelEl) nextLevelEl.textContent = level + 1;
+                if (progressBar) progressBar.style.width = `${Math.min(100, progressPercent)}%`;
+                if (currentXPEl) currentXPEl.textContent = currentLevelXP;
+                if (xpNeededEl) xpNeededEl.textContent = xpToNextLevel;
+            }
+
+            async checkIfEmote(playerName) {
+                try {
+                    const response = await fetch(`/api/skins/emote/${encodeURIComponent(playerName)}`);
+                    const data = await response.json();
+                    return data.data || { isEmote: false, url: null };
+                } catch (error) {
+                    console.error('Error checking emote:', error);
+                    return { isEmote: false, url: null };
+                }
+            }
+
+            async handleProfileAvatar(playerData, emoteData = null) {
+                const avatarImg = document.querySelector('.profile-avatar');
+                
+                // If this is an emote, use the emote image as avatar
+                if (emoteData && emoteData.isEmote && emoteData.url) {
+                    avatarImg.src = emoteData.url;
+                    avatarImg.style.borderRadius = '12px'; // Make it less round for emotes
+                    avatarImg.style.objectFit = 'contain'; // Preserve emote aspect ratio
+                    return;
+                }
+                
+                // Reset avatar styling for non-emotes
+                avatarImg.style.borderRadius = '50%';
+                avatarImg.style.objectFit = 'cover';
+                console.log('Fetching 7TV avatar for:', playerData);
+                // Use Twitch ID if available, otherwise fall back to transparent
+                if (playerData.twitchId) {
+                    try {
+                 
+                        const response = await fetch(`https://7tv.io/v3/users/twitch/${playerData.twitchId}`);
+                        if (response.ok) {
+                            const data = await response.json();
+                            if (data.user && data.user.avatar_url) {
+                                avatarImg.src = data.user.avatar_url;
+                                return;
+                            }
+                        }
+                    } catch (error) {
+                        console.log('Failed to fetch 7TV avatar:', error);
+                    }
+                }
+                
+                // Fallback to transparent image
+                avatarImg.src = '/Placeholder.webp';
+            }
+
+
+
+
+
+            async updateSkinCollection(inventoryData) {
+                const skinsGrid = document.getElementById('skins-grid');
+                const skinCount = document.getElementById('skin-count');
+
+                skinsGrid.innerHTML = '';
+
+                // Update shuffle toggle visibility and state
+                const shuffleEnabled = !!inventoryData.shuffle;
+                this.shuffleEnabled = shuffleEnabled;
+                this.updateShuffleToggle(shuffleEnabled);
+
+                if (!inventoryData.inventory || inventoryData.inventory.length === 0) {
+                    skinsGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-secondary); padding: 40px;">No skins collected yet</div>';
+                    skinCount.textContent = '0';
+                    return;
+                }
+
+                try {
+                    // Get skin config and seasonal skin info in parallel
+                    const [configResponse, seasonalResponse] = await Promise.all([
+                        fetch('/skins/config.json'),
+                        fetch('/api/skins/seasonal')
+                    ]);
+                    const skinConfig = await configResponse.json();
+                    const seasonalData = await seasonalResponse.json();
+                    const seasonalSkin = seasonalData.seasonalSkin || null;
+
+                    skinCount.textContent = inventoryData.inventory.length;
+
+                    const canEdit = this.currentUser && this.currentUser.login === this.profileData.name;
+
+                    for (const skinItem of inventoryData.inventory) {
+                        // Handle both string and object formats
+                        const skinName = typeof skinItem === 'string' ? skinItem : (skinItem.skin || skinItem.name || skinItem);
+
+                        if (!skinName || typeof skinName !== 'string') {
+                            console.warn('Invalid skin item:', skinItem);
+                            continue; // Skip invalid items
+                        }
+
+                        // Find skin data in config array
+                        const skinData = skinConfig.find(s => s.name === skinName);
+                        const rarity = this.getSkinRarity(skinData, skinName, seasonalSkin);
+
+                        // Get correct file extension
+                        let skinPath = `/skins/cone_${skinName}.png`; // Default fallback
+                        if (skinData && skinData.visuals) {
+                            skinPath = `/skins/${skinData.visuals}`;
+
+                            // Special handling for doppler holo skin
+                            if (skinData.visuals === 'holo_doppler') {
+                                skinPath = `/skins/holo_doppler_3.jpg`;
+                            }
+                        }
+
+                        const skinElement = document.createElement('div');
+                        skinElement.className = 'skin-item';
+
+                        // Check if this is the currently equipped skin
+                        const isCurrentSkin = inventoryData.skin === skinName;
+                        if (isCurrentSkin) {
+                            skinElement.classList.add('selected');
+                        }
+
+                        // Visually disable skin selection when shuffle is active
+                        if (canEdit && shuffleEnabled) {
+                            skinElement.classList.add('shuffle-disabled');
+                        }
+
+                        const isHolo = skinName.includes('holo') || (skinData && skinData.visuals && skinData.visuals.includes('holo'));
+
+                        const rarityHtml = rarity
+                            ? `<p><span class="rarity-${rarity.toLowerCase().replace(/ /g, '-')}">${rarity}</span></p>`
+                            : '';
+
+                        const selectHint = canEdit && !isCurrentSkin && !shuffleEnabled
+                            ? '<p style="color: var(--text-tertiary); font-size: 0.75rem; margin-top: 4px; font-style: italic;">Click to equip cone skin</p>'
+                            : '';
+
+                        skinElement.innerHTML = `
+                            <div class="skin-info">
+                                <div class="skin-preview" style="background-image: url('${skinPath}')"></div>
+                                <div class="skin-details">
+                                    <h4>${this.formatSkinName(skinName)} ${isHolo ? '(Holo)' : '(Cone)'}</h4>
+                                    ${rarityHtml}
+                                    ${inventoryData.skin === skinName ? '<p style="color: #10b981; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">✓ Selected</p>' : ''}
+                                    ${selectHint}
+                                </div>
+                            </div>
+                        `;
+
+                        // Make entire card clickable for skin selection (disabled when shuffle is on)
+                        if (canEdit && !isCurrentSkin && !shuffleEnabled) {
+                            skinElement.style.cursor = 'pointer';
+                            skinElement.style.transition = 'all 0.2s ease';
+
+                            skinElement.addEventListener('click', () => {
+                                this.selectSkin(skinName);
+                            });
+
+                            skinElement.addEventListener('mouseenter', () => {
+                                skinElement.style.transform = 'translateY(-2px)';
+                                skinElement.style.boxShadow = '0 8px 25px var(--shadow-color)';
+                            });
+
+                            skinElement.addEventListener('mouseleave', () => {
+                                skinElement.style.transform = 'translateY(0)';
+                                skinElement.style.boxShadow = '0 4px 6px var(--shadow-color)';
+                            });
+                        }
+
+                        skinsGrid.appendChild(skinElement);
+                    }
+                } catch (error) {
+                    console.error('Failed to load skin collection:', error);
+                    skinsGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-secondary); padding: 40px;">Failed to load skin collection</div>';
+                }
+            }
+
+            updateShuffleToggle(enabled) {
+                const toggleContainer = document.getElementById('shuffle-toggle');
+                const toggleSwitch = document.getElementById('shuffle-switch');
+                const toggleLabel = document.getElementById('shuffle-label');
+                const canEdit = this.currentUser && this.profileData && this.currentUser.login === this.profileData.name;
+
+                if (canEdit) {
+                    toggleContainer.classList.add('visible');
+                    if (enabled) {
+                        toggleSwitch.classList.add('active');
+                        toggleLabel.textContent = 'Shuffle active';
+                    } else {
+                        toggleSwitch.classList.remove('active');
+                        toggleLabel.textContent = 'Shuffle';
+                    }
+
+                    // Remove old listener by replacing node
+                    const newSwitch = toggleSwitch.cloneNode(true);
+                    toggleSwitch.parentNode.replaceChild(newSwitch, toggleSwitch);
+                    newSwitch.addEventListener('click', () => this.toggleShuffle());
+                } else {
+                    toggleContainer.classList.remove('visible');
+                }
+            }
+
+            async toggleShuffle() {
+                if (!this.currentUser || !this.profileData || this.currentUser.login !== this.profileData.name) {
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/skins/shuffle', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include'
+                    });
+
+                    const result = await response.json();
+
+                    if (result.status === 'success') {
+                        this.shuffleEnabled = result.shuffle;
+                        // Reload the profile to reflect the new state
+                        await this.loadProfile(this.profileData.name);
+                        this.showMessage(result.message, 'success');
+                    } else {
+                        this.showMessage(result.message || 'Failed to toggle shuffle', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error toggling shuffle:', error);
+                    this.showMessage('Failed to toggle shuffle', 'error');
+                }
+            }
+
+            async updateTrailCollection(playerName) {
+                const trailsGrid = document.getElementById('trails-grid');
+                const trailCount = document.getElementById('trail-count');
+                
+                try {
+                    // Fetch trail data and configurations in parallel
+                    const [trailResponse, trailConfigResponse] = await Promise.all([
+                        fetch(`/api/trails/user/${encodeURIComponent(playerName)}`),
+                        fetch('/api/trails/config')
+                    ]);
+                    
+                    const trailData = await trailResponse.json();
+                    const trailConfigs = await trailConfigResponse.json();
+                    
+                    // Create a map of trail configs for easy lookup
+                    const configMap = {};
+                    for (const config of trailConfigs) {
+                        configMap[config.name] = config;
+                    }
+                    
+                    const trailInventory = trailData.data || {};
+                    const userTrails = trailInventory.inventory || [];
+                    const currentTrail = trailInventory.trail || 'default';
+                    
+                    // Clear existing content
+                    trailsGrid.innerHTML = '';
+                    
+                    if (userTrails.length === 0) {
+                        trailsGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-secondary); padding: 40px;">No trails collected yet</div>';
+                        trailCount.textContent = '0';
+                        
+                        // Hide unset button when no trails
+                        const unsetBtn = document.getElementById('unset-trail-btn');
+                        if (unsetBtn) {
+                            unsetBtn.style.display = 'none';
+                        }
+                        
+                        return;
+                    }
+                    
+                    trailCount.textContent = userTrails.length;
+                    
+                    // Show/hide unset trail button
+                    const unsetBtn = document.getElementById('unset-trail-btn');
+                    const canEdit = this.currentUser && this.currentUser.login === this.profileData.name;
+                    const hasNonDefaultTrail = currentTrail && currentTrail !== 'default';
+                    
+                    if (canEdit && hasNonDefaultTrail && unsetBtn) {
+                        unsetBtn.style.display = 'flex';
+                        unsetBtn.onclick = () => this.unsetTrail();
+                    } else if (unsetBtn) {
+                        unsetBtn.style.display = 'none';
+                    }
+                    
+                    for (const trailItem of userTrails) {
+                        // Handle both string and object formats
+                        const trailName = typeof trailItem === 'string' ? trailItem : (trailItem.trail || trailItem.name || trailItem);
+                        
+                        if (!trailName || typeof trailName !== 'string') {
+                            console.warn('Invalid trail item:', trailItem);
+                            continue;
+                        }
+                        
+                        // Find trail data in config array
+                        const trailData = configMap[trailName];
+                        
+                        const trailElement = document.createElement('div');
+                        trailElement.className = 'trail-item';
+                        
+                        // Check if this is the currently equipped trail
+                        const isCurrentTrail = currentTrail === trailName;
+                        if (isCurrentTrail) {
+                            trailElement.classList.add('selected');
+                        }
+                        
+                        // Check if current user owns this profile (can edit)
+                        const canEdit = this.currentUser && this.currentUser.login === this.profileData.name;
+                        
+                        // Generate trail icon based on configuration
+                        const trailIcon = this.generateTrailIcon(trailData, trailName);
+                        
+                        trailElement.innerHTML = `
+                            <div class="trail-info">
+                                <div class="trail-preview ${trailName}">${trailIcon}</div>
+                                <div class="trail-details">
+                                    <h4>${this.formatTrailName(trailName)}</h4>
+                                    ${isCurrentTrail ? '<p style="color: #8b5cf6; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">✓ Selected</p>' : ''}
+                                    ${canEdit && !isCurrentTrail ? '<p style="color: var(--text-tertiary); font-size: 0.75rem; margin-top: 4px; font-style: italic;">Click to equip trail effect</p>' : ''}
+                                </div>
+                            </div>
+                        `;
+                        
+                        // Make entire card clickable for trail selection
+                        if (canEdit && !isCurrentTrail) {
+                            trailElement.style.cursor = 'pointer';
+                            trailElement.style.transition = 'all 0.2s ease';
+                            
+                            trailElement.addEventListener('click', () => {
+                                this.selectTrail(trailName);
+                            });
+                            
+                            trailElement.addEventListener('mouseenter', () => {
+                                trailElement.style.transform = 'translateY(-2px)';
+                                trailElement.style.boxShadow = '0 8px 25px var(--shadow-color)';
+                            });
+                            
+                            trailElement.addEventListener('mouseleave', () => {
+                                trailElement.style.transform = 'translateY(0)';
+                                trailElement.style.boxShadow = '0 4px 6px var(--shadow-color)';
+                            });
+                        }
+                        
+                        trailsGrid.appendChild(trailElement);
+                    }
+                } catch (error) {
+                    console.error('Failed to load trail collection:', error);
+                    trailsGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-secondary); padding: 40px;">Failed to load trail collection</div>';
+                    
+                    // Hide unset button on error
+                    const unsetBtn = document.getElementById('unset-trail-btn');
+                    if (unsetBtn) {
+                        unsetBtn.style.display = 'none';
+                    }
+                }
+            }
+
+            generateTrailIcon(trailData, trailName) {
+                // Default fallback
+                if (!trailData || !trailData.visuals) {
+                    return '✨';
+                }
+                
+                const visuals = trailData.visuals;
+                
+                // Check if trail has custom image(s)
+                if (visuals.image) {
+                    const images = Array.isArray(visuals.image) ? visuals.image : [visuals.image];
+                    const firstImage = images[0];
+                    
+                    // Handle different image types
+                    if (firstImage.startsWith('data:image/svg+xml;base64,')) {
+                        // Base64 SVG - decode and use directly
+                        try {
+                            const svgData = atob(firstImage.split(',')[1]);
+                            return svgData;
+                        } catch (e) {
+                            console.warn('Failed to decode base64 SVG for trail:', trailName);
+                        }
+                    } else {
+                        // Regular image URL
+                        return `<img src="${firstImage}" alt="${trailName}" style="width: 100%; height: 100%; object-fit: contain; border-radius: 4px;">`;
+                    }
+                }
+                
+                // Check if trail has colors (create color representation)
+                if (visuals.colors && visuals.colors.length > 0) {
+                    const colors = visuals.colors;
+                    
+                    if (colors.length === 1) {
+                        // Single color - solid circle
+                        return `<div style="width: 24px; height: 24px; border-radius: 50%; background: ${colors[0]}; border: 2px solid rgba(255,255,255,0.3); box-shadow: 0 2px 8px rgba(0,0,0,0.3);"></div>`;
+                    } else if (colors.length === 2) {
+                        // Two colors - split circle
+                        return `<div style="width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(45deg, ${colors[0]} 50%, ${colors[1]} 50%); border: 2px solid rgba(255,255,255,0.3); box-shadow: 0 2px 8px rgba(0,0,0,0.3);"></div>`;
+                    } else {
+                        // Multiple colors - gradient circle
+                        const gradient = colors.join(', ');
+                        return `<div style="width: 24px; height: 24px; border-radius: 50%; background: conic-gradient(${gradient}); border: 2px solid rgba(255,255,255,0.3); box-shadow: 0 2px 8px rgba(0,0,0,0.3);"></div>`;
+                    }
+                }
+                
+                // Trail type specific icons
+                switch (visuals.type) {
+                    case 'sparkle':
+                        return '✨';
+                    case 'fire':
+                        return '🔥';
+                    case 'ice':
+                        return '❄️';
+                    case 'electric':
+                        return '⚡';
+                    case 'shadow':
+                        return '🌑';
+                    case 'cosmic':
+                        return '🌌';
+                    case 'rainbow':
+                        return '🌈';
+                    case 'golden':
+                        return '✨';
+                    case 'hearts':
+                        return '💖';
+                    case 'line':
+                        // Create a line icon based on colors
+                        const lineColor = visuals.colors?.[0] || '#00ffff';
+                        const isRainbow = visuals.rainbowEffect;
+                        if (isRainbow) {
+                            return `<div style="width: 24px; height: 4px; background: linear-gradient(90deg, #ff0080, #ff8000, #ffff00, #80ff00, #00ff80, #0080ff, #8000ff); border-radius: 2px; box-shadow: 0 0 8px rgba(255,255,255,0.5);"></div>`;
+                        } else {
+                            return `<div style="width: 24px; height: 4px; background: ${lineColor}; border-radius: 2px; box-shadow: 0 0 8px ${lineColor}66, 0 0 4px ${lineColor};"></div>`;
+                        }
+                    default:
+                        return '✨';
+                }
+            }
+
+            getTrailRarity(trailData) {
+                if (!trailData || !trailData.unboxWeight) return 'Mil-Spec';
+                
+                const weight = trailData.unboxWeight;
+                if (weight >= 30) return 'Mil-Spec';
+                if (weight >= 15) return 'Restricted';
+                if (weight >= 9) return 'Classified';
+                if (weight >= 5) return 'Covert';
+                return 'Gold';
+            }
+
+            formatTrailName(trailName) {
+                if (!trailName || typeof trailName !== 'string') {
+                    return 'Unknown';
+                }
+                
+                return trailName
+                    .split(/[_-]/)
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                    .join(' ');
+            }
+
+            async selectTrail(trailName) {
+                if (!this.currentUser || !this.profileData || this.currentUser.login !== this.profileData.name) {
+                    console.error('Cannot select trail: not authorized');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/trails/select', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        credentials: 'include',
+                        body: JSON.stringify({ trailName })
+                    });
+
+                    const result = await response.json();
+
+                    if (result.status === 'success') {
+                        // Refresh trail collection to show updated selection
+                        await this.updateTrailCollection(this.profileData.name);
+                        
+                        // Show success message
+                        this.showMessage(`Trail changed to "${this.formatTrailName(trailName)}"!`, 'success');
+                    } else {
+                        this.showMessage(result.message || 'Failed to select trail', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error selecting trail:', error);
+                    this.showMessage('Failed to select trail', 'error');
+                }
+            }
+
+            getSkinRarity(skinData, skinName, seasonalSkin) {
+                // If this skin is the current seasonal skin, show "Seasonal"
+                if (seasonalSkin && skinName === seasonalSkin) {
+                    return 'Seasonal';
+                }
+
+                // If skin is not unboxable, don't show rarity
+                if (!skinData || !skinData.canUnbox) {
+                    return null;
+                }
+
+                const weight = skinData.unboxWeight || 0;
+                if (weight >= 30) return 'Mil-Spec';
+                if (weight >= 15) return 'Restricted';
+                if (weight >= 9) return 'Classified';
+                if (weight >= 5) return 'Covert';
+                return 'Gold';
+            }
+
+            formatSkinName(skinName) {
+                if (!skinName || typeof skinName !== 'string') {
+                    return 'Unknown';
+                }
+                
+                return skinName
+                    .split(/[_-]/)
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                    .join(' ');
+            }
+
+            showProfile() {
+                this.profileContainer.classList.add('show');
+                this.noProfile.style.display = 'none';
+            }
+
+            showNoProfile() {
+                this.profileContainer.classList.remove('show');
+                this.noProfile.style.display = 'block';
+            }
+
+            showLoading() {
+                // Don't destroy the HTML structure, just show loading message
+                this.profileContainer.classList.add('show');
+                this.noProfile.style.display = 'none';
+                
+                // Add loading overlay instead of replacing content
+                if (!document.querySelector('.profile-loading')) {
+                    const loadingDiv = document.createElement('div');
+                    loadingDiv.className = 'profile-loading';
+                    loadingDiv.style.cssText = `
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        bottom: 0;
+                        background: var(--card-bg);
+                        backdrop-filter: blur(10px);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        color: var(--text-secondary);
+                        font-size: 1.2rem;
+                        border-radius: 16px;
+                        z-index: 100;
+                    `;
+                    loadingDiv.textContent = 'Loading profile...';
+                    this.profileContainer.style.position = 'relative';
+                    this.profileContainer.appendChild(loadingDiv);
+                }
+            }
+
+            showError(message) {
+                this.profileContainer.classList.add('show');
+                this.noProfile.style.display = 'none';
+                
+                // Add error overlay instead of replacing content
+                const existingError = document.querySelector('.profile-error');
+                if (existingError) existingError.remove();
+                
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'profile-error';
+                errorDiv.style.cssText = `
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: var(--card-bg);
+                    backdrop-filter: blur(10px);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: #ef4444;
+                    font-size: 1.2rem;
+                    border-radius: 16px;
+                    z-index: 100;
+                    border: 1px solid rgba(239, 68, 68, 0.3);
+                `;
+                errorDiv.textContent = message;
+                this.profileContainer.style.position = 'relative';
+                this.profileContainer.appendChild(errorDiv);
+            }
+
+            showDropdown() {
+                this.dropdown.style.display = 'block';
+            }
+
+            hideDropdown() {
+                this.dropdown.style.display = 'none';
+                this.selectedIndex = -1;
+            }
+
+            async selectSkin(skinName) {
+                if (!this.currentUser || !this.profileData || this.currentUser.login !== this.profileData.name) {
+                    console.error('Cannot select skin: not authorized');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/skins/select', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        credentials: 'include',
+                        body: JSON.stringify({ skinName })
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok && result.status === 'success') {
+                        // Reload the profile to show updated skin selection
+                        await this.loadProfile(this.profileData.name);
+                        
+                        // Show success message if notification function exists
+                        if (typeof showNotification === 'function') {
+                            showNotification(`Skin changed to "${skinName}"!`, 'success');
+                        }
+                    } else {
+                        console.error('Failed to select skin:', result.message);
+                        if (typeof showNotification === 'function') {
+                            showNotification(result.message || 'Failed to select skin', 'error');
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error selecting skin:', error);
+                    if (typeof showNotification === 'function') {
+                        showNotification('Network error occurred', 'error');
+                    }
+                }
+            }
+
+            showMessage(message, type = 'info') {
+                // Create a toast notification element
+                const toast = document.createElement('div');
+                toast.className = `toast toast-${type}`;
+                toast.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    padding: 12px 20px;
+                    background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+                    color: white;
+                    border-radius: 8px;
+                    font-weight: 600;
+                    z-index: 10000;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                    transform: translateX(100%);
+                    transition: transform 0.3s ease;
+                `;
+                toast.textContent = message;
+                
+                document.body.appendChild(toast);
+                
+                // Slide in
+                setTimeout(() => {
+                    toast.style.transform = 'translateX(0)';
+                }, 10);
+                
+                // Remove after delay
+                setTimeout(() => {
+                    toast.style.transform = 'translateX(100%)';
+                    setTimeout(() => {
+                        if (toast.parentNode) {
+                            toast.parentNode.removeChild(toast);
+                        }
+                    }, 300);
+                }, 3000);
+            }
+
+            async unsetTrail() {
+                if (!this.currentUser || !this.profileData || this.currentUser.login !== this.profileData.name) {
+                    console.error('Cannot unset trail: not authorized');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/trails/select', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        credentials: 'include',
+                        body: JSON.stringify({ trailName: 'default' })
+                    });
+
+                    const result = await response.json();
+
+                    if (result.status === 'success') {
+                        // Refresh trail collection to show updated selection
+                        await this.updateTrailCollection(this.profileData.name);
+                        
+                        // Show success message
+                        this.showMessage('Trail unset successfully!', 'success');
+                    } else {
+                        this.showMessage(result.message || 'Failed to unset trail', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error unsetting trail:', error);
+                    this.showMessage('Failed to unset trail', 'error');
+                }
+            }
+        }
+
+
+
+        // Initialize the profile manager when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            window.profileManager = new ProfileManager();
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,3831 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Duru+Sans&family=Manrope:wght@200..800&display=swap" rel="stylesheet">
+
+
+  <meta charset="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ConeFlip</title>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+    }
+
+    #world,
+    #confetti-canvas {
+      display: block;
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
+
+    #confetti-canvas {
+      z-index: 2;
+    }
+
+    .userName {
+      position: fixed;
+      font-family: "Duru Sans", serif;
+      background-color: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(10px);
+      padding: 5px 10px;
+      font-weight: bold;
+      color: white;
+      pointer-events: none;
+      border-radius: 6px;
+      transition: opacity 0.5s ease;
+    }
+    
+    .userName.has-emote {
+      background-color: transparent;
+      padding: 0;
+    }
+
+    /* New CSS for winner name text so the painted gradient shows through */
+    .winner-name {
+      display: inline-block;
+      color: white !important;
+      -webkit-background-clip: text;
+      background-clip: text;
+    }
+
+    /* New CSS for layered painted names */
+    .paint-wrapper {
+      position: relative;
+      display: inline-block;
+    }
+    .paint-shadow {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+      display: none;
+    }
+    .paint-text {
+      position: relative;
+      z-index: 2;
+    }
+
+    #celebration-container {
+      display: block;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      z-index: 10;
+      animation: fade-in 1s ease-in-out forwards;
+    }
+
+    .fadeoutgold {
+      animation: fade-out-gold 1s ease-in-out forwards !important;
+    }
+
+    /* Trail particle animations */
+    @keyframes sparkle {
+      0%, 100% { 
+        transform: scale(1); 
+        opacity: 0.8; 
+      }
+      50% { 
+        transform: scale(1.5); 
+        opacity: 1; 
+      }
+    }
+
+    @keyframes cosmic-pulse {
+      0%, 100% { 
+        transform: scale(1) rotate(0deg); 
+        opacity: 0.7; 
+      }
+      50% { 
+        transform: scale(1.3) rotate(180deg); 
+        opacity: 1; 
+      }
+    }
+
+    @keyframes golden-shimmer {
+      0%, 100% { 
+        transform: scale(1); 
+        filter: brightness(1); 
+      }
+      33% { 
+        transform: scale(1.2); 
+        filter: brightness(1.5); 
+      }
+      66% { 
+        transform: scale(0.9); 
+        filter: brightness(1.8); 
+      }
+    }
+
+    @keyframes fire-flicker {
+      0% {
+        transform: scaleY(1.4) scaleX(1);
+        opacity: 0.9;
+        filter: brightness(1);
+      }
+      25% {
+        transform: scaleY(1.5) scaleX(0.95);
+        opacity: 1;
+        filter: brightness(1.3);
+      }
+      50% {
+        transform: scaleY(1.35) scaleX(1.05);
+        opacity: 0.85;
+        filter: brightness(1.1);
+      }
+      75% {
+        transform: scaleY(1.55) scaleX(0.9);
+        opacity: 1;
+        filter: brightness(1.4);
+      }
+      100% {
+        transform: scaleY(1.4) scaleX(1);
+        opacity: 0.9;
+        filter: brightness(1);
+      }
+    }
+
+    @keyframes ice-shimmer {
+      0%, 100% {
+        transform: scale(1);
+        filter: brightness(1);
+      }
+      50% {
+        transform: scale(1.05);
+        filter: brightness(1.3);
+      }
+    }
+
+    @keyframes electric-flicker {
+      0% {
+        opacity: 1;
+        filter: brightness(2);
+        transform: scale(1);
+      }
+      20% {
+        opacity: 0.4;
+        filter: brightness(3);
+        transform: scale(1.2);
+      }
+      40% {
+        opacity: 1;
+        filter: brightness(1.5);
+        transform: scale(0.9);
+      }
+      60% {
+        opacity: 0.6;
+        filter: brightness(2.5);
+        transform: scale(1.3);
+      }
+      80% {
+        opacity: 1;
+        filter: brightness(2);
+        transform: scale(1.1);
+      }
+      100% {
+        opacity: 0.8;
+        filter: brightness(1.8);
+        transform: scale(1);
+      }
+    }
+
+    @keyframes electric-spark {
+      0%, 100% {
+        transform: scale(1);
+        filter: brightness(1);
+      }
+      25% {
+        transform: scale(1.3);
+        filter: brightness(2);
+      }
+      75% {
+        transform: scale(0.8);
+        filter: brightness(1.5);
+      }
+    }
+
+    @keyframes glue-drip {
+      0% {
+        transform: scaleY(1) scaleX(1);
+        opacity: 0.95;
+      }
+      50% {
+        transform: scaleY(2.5) scaleX(0.7);
+        opacity: 0.9;
+      }
+      100% {
+        transform: scaleY(3) scaleX(0.5);
+        opacity: 0;
+      }
+    }
+
+    @keyframes rainbow-cycle {
+      0% { filter: hue-rotate(0deg); }
+      100% { filter: hue-rotate(360deg); }
+    }
+
+    @keyframes shadow-drift {
+      0%, 100% { 
+        transform: scale(1) translateY(0px); 
+        opacity: 0.7; 
+      }
+      50% { 
+        transform: scale(1.2) translateY(-10px); 
+        opacity: 0.3; 
+      }
+    }
+
+    @keyframes sparkle-twinkle {
+      0%, 100% { 
+        opacity: 0.4; 
+        transform: scale(0.8); 
+      }
+      50% { 
+        opacity: 1; 
+        transform: scale(1.2); 
+      }
+    }
+
+    @keyframes star-rotation {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes prismatic-shift {
+      0% { filter: hue-rotate(0deg) brightness(1); }
+      25% { filter: hue-rotate(90deg) brightness(1.2); }
+      50% { filter: hue-rotate(180deg) brightness(1); }
+      75% { filter: hue-rotate(270deg) brightness(1.2); }
+      100% { filter: hue-rotate(360deg) brightness(1); }
+    }
+
+    @keyframes nebula-drift {
+      0%, 100% { 
+        transform: scale(1) rotate(0deg); 
+        opacity: 0.6; 
+      }
+      33% { 
+        transform: scale(1.3) rotate(120deg); 
+        opacity: 0.9; 
+      }
+      66% { 
+        transform: scale(0.8) rotate(240deg); 
+        opacity: 0.7; 
+      }
+    }
+
+    @keyframes heat-wave {
+      0%, 100% { 
+        filter: blur(0px) hue-rotate(0deg); 
+      }
+      50% { 
+        filter: blur(1px) hue-rotate(10deg); 
+      }
+    }
+
+    @keyframes pulse-effect {
+      0%, 100% { 
+        transform: scale(1); 
+        opacity: 0.8; 
+      }
+      50% { 
+        transform: scale(1.3); 
+        opacity: 1; 
+      }
+    }
+
+    @keyframes float-effect {
+      0%, 100% { 
+        transform: translateY(0px); 
+      }
+      50% { 
+        transform: translateY(-15px); 
+      }
+    }
+
+    @keyframes sparkle-burst {
+      0% { 
+        transform: scale(0) rotate(0deg); 
+        opacity: 0; 
+      }
+      50% { 
+        transform: scale(1.5) rotate(180deg); 
+        opacity: 1; 
+      }
+      100% { 
+        transform: scale(0.5) rotate(360deg); 
+        opacity: 0; 
+      }
+    }
+
+    @keyframes electric-crackle {
+      0%, 100% { 
+        transform: scale(1) skew(0deg); 
+        filter: brightness(1); 
+      }
+      25% { 
+        transform: scale(1.2) skew(2deg); 
+        filter: brightness(1.5); 
+      }
+      75% { 
+        transform: scale(0.9) skew(-2deg); 
+        filter: brightness(1.3); 
+      }
+    }
+
+    @keyframes shadow-wisp {
+      0% { 
+        transform: scale(0.5) rotate(0deg); 
+        opacity: 0.3; 
+      }
+      50% { 
+        transform: scale(1.2) rotate(180deg); 
+        opacity: 0.7; 
+      }
+      100% { 
+        transform: scale(2) rotate(360deg); 
+        opacity: 0; 
+      }
+    }
+
+    @keyframes cosmic-swirl {
+      0% { filter: hue-rotate(0deg) brightness(1); }
+      25% { filter: hue-rotate(90deg) brightness(1.3); }
+      50% { filter: hue-rotate(180deg) brightness(1.1); }
+      75% { filter: hue-rotate(270deg) brightness(1.4); }
+      100% { filter: hue-rotate(360deg) brightness(1); }
+    }
+    
+    @keyframes cosmic-pulse {
+      0% { transform: scale(1) rotate(0deg); filter: brightness(1); }
+      50% { transform: scale(1.2) rotate(180deg); filter: brightness(1.5); }
+      100% { transform: scale(1) rotate(360deg); filter: brightness(1); }
+    }
+    
+    @keyframes rainbow-cycle {
+      0% { filter: hue-rotate(0deg) saturate(1.5); }
+      16.66% { filter: hue-rotate(60deg) saturate(1.5); }
+      33.33% { filter: hue-rotate(120deg) saturate(1.5); }
+      50% { filter: hue-rotate(180deg) saturate(1.5); }
+      66.66% { filter: hue-rotate(240deg) saturate(1.5); }
+      83.33% { filter: hue-rotate(300deg) saturate(1.5); }
+      100% { filter: hue-rotate(360deg) saturate(1.5); }
+    }
+
+    @keyframes glue-splat {
+      0% { 
+        transform: scale(0.3) rotate(0deg); 
+      }
+      50% { 
+        transform: scale(1.1) rotate(180deg); 
+      }
+      100% { 
+        transform: scale(0.9) rotate(360deg); 
+      }
+    }
+
+    .trail-particle {
+      will-change: transform, opacity;
+      backface-visibility: hidden;
+    }
+
+    #celebration-container.hidden {
+      display: none;
+    }
+
+    #player-details img {
+      height: 150px;
+      margin-bottom: 20px;
+    }
+
+    #player-details h1 {
+      font-size: 3rem;
+      font-family: "Duru Sans", serif;
+      color: gold;
+      margin: 0;
+    }
+
+    #winner-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 120px;
+      z-index: 10;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    #winner-container.hidden {
+      display: none;
+    }
+
+    /* Diagonal bars */
+    .winner-bar {
+      position: absolute;
+      top: 0;
+      width: 60%;
+      height: 100%;
+      background: linear-gradient(180deg, rgba(20, 20, 20, 0.5) 0%, rgba(10, 10, 10, 0.5) 100%);
+      z-index: 1;
+    }
+
+    .winner-bar-left {
+      left: 0;
+      clip-path: polygon(0 0, 100% 0, 85% 100%, 0 100%);
+      transform: translateX(-100%);
+    }
+
+    .winner-bar-left::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 4px;
+      height: 141%;
+      background: linear-gradient(180deg, rgba(255, 215, 0, 0.8) 0%, rgba(255, 215, 0, 0.4) 100%);
+      transform: rotate(-9.5deg);
+      transform-origin: top right;
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.6), 0 0 30px rgba(255, 215, 0, 0.3);
+    }
+
+    .winner-bar-right {
+      right: 0;
+      clip-path: polygon(15% 0, 100% 0, 100% 100%, 0 100%);
+      transform: translateX(100%);
+    }
+
+    .winner-bar-right::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 141%;
+      background: linear-gradient(180deg, rgba(255, 215, 0, 0.8) 0%, rgba(255, 215, 0, 0.4) 100%);
+      transform: rotate(9.5deg);
+      transform-origin: top left;
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.6), 0 0 30px rgba(255, 215, 0, 0.3);
+    }
+
+    /* Bar animations */
+    #winner-container.animate-in .winner-bar-left {
+      animation: bar-sweep-in-left 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    }
+
+    #winner-container.animate-in .winner-bar-right {
+      animation: bar-sweep-in-right 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    }
+
+    #winner-container.animate-out .winner-bar-left {
+      animation: bar-sweep-out-left 0.5s cubic-bezier(0.55, 0.06, 0.68, 0.19) forwards;
+    }
+
+    #winner-container.animate-out .winner-bar-right {
+      animation: bar-sweep-out-right 0.5s cubic-bezier(0.55, 0.06, 0.68, 0.19) forwards;
+    }
+
+    @keyframes bar-sweep-in-left {
+      from { transform: translateX(-100%); }
+      to { transform: translateX(0); }
+    }
+
+    @keyframes bar-sweep-in-right {
+      from { transform: translateX(100%); }
+      to { transform: translateX(0); }
+    }
+
+    @keyframes bar-sweep-out-left {
+      from { transform: translateX(0); }
+      to { transform: translateX(-100%); }
+    }
+
+    @keyframes bar-sweep-out-right {
+      from { transform: translateX(0); }
+      to { transform: translateX(100%); }
+    }
+
+    /* Winner text content */
+    #winner-player-details {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      opacity: 0;
+      z-index: 11;
+    }
+
+    #winner-container.animate-in #winner-player-details {
+      animation: text-fade-in 0.2s ease-out 0.35s forwards;
+    }
+
+    #winner-container.animate-out #winner-player-details {
+      animation: text-fade-out 0.3s ease-in forwards;
+    }
+
+    @keyframes text-fade-in {
+      from { opacity: 0; transform: translate(-50%, -50%) scale(0.95); }
+      to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    }
+
+    @keyframes text-fade-out {
+      from { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+      to { opacity: 0; transform: translate(-50%, -50%) scale(0.95); }
+    }
+
+    #winner-player-details .winner-label {
+      font-size: 0.85rem;
+      color: #FFD700;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 5px;
+      display: block;
+      margin-bottom: 6px;
+      text-shadow: 0 0 15px rgba(255, 215, 0, 0.8), 0 0 30px rgba(255, 215, 0, 0.4);
+      font-family: "Duru Sans", serif;
+    }
+
+    #winner-player-details img,
+    #winner-player-details .emote-inline-winner {
+      width: 70px;
+      height: 70px;
+      margin-bottom: 0;
+    }
+
+    #winner-player-name {
+      color: #fff;
+      margin: 0;
+    }
+
+    #winner-player-details h1 {
+      font-size: 2.2rem;
+      color: #fff;
+      font-family: "Duru Sans", serif;
+      font-weight: 700;
+      margin: 0;
+      letter-spacing: 1px;
+      line-height: 1.1;
+      text-align: center;
+    }
+
+    .no7TV{
+      text-shadow: #474747 3px 5px 2px;
+    }
+
+    @keyframes fade-in {
+      from {
+        opacity: 0;
+        transform: translate(-50%, -60%);
+      }
+      to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+      }
+    }
+
+    @keyframes fade-out-gold {
+      from {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+      }
+      to {
+        opacity: 0;
+        transform: translate(-50%, -60%) scale(0.9);
+      }
+    }
+
+    .cone {
+      position: absolute;
+      height: 160px;
+      width: 120px;
+      will-change: transform, top, left;
+      transition: opacity 0.5s ease;
+      z-index: 1;
+    }
+
+    .cone_holo {
+      position: absolute;
+      height: 160px;
+      width: 120px;
+      transition: background-position 0.1s ease;
+      z-index: 1;
+      -webkit-mask-image: url(skins/cone_mask.png);
+      mask-image: url(skins/cone_mask.png);
+      mask-repeat: no-repeat;
+      background-size: 400%;
+      transition: opacity 0.5s ease;
+    }
+
+    /* Notification Container */
+    #mk-notification {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #fff;
+      font-family: "Duru Sans", serif;
+      font-size: 30px;
+      text-transform: uppercase;
+      letter-spacing: 5px;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes fadeOut {
+      from {
+        opacity: 1;
+      }
+      to {
+        opacity: 0;
+      }
+    }
+
+    .emote-inline {
+      display: inline-block;
+      vertical-align: middle;
+      width: 80px;
+      height: 80px;
+      margin: 0px 2px;
+      transform: translateY(-40px);
+      object-fit: contain;
+    }
+
+    .emote-inline-winner {
+      display: inline-block;
+      vertical-align: middle;
+      width: 200px;
+      height: 200px;
+      margin: 0 2px;
+      object-fit: contain;
+    }
+
+    /* XP Popup Styles */
+    .xp-popup {
+      position: fixed;
+      font-family: "Duru Sans", serif;
+      font-size: 28px;
+      font-weight: bold;
+      color: #FFD700;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9), 0 0 10px rgba(255, 215, 0, 0.5);
+      pointer-events: none;
+      z-index: 100;
+      animation: xp-float-up 2s ease-out forwards;
+      white-space: nowrap;
+    }
+
+    .xp-popup .streak-bonus {
+      color: #FF6B35;
+      font-size: 20px;
+      display: block;
+      margin-top: 3px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9), 0 0 8px rgba(255, 107, 53, 0.5);
+    }
+
+    @keyframes xp-float-up {
+      0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+      20% {
+        opacity: 1;
+        transform: translateY(-20px) scale(1.15);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(-80px) scale(0.9);
+      }
+    }
+
+    /* Level Up Text Styles (subtle) */
+    .level-up-text {
+      position: fixed;
+      font-family: "Duru Sans", serif;
+      font-size: 24px;
+      font-weight: bold;
+      color: #FFD700;
+      text-shadow: 0 0 10px rgba(255, 215, 0, 0.6), 2px 2px 4px rgba(0, 0, 0, 0.5);
+      pointer-events: none;
+      z-index: 1000;
+      animation: level-up-float 2.5s ease-out forwards;
+    }
+
+    .level-up-text .player-name {
+      font-size: 16px;
+      color: white;
+      display: block;
+      margin-top: 4px;
+    }
+
+    @keyframes level-up-float {
+      0% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+      100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-100px);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="mk-notification">ROUND 1</div>
+
+  <canvas id="confetti-canvas"></canvas>
+  <div id="celebration-container" class="hidden">
+    <div id="player-details">
+      <img id="player-image" src="skins/cone_gold.webp">
+      <h1 id="player-name"></h1>
+    </div>
+  </div>
+
+  <div id="winner-container" class="hidden">
+    <div class="winner-bar winner-bar-left"></div>
+    <div class="winner-bar winner-bar-right"></div>
+    <div id="winner-player-details">
+      <span class="winner-label">WINNER</span>
+      <h1 id="winner-player-name"></h1>
+    </div>
+  </div>
+
+  <canvas id="world"></canvas>
+
+  <script src="https://cdn.jsdelivr.net/npm/matter-js@0.19.0/build/matter.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pathseg@1.2.1/pathseg.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/poly-decomp@0.3.0/build/decomp.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tsparticles/confetti@3.0.3/tsparticles.confetti.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tsparticles@3.0.3/tsparticles.bundle.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+
+  <audio id="coolSound" src="O.wav"></audio>
+  <audio id="failSound" src="bwomp.wav"></audio>
+  <audio id="newGold" src="newGold.wav"></audio>
+  <audio id="slowin" src="slowin.mp3"></audio>
+  <audio id="slowout" src="slowout.mp3"></audio>
+  <audio id="fight" src="fight.mp3"></audio>
+  <audio id="winner" src="winner.mp3"></audio>
+  <!-- Hidden SVG used as a template for the cone hitbox -->
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488.1 645.4" style="display: none;">
+    <path id="hitbox" d="M488,539.6v-12.7c0-4.2-1.8-8.2-4.9-10.9-2.6-2.2-5.9-3.4-9.2-3.4h-69.9L311.6,45.4
+       c-4.2-21.3-20.3-38.3-41.3-43.6-4.5-1.2-9.2-1.7-13.9-1.7h-24.8c-4.7,0-9.4.6-13.9,1.7c-21,5.4-37.1,22.3-41.3,43.6
+       l-92.3,467.2H14c-4.2,0-8.2,1.8-10.9,4.9c-2.2,2.6-3.4,5.9-3.4,9.2L0,573.2v57.8c0,4.2,1.8,8.2,4.9,10.9
+       c2.6,2.2,5.9,3.4,9.2,3.4h459.7c3.4,0,6.7-1.2,9.2-3.4c3.2-2.7,5-6.7,4.9-10.9v-91c0-0.2,0-0.3,0-0.5Z" />
+  </svg>
+
+  <script>
+    (() => {
+      const DEBUG_MODE = false;
+      const slowOdds = 99999999999999;
+
+
+      function convertColor(num) {
+        let hexFull = (num >>> 0).toString(16).padStart(8, '0');
+        let hex = hexFull.substring(0, 6);
+        const r = parseInt(hex.substring(0, 2), 16);
+        const g = parseInt(hex.substring(2, 4), 16);
+        const b = parseInt(hex.substring(4, 6), 16);
+        return `rgb(${r}, ${g}, ${b})`;
+      }
+
+      // Helper function to add timeout to fetch requests (for 7tv API calls)
+      function fetchWithTimeout(url, timeoutMs = 3000) {
+        return Promise.race([
+          fetch(url),
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Request timeout')), timeoutMs)
+          )
+        ]);
+      }
+
+      // Image preload cache to prevent blank cones
+      const imageCache = new Map();
+
+      function preloadImage(url) {
+        if (!url || imageCache.has(url)) {
+          return imageCache.get(url) || Promise.resolve();
+        }
+
+        const promise = new Promise((resolve) => {
+          const img = new Image();
+          img.onload = () => {
+            console.log(`✅ Preloaded skin: ${url}`);
+            resolve(img);
+          };
+          img.onerror = () => {
+            console.warn(`⚠️ Failed to preload: ${url}`);
+            resolve(null);
+          };
+          img.src = url;
+        });
+
+        imageCache.set(url, promise);
+        return promise;
+      }
+
+      function preloadAllSkins(skins) {
+        const urls = Object.values(skins).filter(url => url);
+        console.log(`🎨 Preloading ${urls.length} skin images...`);
+
+        // Also preload holo_doppler variants (phases 1-4)
+        const allUrls = [];
+        for (const url of urls) {
+          if (url.includes('holo_doppler')) {
+            for (let phase = 1; phase <= 4; phase++) {
+              allUrls.push(`${url}_${phase}.jpg`);
+            }
+          } else {
+            allUrls.push(url);
+          }
+        }
+
+        return Promise.all(allUrls.map(preloadImage));
+      }
+
+      function getPaintCSS(paint) {
+        if (!paint) return null;
+        if (paint.function === "LINEAR_GRADIENT") {
+          const stops = paint.gradientStops
+            .map(stop => `${convertColor(stop.color)} ${stop.at}`)
+            .join(', ');
+          let angle = "90deg";
+          if (paint.gradientAngle && paint.gradientAngle !== "N/A") {
+            angle = paint.gradientAngle + "deg";
+          }
+          return `repeating-linear-gradient(${angle}, ${stops})`;
+        } else if (paint.function === "RADIAL_GRADIENT") {
+          const stops = paint.gradientStops
+            .map(stop => `${convertColor(stop.color)} ${stop.at}`)
+            .join(', ');
+          return `radial-gradient(circle, ${stops})`;
+        } else if (paint.function === "URL") {
+          if (paint.image) {
+            return `url('${paint.image}') no-repeat center/cover`;
+          }
+          return null;
+        } else {
+          if (paint.color && paint.color !== "N/A") {
+            return convertColor(paint.color);
+          }
+          return null;
+        }
+      }
+
+
+      function applyPaintToName(nameElement, playerName) {
+        if (!nameElement.querySelector('.paint-wrapper')) {
+          let originalText = nameElement.textContent;
+          nameElement.innerHTML = "";
+          let wrapper = document.createElement('span');
+          wrapper.className = 'paint-wrapper';
+          let shadowSpan = document.createElement('span');
+          shadowSpan.className = 'paint-shadow';
+          shadowSpan.textContent = originalText;
+          let textSpan = document.createElement('span');
+          textSpan.className = 'paint-text';
+          textSpan.textContent = originalText;
+          textSpan.style.color = "white";
+          wrapper.appendChild(shadowSpan);
+          wrapper.appendChild(textSpan);
+          nameElement.appendChild(wrapper);
+        }
+
+        let wrapper = nameElement.querySelector('.paint-wrapper');
+        let textSpan = wrapper.querySelector('.paint-text');
+        let shadowSpan = wrapper.querySelector('.paint-shadow');
+
+        textSpan.classList.remove('no7TV');
+        nameElement.style.display = "inline-block";
+        nameElement.style.opacity = "1";
+        nameElement.style.transition = "opacity 0.5s ease";
+
+        // Fetch paint with 3s timeout to prevent blocking
+        fetchWithTimeout(`/api/skins/paint/${encodeURIComponent(playerName)}`)
+          .then(response => response.json())
+          .then(paintData => {
+            if (paintData && paintData.function) {
+              const cssValue = getPaintCSS(paintData);
+         
+              if (cssValue) {
+                if (typeof CSS !== "undefined" && CSS.supports && CSS.supports("-webkit-background-clip", "text")) {
+                  textSpan.style.background = cssValue;
+                  textSpan.style.webkitBackgroundClip = "text";
+                  textSpan.style.backgroundClip = "text";
+                  textSpan.style.webkitTextFillColor = "transparent";
+                  textSpan.style.color = "transparent";
+                  textSpan.style.setProperty("color-shadow", "transparent", "important");
+                  if (paintData.function === "URL") {
+                    textSpan.style.backgroundSize = "cover";
+                  }
+       
+                  if (paintData.shadows && Array.isArray(paintData.shadows) && paintData.shadows.length > 0) {
+                    const multiplier = nameElement.classList.contains('winner-name') ? 2 : 1;
+                    const filterValue = paintData.shadows
+                      .map(shadow =>
+                        `drop-shadow(${convertColor(shadow.color)} ${shadow.x_offset * multiplier}px ${shadow.y_offset * multiplier}px ${shadow.radius * multiplier}px)`
+                      )
+                      .join(' ');
+                    shadowSpan.style.setProperty("filter", filterValue, "important");
+                    shadowSpan.style.setProperty("text-shadow", "none", "important");
+                    shadowSpan.style.display = "inline";
+                  } else {
+                    shadowSpan.style.display = "none";
+                    textSpan.style.webkitTextStroke = "0px";
+                  }
+                } else {
+                  applySVGGradientToName(nameElement, nameElement.textContent, paintData);
+                }
+              }
+            } else {
+              textSpan.style.background = "";
+              textSpan.style.webkitBackgroundClip = "";
+              textSpan.style.backgroundClip = "";
+              textSpan.style.webkitTextFillColor = "";
+              textSpan.style.color = "white";
+              textSpan.style.backgroundSize = "";
+              textSpan.style.webkitTextStroke = "";
+              textSpan.classList.add('no7TV');
+              shadowSpan.style.display = "none";
+      
+              console.log("No paint data found for " + playerName);
+            }
+          })
+          .catch(error => {
+            console.log(`Error fetching paint for ${playerName}:`, error);
+            textSpan.style.color = "white";
+          });
+      }
+
+      function applySVGGradientToName(nameElem, text, paintData) {
+        const svgNS = "http://www.w3.org/2000/svg";
+        const gradientId = "grad-" + Math.random().toString(36).substr(2, 9);
+        const svg = document.createElementNS(svgNS, "svg");
+        svg.setAttribute("width", "100%");
+        svg.setAttribute("height", "1em");
+        svg.setAttribute("viewBox", "0 0 200 40");
+        svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+
+        const defs = document.createElementNS(svgNS, "defs");
+        const linearGradient = document.createElementNS(svgNS, "linearGradient");
+        linearGradient.setAttribute("id", gradientId);
+        let angle = 90;
+        if (paintData.gradientAngle && paintData.gradientAngle !== "N/A") {
+          angle = parseFloat(paintData.gradientAngle);
+        }
+        linearGradient.setAttribute("x1", "0%");
+        linearGradient.setAttribute("y1", "0%");
+        linearGradient.setAttribute("x2", "100%");
+        linearGradient.setAttribute("y2", "0%");
+        linearGradient.setAttribute("gradientTransform", `rotate(${angle})`);
+
+        if (paintData.gradientStops && paintData.gradientStops.length > 0) {
+          for (let stop of paintData.gradientStops) {
+            const stopElem = document.createElementNS(svgNS, "stop");
+            stopElem.setAttribute("offset", stop.at);
+            stopElem.setAttribute("stop-color", convertColor(stop.color));
+            linearGradient.appendChild(stopElem);
+          }
+        } else if (paintData.color && paintData.color !== "N/A") {
+          const stopElem = document.createElementNS(svgNS, "stop");
+          stopElem.setAttribute("offset", "100%");
+          stopElem.setAttribute("stop-color", convertColor(paintData.color));
+          linearGradient.appendChild(stopElem);
+        }
+
+        defs.appendChild(linearGradient);
+        svg.appendChild(defs);
+
+        const textElem = document.createElementNS(svgNS, "text");
+        textElem.setAttribute("x", "50%");
+        textElem.setAttribute("y", "50%");
+        textElem.setAttribute("dominant-baseline", "middle");
+        textElem.setAttribute("text-anchor", "middle");
+        textElem.setAttribute("font-size", "24");
+        textElem.setAttribute("fill", `url(#${gradientId})`);
+        textElem.textContent = text;
+
+        svg.appendChild(textElem);
+        nameElem.innerHTML = "";
+        nameElem.appendChild(svg);
+      }
+
+      const {
+        Engine,
+        Render,
+        Runner,
+        Bodies,
+        Composite,
+        Body,
+        Events,
+        Svg
+      } = Matter;
+
+      class TrailManager {
+        constructor() {
+          this.activeTrails = new Map(); // Map of cone ID to trail data
+          this.trailConfigs = {};
+          this.playerTrails = {};
+          this.particleContainer = null;
+          this.lineContainer = null;
+          this.initialized = false;
+          
+          this.loadTrailConfigs();
+          this.initializeParticles();
+        }
+
+        async loadTrailConfigs() {
+          try {
+            console.log('🔄 TrailManager: Loading trail configs...');
+            const response = await fetch('/api/trails/config');
+            const configs = await response.json();
+            
+            this.trailConfigs = {};
+            for (const config of configs) {
+              this.trailConfigs[config.name] = config;
+            }
+            
+            console.log('✅ Loaded', Object.keys(this.trailConfigs).length, 'trail configurations');
+          } catch (error) {
+            console.error('❌ Failed to load trail configurations:', error);
+            this.trailConfigs = {
+              'default': { name: 'default', type: 'none', visuals: { type: 'none' } }
+            };
+          }
+        }
+
+        async updatePlayerTrails() {
+          try {
+            const response = await fetch('/api/trails/users');
+            const userData = await response.json();
+            
+            this.playerTrails = {};
+            if (Array.isArray(userData)) {
+              userData.forEach(user => {
+                this.playerTrails[user.name] = user.trail || 'default';
+              });
+            } else if (userData.data && Array.isArray(userData.data)) {
+              userData.data.forEach(user => {
+                this.playerTrails[user.name] = user.trail || 'default';
+              });
+            }
+            
+            console.log('✅ Updated player trails for', Object.keys(this.playerTrails).length, 'players');
+          } catch (error) {
+            console.error('❌ Failed to update player trails:', error);
+          }
+        }
+
+        initializeParticles() {
+          if (this.initialized) return;
+          
+          // Create simple particle container
+          this.particleContainer = document.createElement('div');
+          this.particleContainer.id = 'trail-particles';
+          this.particleContainer.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+          `;
+          document.body.appendChild(this.particleContainer);
+          
+          // Create line trail container
+          this.lineContainer = document.createElement('div');
+          this.lineContainer.id = 'trail-lines';
+          this.lineContainer.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+          `;
+          document.body.appendChild(this.lineContainer);
+          
+          this.initialized = true;
+          console.log('✅ Particle and line trail systems initialized');
+        }
+
+        getPlayerTrail(playerName) {
+          const trail = this.playerTrails[playerName] || 'default';
+          console.log(`🎯 Getting trail for ${playerName}: ${trail}`);
+          return trail;
+        }
+
+        createTrailForCone(cone) {
+          const playerName = cone.name;
+          const trailName = this.getPlayerTrail(playerName);
+          const trailConfig = this.trailConfigs[trailName];
+          
+          console.log(`🎪 Creating trail for ${playerName}:`);
+          console.log(`   - Trail name: ${trailName}`);
+          console.log(`   - Trail config:`, trailConfig);
+          
+          if (!trailConfig || !trailConfig.visuals || trailConfig.visuals.type === 'none' || trailName === 'default') {
+            console.log(`🚫 No trail effect for ${playerName}`);
+            return null;
+          }
+          
+          const trailId = `trail_${cone.name}_${Date.now()}`;
+          
+          const trail = {
+            id: trailId,
+            cone: cone,
+            config: trailConfig,
+            visualConfig: trailConfig.visuals,
+            lastPosition: this.getConeBottomPosition(cone),
+            updateCounter: 0,
+            lastEmission: 0,
+            // Line trail specific properties
+            positionHistory: [],
+            lineElement: null,
+            lastMoving: false
+          };
+          
+          this.activeTrails.set(trailId, trail);
+          console.log(`✨ SUCCESS: Created ${trailConfig.displayName || trailName} trail for ${playerName}!`);
+          
+          return trail;
+        }
+
+        updateTrails() {
+          if (!this.initialized || this.activeTrails.size === 0) return;
+          
+          for (const [trailId, trail] of this.activeTrails) {
+            if (trail.cone.isRemoved) {
+              this.removeTrail(trailId);
+              continue;
+            }
+            
+            this.updateTrailParticles(trail);
+          }
+        }
+
+        updateTrailParticles(trail) {
+          const cone = trail.cone;
+          const visualConfig = trail.visualConfig;
+          
+          // Check if this is a line trail
+          if (visualConfig.shape === 'line' || visualConfig.type === 'line') {
+            this.updateLineTrail(trail);
+            return;
+          }
+          
+          // Only emit particles if cone is moving
+          const velocity = Math.sqrt(cone.body.velocity.x ** 2 + cone.body.velocity.y ** 2);
+          if (velocity < 1.5 || !cone.hasLaunched) return;
+          
+          // Get position from bottom of cone
+          const currentPos = this.getConeBottomPosition(cone);
+          
+          trail.updateCounter++;
+          
+          // Frequent emission with slight randomness
+          const emissionRate = Math.random() > 0.5 ? 2 : 3; // Vary between 2-3 frames
+          const now = Date.now();
+          
+          if (trail.updateCounter % emissionRate === 0 && now - (trail.lastEmission || 0) > 25) {
+            this.emitParticles(trail, currentPos, visualConfig);
+            trail.lastEmission = now;
+          }
+        }
+
+        getConeBottomPosition(cone) {
+          const pos = cone.body.position;
+          const angle = cone.body.angle;
+          
+          // Cone dimensions - standard cone height in your game
+          const coneHeight = 50; // More accurate cone height
+          
+          // Calculate bottom position considering rotation
+          // Use -cos for Y because screen Y increases downward
+          const bottomX = pos.x + Math.sin(angle) * (coneHeight / 2);
+          const bottomY = pos.y - Math.cos(angle) * (coneHeight / 2);
+          
+          return { x: bottomX, y: bottomY };
+        }
+
+        emitParticles(trail, position, visualConfig) {
+          if (!visualConfig || visualConfig.type === 'none' || !this.particleContainer) return;
+
+          const particleCount = Math.min(visualConfig.particleCount || 3, 6);
+          const colors = visualConfig.colors || ['#FFD700'];
+          const lifetime = visualConfig.lifetime || 1200;
+          const trailType = visualConfig.type || 'default';
+
+          for (let i = 0; i < particleCount; i++) {
+            const offsetX = (Math.random() - 0.5) * 18;
+            const offsetY = (Math.random() - 0.5) * 14;
+            const color = colors[Math.floor(Math.random() * colors.length)];
+
+            let size;
+            if (visualConfig.size && typeof visualConfig.size === 'object') {
+              size = visualConfig.size.min + Math.random() * (visualConfig.size.max - visualConfig.size.min);
+              // Electric stays small, others get scaled up
+              if (trailType !== 'electric') {
+                size = size * 1.3;
+              }
+            } else {
+              size = 10 + Math.random() * 8;
+            }
+
+            this.createParticle(
+              position.x + offsetX,
+              position.y + offsetY,
+              color,
+              size,
+              lifetime,
+              visualConfig,
+              trail,
+              i
+            );
+          }
+        }
+
+        updateLineTrail(trail) {
+          const cone = trail.cone;
+          const visualConfig = trail.visualConfig;
+          
+          // Get current position
+          const currentPos = this.getConeBottomPosition(cone);
+          
+          // Check if cone is moving
+          const velocity = Math.sqrt(cone.body.velocity.x ** 2 + cone.body.velocity.y ** 2);
+          const isMoving = velocity > 0.5 && cone.hasLaunched;
+          
+          // Always add position if cone is moving, or add final position when it stops
+          if (isMoving || (!trail.lastMoving && trail.positionHistory.length > 0)) {
+            trail.positionHistory.push({
+              x: currentPos.x,
+              y: currentPos.y,
+              timestamp: Date.now()
+            });
+          }
+          
+          // Store previous moving state
+          trail.lastMoving = isMoving;
+          
+          // Limit history length based on trail configuration
+          const maxHistory = visualConfig.lineLength || 50;
+          if (trail.positionHistory.length > maxHistory) {
+            trail.positionHistory.shift();
+          }
+          
+          // Remove old positions based on lifetime
+          const maxAge = visualConfig.lifetime || 2000;
+          const now = Date.now();
+          trail.positionHistory = trail.positionHistory.filter(pos => 
+            now - pos.timestamp < maxAge
+          );
+          
+          // Update line visual
+          this.updateLineVisual(trail);
+          
+          // If cone stopped and line is old enough, start fading it out
+          if (!isMoving && trail.positionHistory.length > 0) {
+            const oldestTime = trail.positionHistory[0].timestamp;
+            const age = now - oldestTime;
+            if (age > (maxAge * 0.7)) { // Start fading at 70% of lifetime
+              this.fadeOutLineTrail(trail);
+            }
+          }
+        }
+
+        updateLineVisual(trail) {
+          const visualConfig = trail.visualConfig;
+          
+          if (trail.positionHistory.length < 2) return;
+          
+          // Create SVG line if it doesn't exist
+          if (!trail.lineElement) {
+            trail.lineElement = this.createLineElement(trail);
+          }
+          
+          // Update the SVG path
+          this.updateLinePath(trail);
+        }
+
+        createLineElement(trail) {
+          const visualConfig = trail.visualConfig;
+          const colors = visualConfig.colors || ['#00ffff'];
+          const lineWidth = visualConfig.lineWidth || 3;
+          const neonIntensity = visualConfig.neonIntensity || 1;
+          const rainbowEffect = visualConfig.rainbowEffect || false;
+          
+          // Create SVG element
+          const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+          svg.style.cssText = `
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+          `;
+          
+          // Create path element
+          const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          let color = colors[0];
+          
+          // Rainbow effect setup
+          if (rainbowEffect) {
+            // Create a gradient for rainbow effect
+            const gradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+            // Sanitize trail ID for SVG use (remove special characters)
+            const sanitizedId = trail.id.replace(/[^a-zA-Z0-9]/g, '');
+            gradient.id = `rainbow-gradient-${sanitizedId}`;
+            gradient.setAttribute('gradientUnits', 'userSpaceOnUse');
+            
+            // Rainbow colors
+            const rainbowColors = ['#ff0080', '#ff8000', '#ffff00', '#80ff00', '#00ff80', '#0080ff', '#8000ff'];
+            rainbowColors.forEach((c, i) => {
+              const stop = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+              stop.setAttribute('offset', `${(i / (rainbowColors.length - 1)) * 100}%`);
+              stop.setAttribute('stop-color', c);
+              gradient.appendChild(stop);
+            });
+            
+            const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+            defs.appendChild(gradient);
+            svg.appendChild(defs);
+            
+            color = `url(#rainbow-gradient-${sanitizedId})`;
+            
+            // Add rainbow animation
+            const animateGradient = document.createElementNS('http://www.w3.org/2000/svg', 'animateTransform');
+            animateGradient.setAttribute('attributeName', 'gradientTransform');
+            animateGradient.setAttribute('type', 'rotate');
+            animateGradient.setAttribute('values', '0;360;0');
+            animateGradient.setAttribute('dur', '3s');
+            animateGradient.setAttribute('repeatCount', 'indefinite');
+            gradient.appendChild(animateGradient);
+          }
+          
+          // Neon glow effect with multiple shadow layers
+          const glowFilter = `
+            drop-shadow(0 0 ${2 * neonIntensity}px ${colors[0]})
+            drop-shadow(0 0 ${4 * neonIntensity}px ${colors[0]})
+            drop-shadow(0 0 ${8 * neonIntensity}px ${colors[0]})
+            drop-shadow(0 0 ${16 * neonIntensity}px ${colors[0]}66)
+          `;
+          
+          path.style.cssText = `
+            fill: none;
+            stroke: ${color};
+            stroke-width: ${lineWidth}px;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            filter: ${glowFilter};
+            opacity: 1;
+          `;
+          
+          svg.appendChild(path);
+          trail.lineElement = { svg, path, gradient: rainbowEffect ? gradient : null };
+          
+          this.lineContainer.appendChild(svg);
+          return trail.lineElement;
+        }
+
+        updateLinePath(trail) {
+          if (!trail.lineElement || trail.positionHistory.length < 2) return;
+          
+          const visualConfig = trail.visualConfig;
+          const fadeEffect = visualConfig.fadeEffect !== false; // Default to true
+          
+          // Create smooth curve through all points
+          let pathData = `M ${trail.positionHistory[0].x} ${trail.positionHistory[0].y}`;
+          
+          if (trail.positionHistory.length === 2) {
+            // Simple line for 2 points
+            pathData += ` L ${trail.positionHistory[1].x} ${trail.positionHistory[1].y}`;
+          } else {
+            // Smooth curve for multiple points
+            for (let i = 1; i < trail.positionHistory.length; i++) {
+              const curr = trail.positionHistory[i];
+              const prev = trail.positionHistory[i - 1];
+              
+              if (i === 1) {
+                pathData += ` Q ${prev.x} ${prev.y} ${curr.x} ${curr.y}`;
+              } else {
+                const next = trail.positionHistory[i + 1];
+                if (next) {
+                  // Control point calculation for smooth curves
+                  const cpX = curr.x + (prev.x - next.x) * 0.1;
+                  const cpY = curr.y + (prev.y - next.y) * 0.1;
+                  pathData += ` Q ${cpX} ${cpY} ${curr.x} ${curr.y}`;
+                } else {
+                  pathData += ` L ${curr.x} ${curr.y}`;
+                }
+              }
+            }
+          }
+          
+          trail.lineElement.path.setAttribute('d', pathData);
+          
+          // Apply fade effect based on age
+          if (fadeEffect && trail.positionHistory.length > 0) {
+            const oldestTime = trail.positionHistory[0].timestamp;
+            const newestTime = trail.positionHistory[trail.positionHistory.length - 1].timestamp;
+            const age = Date.now() - oldestTime;
+            const maxAge = visualConfig.lifetime || 2000;
+            const opacity = Math.max(0.1, 1 - (age / maxAge));
+            trail.lineElement.path.style.opacity = opacity;
+          }
+        }
+
+        fadeOutLineTrail(trail) {
+          if (!trail.lineElement) return;
+          
+          // Accelerated fade out when cone stops
+          const path = trail.lineElement.path;
+          const currentOpacity = parseFloat(path.style.opacity) || 1;
+          const newOpacity = Math.max(0, currentOpacity - 0.05);
+          
+          path.style.opacity = newOpacity;
+          
+          // Remove line when fully faded
+          if (newOpacity <= 0) {
+            this.removeTrail(trail.id);
+          }
+        }
+
+        createParticle(x, y, color, size, lifetime, visualConfig, trail, particleIndex = 0) {
+          const particle = document.createElement('div');
+          
+          // Get shape/image for this trail type
+          const shape = this.getParticleShape(visualConfig, size, color, particleIndex);
+          
+          // Basic positioning
+          particle.style.cssText = `
+            position: absolute;
+            left: ${x - size/2}px;
+            top: ${y - size/2}px;
+            width: ${size}px;
+            height: ${size}px;
+            pointer-events: none;
+            z-index: 0;
+            ${shape.styles}
+          `;
+          
+          // Add shape content (SVG, emoji, or styled div)
+          if (shape.content) {
+            particle.innerHTML = shape.content;
+          }
+          
+          // Add to container
+          this.particleContainer.appendChild(particle);
+          
+          // Track for cleanup
+          if (!trail.activeParticles) trail.activeParticles = new Set();
+          trail.activeParticles.add(particle);
+          
+          // Physics from config with more variety
+          const physics = visualConfig.physics || {};
+          const velX = physics.velocityX ? 
+            physics.velocityX.min + Math.random() * (physics.velocityX.max - physics.velocityX.min) :
+            (Math.random() - 0.5) * 35;
+          const velY = physics.velocityY ? 
+            physics.velocityY.min + Math.random() * (physics.velocityY.max - physics.velocityY.min) :
+            Math.random() * 25 + 10;
+          const gravity = physics.gravity || 0.12;
+          
+          // Enhanced animations based on trail type
+          const trailType = visualConfig.type || 'default';
+          this.applyTrailSpecificAnimation(particle, trailType, visualConfig, lifetime, velX, velY, gravity, particleIndex);
+          
+          // Remove particle after animation
+          setTimeout(() => {
+            if (particle.parentNode) {
+              particle.parentNode.removeChild(particle);
+            }
+            if (trail.activeParticles) {
+              trail.activeParticles.delete(particle);
+            }
+          }, lifetime + 300);
+        }
+
+        applyTrailSpecificAnimation(particle, trailType, visualConfig, lifetime, velX, velY, gravity, particleIndex) {
+          const animationDelay = particleIndex * 50; // Stagger animations
+          
+          switch (trailType) {
+            case 'sparkle':
+              // Twinkling sparkle effect
+              particle.style.transition = `transform ${lifetime}ms ease-out, opacity ${lifetime}ms ease-in-out, filter ${lifetime/3}ms ease-in-out`;
+              particle.style.animation = `sparkle-twinkle ${lifetime/4}ms infinite alternate`;
+              setTimeout(() => {
+                const finalY = velY + (gravity * lifetime / 10);
+                const rotation = 360 + Math.random() * 720; // Multiple rotations
+                particle.style.transform = `translate(${velX}px, ${finalY}px) rotate(${rotation}deg) scale(0.3)`;
+                particle.style.opacity = '0';
+                particle.style.filter = 'brightness(2) blur(1px)';
+              }, animationDelay);
+              break;
+              
+            case 'fire':
+              // Flickering upward fire effect
+              particle.style.transition = `transform ${lifetime}ms cubic-bezier(0.68, -0.55, 0.265, 1.55), opacity ${lifetime}ms ease-out`;
+              particle.style.animation = `fire-flicker ${lifetime/6}ms infinite`;
+              setTimeout(() => {
+                const finalY = velY + (gravity * lifetime / 15); // Upward motion
+                const wobble = Math.sin(Date.now() * 0.01) * 10;
+                particle.style.transform = `translate(${velX + wobble}px, ${-finalY}px) scale(0.1)`;
+                particle.style.opacity = '0';
+              }, animationDelay);
+              break;
+            case 'glue':
+              // Dripping glue/cum effect - falls and stretches
+              particle.style.transition = `transform ${lifetime}ms ease-in, opacity ${lifetime}ms ease-out`;
+              setTimeout(() => {
+                const finalY = velY + (gravity * lifetime / 8); // Falls faster
+                const stretch = 1.5 + Math.random() * 1.5; // Stretches as it falls
+                particle.style.transform = `translate(${velX * 0.3}px, ${finalY}px) scaleY(${stretch}) scaleX(${1/stretch})`;
+                particle.style.opacity = '0';
+              }, animationDelay);
+              break;
+
+
+              
+            case 'electric':
+              // Lightning bolt shoots out and fades
+              particle.style.transition = `transform ${lifetime}ms linear, opacity ${lifetime * 0.8}ms ease-out`;
+              const randomRotation = Math.random() * 360;
+              particle.style.transform = `rotate(${randomRotation}deg)`;
+              setTimeout(() => {
+                const shootX = velX * 1.5;
+                const shootY = velY * 1.5;
+                particle.style.transform = `translate(${shootX}px, ${shootY}px) rotate(${randomRotation + (Math.random() - 0.5) * 90}deg) scale(0.3)`;
+                particle.style.opacity = '0';
+              }, animationDelay);
+              break;
+              
+            case 'ice':
+              // Slow, crystalline falling effect
+              particle.style.transition = `transform ${lifetime}ms linear, opacity ${lifetime}ms ease-in-out`;
+              particle.style.animation = `ice-shimmer ${lifetime/3}ms infinite`;
+              setTimeout(() => {
+                const finalY = velY + (gravity * lifetime / 8);
+                const drift = Math.sin(Date.now() * 0.005) * 15;
+                particle.style.transform = `translate(${velX + drift}px, ${finalY}px) rotate(${Math.random() * 180}deg)`;
+                particle.style.opacity = '0';
+              }, animationDelay);
+              break;
+              
+            case 'smoke':
+              // Smoke rises, expands and fades
+              particle.style.transition = `transform ${lifetime}ms ease-out, opacity ${lifetime}ms ease-out`;
+              setTimeout(() => {
+                const riseY = -Math.abs(velY) - 40; // Always rise up
+                const drift = (Math.random() - 0.5) * 30;
+                const expand = 1.5 + Math.random() * 0.8;
+                particle.style.transform = `translate(${drift}px, ${riseY}px) scale(${expand})`;
+                particle.style.opacity = '0';
+              }, animationDelay);
+              break;
+
+            case 'cosmic':
+              // Cosmic floats and pulses with rotation
+              particle.style.transition = `transform ${lifetime}ms ease-out, opacity ${lifetime}ms ease-out`;
+              setTimeout(() => {
+                const floatX = velX * 0.8;
+                const floatY = velY * 0.8;
+                const rotation = 180 + Math.random() * 360;
+                const scale = 0.3 + Math.random() * 0.4;
+                particle.style.transform = `translate(${floatX}px, ${floatY}px) rotate(${rotation}deg) scale(${scale})`;
+                particle.style.opacity = '0';
+              }, animationDelay);
+              break;
+               
+             case 'rainbow':
+               // Color-cycling rainbow effect
+               particle.style.transition = `transform ${lifetime}ms ease-out, opacity ${lifetime}ms ease-in-out`;
+               particle.style.animation = `rainbow-cycle ${lifetime/4}ms infinite linear`;
+               setTimeout(() => {
+                 const finalY = velY + (gravity * lifetime / 12);
+                 const bounce = Math.sin(Date.now() * 0.01) * 8;
+                 particle.style.transform = `translate(${velX}px, ${finalY + bounce}px) scale(0.4)`;
+                 particle.style.opacity = '0';
+               }, animationDelay);
+               break;
+               
+             case 'shadow':
+               // Mysterious shadow wisps
+               particle.style.transition = `transform ${lifetime}ms ease-in-out, opacity ${lifetime}ms ease-in-out`;
+               particle.style.animation = `shadow-wisp ${lifetime/4}ms infinite ease-in-out`;
+               setTimeout(() => {
+                 const finalY = velY + (gravity * lifetime / 20);
+                 const spiral = Math.sin(Date.now() * 0.008) * 20;
+                 particle.style.transform = `translate(${velX + spiral}px, ${finalY}px) scale(0.2)`;
+                 particle.style.opacity = '0';
+               }, animationDelay);
+               break;
+              
+            default:
+              // Standard animation
+              particle.style.transition = `transform ${lifetime}ms ease-out, opacity ${lifetime}ms ease-in-out`;
+              setTimeout(() => {
+                const finalY = velY + (gravity * lifetime / 12);
+                particle.style.transform = `translate(${velX}px, ${finalY}px)`;
+                particle.style.opacity = '0';
+              }, animationDelay);
+          }
+        }
+
+        createElectricPath(velX, velY, lifetime) {
+          const points = [];
+          const steps = 8;
+          for (let i = 0; i <= steps; i++) {
+            const progress = i / steps;
+            const x = velX * progress + (Math.random() - 0.5) * 30;
+            const y = velY * progress + (Math.random() - 0.5) * 20;
+            points.push({ x, y, time: (lifetime / steps) * i });
+          }
+          return points;
+        }
+
+        animateElectricParticle(particle, path, lifetime, delay) {
+          setTimeout(() => {
+            let currentPoint = 0;
+            const animateStep = () => {
+              if (currentPoint >= path.length) {
+                particle.style.opacity = '0';
+                return;
+              }
+              
+              const point = path[currentPoint];
+              particle.style.transform = `translate(${point.x}px, ${point.y}px)`;
+              particle.style.filter = `brightness(${2 + Math.random()}) blur(${Math.random()}px)`;
+              
+              currentPoint++;
+              setTimeout(animateStep, 60); // Erratic timing
+            };
+            animateStep();
+          }, delay);
+        }
+
+        getParticleShape(visualConfig, size, color, particleIndex = 0) {
+          const shape = visualConfig.shape || 'circle';
+          const trailType = visualConfig.type || 'default';
+          
+          // Check for custom image first
+          if (visualConfig.image) {
+            const images = Array.isArray(visualConfig.image) ? visualConfig.image : [visualConfig.image];
+            const imageUrl = images[particleIndex % images.length];
+            
+            return {
+              styles: `
+                background-image: url('${imageUrl}');
+                background-size: contain;
+                background-repeat: no-repeat;
+                background-position: center;
+                background-color: transparent;
+                filter: drop-shadow(0 0 ${size/3}px ${color});
+              `,
+              content: ''
+            };
+          }
+          
+          // Add variety within same trail type
+          const variation = particleIndex % 3;
+          
+          switch (trailType) {
+            case 'sparkle':
+              const sparkleVariations = [
+                // 4-pointed star
+                `<svg width="100%" height="100%" viewBox="0 0 24 24" fill="${color}">
+                   <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                 </svg>`,
+                // 6-pointed star
+                `<svg width="100%" height="100%" viewBox="0 0 24 24" fill="${color}">
+                   <path d="M12,2 L15,9 L22,9 L17,14 L19,21 L12,17 L5,21 L7,14 L2,9 L9,9 Z"/>
+                   <path d="M12,6 L10,10 L6,10 L9,13 L8,17 L12,15 L16,17 L15,13 L18,10 L14,10 Z" fill="${color}88"/>
+                 </svg>`,
+                // Plus sparkle
+                `<svg width="100%" height="100%" viewBox="0 0 24 24" fill="${color}">
+                   <path d="M12 1L12 23 M1 12L23 12" stroke="${color}" stroke-width="3" stroke-linecap="round"/>
+                   <path d="M6 6L18 18 M18 6L6 18" stroke="${color}" stroke-width="2" stroke-linecap="round"/>
+                 </svg>`
+              ];
+              return {
+                styles: `
+                  background: transparent;
+                  filter: drop-shadow(0 0 ${size}px ${color}) drop-shadow(0 0 ${size/2}px white);
+                `,
+                content: sparkleVariations[variation]
+              };
+              
+            case 'fire':
+              const fireVariations = [
+                // Bright flame core
+                `background: radial-gradient(ellipse at 50% 80%, #ffff80 0%, #ffcc00 15%, #ff8800 35%, ${color} 55%, #ff4400 75%, transparent 100%);
+                 border-radius: 50% 50% 50% 50% / 60% 60% 35% 35%;
+                 transform: scaleY(1.4);`,
+                // Hot ember
+                `background: radial-gradient(circle at 50% 60%, #ffffaa 0%, #ffdd00 20%, ${color} 45%, #ff3300 70%, transparent 100%);
+                 border-radius: 50%;`,
+                // Flame tongue
+                `background: radial-gradient(ellipse at 50% 90%, #ffff66 0%, #ffaa00 25%, ${color} 50%, #ff2200 80%, transparent 100%);
+                 border-radius: 45% 45% 50% 50% / 55% 55% 30% 30%;
+                 transform: scaleY(1.6);`
+              ];
+              return {
+                styles: `
+                  ${fireVariations[particleIndex % 3]}
+                  box-shadow: 0 0 ${size*2}px ${color}, 0 0 ${size*3}px #ff6600aa, 0 0 ${size}px #ffcc00;
+                  animation: fire-flicker 100ms infinite;
+                `,
+                content: ''
+              };
+              
+            case 'electric': {
+              // Lightning bolt SVGs
+              const boltSize = size * 1.8;
+              const electricVariations = [
+                // Classic lightning bolt
+                `<svg width="${boltSize}" height="${boltSize * 1.5}" viewBox="0 0 24 36" style="filter: drop-shadow(0 0 8px #00ffff) drop-shadow(0 0 16px #00bfff) drop-shadow(0 0 24px #0088ff);">
+                  <path d="M13 1L5 15h6l-3 20 11-18h-7l6-16z" fill="#ffffff" stroke="${color}" stroke-width="0.5"/>
+                  <path d="M12 3L6 14h5l-2 16 8-14h-5l5-13z" fill="${color}" opacity="0.8"/>
+                </svg>`,
+                // Jagged bolt
+                `<svg width="${boltSize}" height="${boltSize * 1.5}" viewBox="0 0 24 36" style="filter: drop-shadow(0 0 10px #00ffff) drop-shadow(0 0 20px #00bfff);">
+                  <path d="M14 0L8 10l4 2-6 12 4 2-4 10 12-14-5-1 5-10-4-1z" fill="#ffffff" stroke="${color}" stroke-width="0.5"/>
+                  <path d="M13 2L8 10l3 2-5 10 3 1-3 8 9-11-4-1 4-8-3-1z" fill="${color}" opacity="0.7"/>
+                </svg>`,
+                // Branching lightning
+                `<svg width="${boltSize * 1.3}" height="${boltSize * 1.5}" viewBox="0 0 30 36" style="filter: drop-shadow(0 0 8px #00ffff) drop-shadow(0 0 16px #00bfff);">
+                  <path d="M15 0L10 12l5 1-8 23 10-16-4-1 4-8 6 4-3-10z" fill="#ffffff" stroke="${color}" stroke-width="0.5"/>
+                  <path d="M20 8l6 10-4 8" fill="none" stroke="#ffffff" stroke-width="2.5"/>
+                  <path d="M8 15l-5 8 3 6" fill="none" stroke="#ffffff" stroke-width="2"/>
+                </svg>`,
+                // Electric arc
+                `<svg width="${boltSize * 1.2}" height="${boltSize}" viewBox="0 0 30 24" style="filter: drop-shadow(0 0 10px #00ffff) drop-shadow(0 0 20px ${color});">
+                  <path d="M0 12 Q5 4 10 12 T20 12 T30 12" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
+                  <path d="M0 12 Q5 4 10 12 T20 12 T30 12" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round"/>
+                  <circle cx="15" cy="12" r="3" fill="#ffffff"/>
+                </svg>`
+              ];
+              return {
+                styles: `
+                  background: transparent;
+                  animation: electric-flicker 60ms infinite;
+                `,
+                content: electricVariations[particleIndex % 4]
+              };
+            }
+              
+            case 'ice':
+              const iceVariations = [
+                // Snowflake
+                `<svg width="100%" height="100%" viewBox="0 0 24 24" fill="${color}">
+                   <path d="M12 2v20M4.93 6.07l14.14 11.86M19.07 6.07L4.93 17.93M7 12h10M9.5 7.5l5 9M14.5 7.5l-5 9"/>
+                 </svg>`,
+                // Ice crystal
+                `<svg width="100%" height="100%" viewBox="0 0 24 24" fill="${color}">
+                   <path d="M12 2L8 8L12 12L16 8L12 2ZM12 12L8 16L12 22L16 16L12 12Z"/>
+                 </svg>`,
+                // Hexagon ice
+                `<div style="width: 100%; height: 100%; background: ${color}; clip-path: polygon(30% 0%, 70% 0%, 100% 50%, 70% 100%, 30% 100%, 0% 50%);"></div>`
+              ];
+              return {
+                styles: `
+                  background: transparent;
+                  filter: drop-shadow(0 0 ${size/2}px ${color}) drop-shadow(0 0 ${size/4}px #FFFFFF);
+                `,
+                content: iceVariations[variation]
+              };
+              
+            case 'shadow':
+              const shadowVariations = [
+                // Wispy shadow
+                `background: radial-gradient(ellipse, ${color} 30%, transparent 70%);
+                 border-radius: 60% 40% 40% 60%;`,
+                // Shadow orb
+                `background: radial-gradient(circle, ${color} 50%, transparent 80%);
+                 border-radius: 50%;`,
+                // Flowing shadow
+                `background: linear-gradient(135deg, ${color} 0%, transparent 40%, ${color} 100%);
+                 border-radius: 40% 60% 60% 40%;`
+              ];
+              return {
+                styles: `
+                  ${shadowVariations[variation]}
+                  box-shadow: 0 0 ${size*2}px ${color}66;
+                `,
+                content: ''
+              };
+              
+            case 'smoke': {
+              // Smoke cloud SVGs
+              const smokeSize = size * 1.8;
+              const smokeVariations = [
+                // Fluffy cloud
+                `<svg width="${smokeSize}" height="${smokeSize}" viewBox="0 0 50 50" style="filter: blur(2px);">
+                  <ellipse cx="25" cy="30" rx="20" ry="15" fill="${color}" opacity="0.6"/>
+                  <ellipse cx="18" cy="25" rx="12" ry="10" fill="${color}" opacity="0.5"/>
+                  <ellipse cx="32" cy="22" rx="14" ry="11" fill="${color}" opacity="0.55"/>
+                  <ellipse cx="25" cy="18" rx="10" ry="8" fill="${color}" opacity="0.4"/>
+                </svg>`,
+                // Wispy smoke
+                `<svg width="${smokeSize}" height="${smokeSize * 1.2}" viewBox="0 0 40 50" style="filter: blur(1.5px);">
+                  <path d="M20 45 Q10 35 15 25 Q8 20 12 12 Q18 5 22 10 Q28 5 32 12 Q38 18 30 25 Q35 35 20 45" fill="${color}" opacity="0.5"/>
+                  <ellipse cx="20" cy="35" rx="12" ry="8" fill="${color}" opacity="0.4"/>
+                </svg>`,
+                // Puff cloud
+                `<svg width="${smokeSize}" height="${smokeSize}" viewBox="0 0 50 50" style="filter: blur(2.5px);">
+                  <circle cx="25" cy="28" r="15" fill="${color}" opacity="0.5"/>
+                  <circle cx="18" cy="22" r="10" fill="${color}" opacity="0.45"/>
+                  <circle cx="32" cy="20" r="11" fill="${color}" opacity="0.4"/>
+                  <circle cx="25" cy="15" r="8" fill="${color}" opacity="0.35"/>
+                </svg>`
+              ];
+              return {
+                styles: `
+                  background: transparent;
+                  opacity: 0.7;
+                `,
+                content: smokeVariations[particleIndex % 3]
+              };
+            }
+
+            case 'cosmic': {
+              // Nebula/galaxy effect with stars
+              const cosmicSize = size * 1.5;
+              const cosmicVariations = [
+                // Spiral galaxy
+                `<svg width="${cosmicSize}" height="${cosmicSize}" viewBox="0 0 50 50" style="filter: drop-shadow(0 0 8px ${color}) drop-shadow(0 0 15px #9b59b6);">
+                  <defs>
+                    <radialGradient id="nebula1" cx="50%" cy="50%" r="50%">
+                      <stop offset="0%" stop-color="#ffffff"/>
+                      <stop offset="20%" stop-color="${color}"/>
+                      <stop offset="50%" stop-color="#9b59b6"/>
+                      <stop offset="80%" stop-color="#3498db"/>
+                      <stop offset="100%" stop-color="transparent"/>
+                    </radialGradient>
+                  </defs>
+                  <circle cx="25" cy="25" r="20" fill="url(#nebula1)"/>
+                  <circle cx="25" cy="25" r="3" fill="#ffffff"/>
+                  <circle cx="18" cy="15" r="1.5" fill="#ffffff" opacity="0.9"/>
+                  <circle cx="35" cy="20" r="1" fill="#ffffff" opacity="0.8"/>
+                  <circle cx="30" cy="35" r="1.2" fill="#ffffff" opacity="0.85"/>
+                </svg>`,
+                // Colorful nebula cloud
+                `<svg width="${cosmicSize}" height="${cosmicSize}" viewBox="0 0 50 50" style="filter: drop-shadow(0 0 10px ${color}) blur(0.5px);">
+                  <ellipse cx="25" cy="25" rx="18" ry="15" fill="${color}" opacity="0.7"/>
+                  <ellipse cx="20" cy="20" rx="12" ry="10" fill="#e74c3c" opacity="0.5"/>
+                  <ellipse cx="30" cy="28" rx="10" ry="8" fill="#3498db" opacity="0.5"/>
+                  <ellipse cx="25" cy="22" rx="8" ry="6" fill="#f39c12" opacity="0.4"/>
+                  <circle cx="25" cy="25" r="2" fill="#ffffff"/>
+                  <circle cx="18" cy="18" r="1" fill="#ffffff" opacity="0.8"/>
+                  <circle cx="32" cy="22" r="1" fill="#ffffff" opacity="0.7"/>
+                </svg>`,
+                // Starburst
+                `<svg width="${cosmicSize}" height="${cosmicSize}" viewBox="0 0 50 50" style="filter: drop-shadow(0 0 12px ${color});">
+                  <defs>
+                    <radialGradient id="star1" cx="50%" cy="50%" r="50%">
+                      <stop offset="0%" stop-color="#ffffff"/>
+                      <stop offset="30%" stop-color="${color}"/>
+                      <stop offset="100%" stop-color="transparent"/>
+                    </radialGradient>
+                  </defs>
+                  <circle cx="25" cy="25" r="18" fill="url(#star1)"/>
+                  <path d="M25 5 L25 45 M5 25 L45 25 M10 10 L40 40 M40 10 L10 40" stroke="${color}" stroke-width="1" opacity="0.4"/>
+                  <circle cx="25" cy="25" r="4" fill="#ffffff"/>
+                </svg>`
+              ];
+              return {
+                styles: `
+                  background: transparent;
+                  animation: cosmic-pulse 2s ease-in-out infinite alternate;
+                `,
+                content: cosmicVariations[particleIndex % 3]
+              };
+            }
+               
+             case 'rainbow':
+               const rainbowVariations = [
+                 // Rainbow gradient orb
+                 `background: radial-gradient(circle, ${color} 30%, transparent 70%);
+                  border-radius: 50%;`,
+                 // Prism effect
+                 `background: linear-gradient(45deg, #FF0000, #FF7F00, #FFFF00, #00FF00, #0000FF, #4B0082, #9400D3);
+                  border-radius: 50%;`,
+                 // Rainbow stripe
+                 `background: linear-gradient(90deg, 
+                    #FF0000 0%, #FF7F00 14%, #FFFF00 28%, #00FF00 42%, 
+                    #0000FF 57%, #4B0082 71%, #9400D3 85%, #FF1493 100%);
+                  border-radius: 20%;`
+               ];
+               return {
+                 styles: `
+                   ${rainbowVariations[variation]}
+                   box-shadow: 0 0 ${size}px ${color}66, 0 0 ${size/2}px #FFFFFF;
+                 `,
+                 content: ''
+               };
+               
+             case 'golden':
+               return {
+                 styles: `
+                   background: radial-gradient(circle, ${color} 30%, #FFD700 60%, #FFA500 100%);
+                   border-radius: 50%;
+                   box-shadow: 0 0 ${size*1.5}px ${color}aa, 0 0 ${size/2}px #FFD700, inset 0 0 ${size/4}px rgba(255,255,255,0.6);
+                 `,
+                 content: ''
+               };
+
+            case 'glue': {
+              // Dripping glue effect with teardrop SVG shapes
+              const height = size * 2.2;
+              const width = size * 0.9;
+              const glueVariations = [
+                // Teardrop drip
+                `<svg width="${width}" height="${height}" viewBox="0 0 20 50" style="filter: drop-shadow(0 0 3px rgba(255,255,255,0.8));">
+                  <defs>
+                    <radialGradient id="glue1" cx="40%" cy="30%" r="60%">
+                      <stop offset="0%" stop-color="#ffffff"/>
+                      <stop offset="50%" stop-color="#f5f5f5"/>
+                      <stop offset="100%" stop-color="#e8e8e8"/>
+                    </radialGradient>
+                  </defs>
+                  <ellipse cx="10" cy="38" rx="8" ry="10" fill="url(#glue1)"/>
+                  <path d="M10 5 Q6 20 4 30 Q2 38 10 38 Q18 38 16 30 Q14 20 10 5" fill="url(#glue1)"/>
+                </svg>`,
+                // Fat drip blob
+                `<svg width="${width}" height="${height}" viewBox="0 0 20 50" style="filter: drop-shadow(0 0 4px rgba(255,255,255,0.9));">
+                  <defs>
+                    <radialGradient id="glue2" cx="35%" cy="35%" r="65%">
+                      <stop offset="0%" stop-color="#ffffff"/>
+                      <stop offset="60%" stop-color="#fafafa"/>
+                      <stop offset="100%" stop-color="#eeeeee"/>
+                    </radialGradient>
+                  </defs>
+                  <ellipse cx="10" cy="35" rx="9" ry="12" fill="url(#glue2)"/>
+                  <path d="M10 3 Q5 15 3 28 Q2 35 10 35 Q18 35 17 28 Q15 15 10 3" fill="url(#glue2)"/>
+                </svg>`,
+                // Long thin drip
+                `<svg width="${width * 0.7}" height="${height * 1.2}" viewBox="0 0 14 60" style="filter: drop-shadow(0 0 3px rgba(255,255,255,0.7));">
+                  <defs>
+                    <radialGradient id="glue3" cx="40%" cy="30%" r="60%">
+                      <stop offset="0%" stop-color="#ffffff"/>
+                      <stop offset="40%" stop-color="#f8f8f8"/>
+                      <stop offset="100%" stop-color="#e5e5e5"/>
+                    </radialGradient>
+                  </defs>
+                  <ellipse cx="7" cy="50" rx="6" ry="8" fill="url(#glue3)"/>
+                  <path d="M7 2 Q4 20 3 35 Q2 50 7 50 Q12 50 11 35 Q10 20 7 2" fill="url(#glue3)"/>
+                </svg>`
+              ];
+              return {
+                styles: `
+                  background: transparent;
+                  display: flex;
+                  align-items: flex-start;
+                  justify-content: center;
+                  width: ${width}px !important;
+                  height: ${height}px !important;
+                `,
+                content: glueVariations[particleIndex % 3]
+              };
+            }
+
+              
+            default:
+              return {
+                styles: `
+                  background: radial-gradient(circle, ${color}, ${color}88);
+                  border-radius: 50%;
+                  box-shadow: 0 0 ${size*1.5}px ${color}77, inset 0 0 ${size/4}px rgba(255,255,255,0.4);
+                `,
+                content: ''
+              };
+          }
+        }
+
+
+
+        removeTrail(trailId) {
+          const trail = this.activeTrails.get(trailId);
+          if (trail) {
+            // Clean up any remaining particles
+            if (trail.activeParticles) {
+              trail.activeParticles.forEach(particle => {
+                if (particle.parentNode) {
+                  particle.parentNode.removeChild(particle);
+                }
+              });
+              trail.activeParticles.clear();
+            }
+            
+            // Clean up line element
+            if (trail.lineElement && trail.lineElement.svg) {
+              if (trail.lineElement.svg.parentNode) {
+                trail.lineElement.svg.parentNode.removeChild(trail.lineElement.svg);
+              }
+            }
+          }
+          this.activeTrails.delete(trailId);
+        }
+
+        removeAllTrails() {
+          // Clean up all particles and lines
+          for (const [trailId, trail] of this.activeTrails) {
+            if (trail.activeParticles) {
+              trail.activeParticles.forEach(particle => {
+                if (particle.parentNode) {
+                  particle.parentNode.removeChild(particle);
+                }
+              });
+            }
+            
+            // Clean up line elements
+            if (trail.lineElement && trail.lineElement.svg) {
+              if (trail.lineElement.svg.parentNode) {
+                trail.lineElement.svg.parentNode.removeChild(trail.lineElement.svg);
+              }
+            }
+          }
+          this.activeTrails.clear();
+          
+          // Clear containers
+          if (this.particleContainer) {
+            this.particleContainer.innerHTML = '';
+          }
+          if (this.lineContainer) {
+            this.lineContainer.innerHTML = '';
+          }
+        }
+      }
+
+      class GameManager {
+        constructor() {
+                  // Get token from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        this.token = urlParams.get('token');
+        if (this.token === null) {
+          location.href = '/u';
+        }
+          this.authenticated = false;
+          this.sessionInUse = false;
+          
+          this.socket = io();
+          this.engine = Engine.create();
+          this.world = this.engine.world;
+          this.world.gravity.y = 2;
+
+          this.render = Render.create({
+            canvas: document.getElementById('world'),
+            engine: this.engine,
+            options: {
+              width: window.innerWidth,
+              height: window.innerHeight,
+              wireframes: DEBUG_MODE,
+              background: 'none',
+            },
+          });
+          Render.run(this.render);
+          this.runner = Runner.create();
+          Runner.run(this.runner, this.engine);
+
+          this.coneManager = new ConeManager(this);
+          this.trailManager = new TrailManager();
+          this.currentTopPlayer = null;
+          this.playerSkins = {};
+          this.playerTrails = {};
+          this.isSlowMotion = false;
+          this.lastConePositions = new Map(); // Store positions for XP popups after cone removal
+
+          this.setupGround();
+          this.setupWalls();
+          this.setupEvents();
+          this.updatePlayerSkins();
+          this.initializeTrails();
+          this.loadAudioVolume();
+
+          Events.on(this.engine, 'collisionStart', (evt) => {
+            this.coneManager.handleCollision(evt);
+          });
+
+          // Start with game disabled but don't show error yet - wait for token validation
+          this.disableGameSilent();
+          
+          // Fallback timeout - if authentication doesn't complete within 10 seconds, show error
+          this.authTimeout = setTimeout(() => {
+            if (!this.authenticated) {
+              console.log('⏰ Authentication timeout - showing error');
+              this.disableGame('unauthorized');
+            }
+          }, 10000);
+        }
+
+        setupGround() {
+          this.ground = Bodies.rectangle(
+            window.innerWidth / 2,
+            window.innerHeight + 10,
+            window.innerWidth,
+            40,
+            {
+              isStatic: true,
+              render: { fillStyle: 'transparent', strokeStyle: 'transparent' },
+              friction: 1,
+              frictionStatic: 1
+            }
+          );
+          Composite.add(this.world, this.ground);
+        }
+
+        setupWalls() {
+          this.leftWall = Bodies.rectangle(
+            -10,
+            window.innerHeight / 2,
+            20,
+            window.innerHeight * 5,
+            {
+              isStatic: true,
+              render: { fillStyle: 'transparent', strokeStyle: 'transparent' }
+            }
+          );
+
+          this.rightWall = Bodies.rectangle(
+            window.innerWidth + 10,
+            window.innerHeight / 2,
+            20,
+            window.innerHeight * 5,
+            {
+              isStatic: true,
+              render: { fillStyle: 'transparent', strokeStyle: 'transparent' }
+            }
+          );
+
+          Composite.add(this.world, [this.ground, this.leftWall, this.rightWall]);
+        }
+
+        setupEvents() {
+          // Token association events
+          this.socket.on('connected', (data) => {
+            console.log('Connected to server, associating token...');
+            this.associateToken();
+          });
+
+          this.socket.on('token_associated', (data) => {
+            // Clear authentication timeout since we got a response
+            if (this.authTimeout) {
+              clearTimeout(this.authTimeout);
+              this.authTimeout = null;
+            }
+            
+            if (data.success) {
+              this.authenticated = true;
+              this.sessionInUse = false;
+              this.hideSessionMessage();
+              this.enableGame();
+              console.log('✅ Token associated successfully - game enabled');
+            } else {
+              console.error('❌ Token association failed:', data.error);
+              this.authenticated = false;
+              if (data.error === 'Token is locked to a different IP address') {
+                this.sessionInUse = true;
+                this.showSessionMessage('🚫 Token locked to a different IP address. Use admin panel to revoke if needed.', 'error');
+                this.disableGame('token_locked');
+              } else {
+                this.showSessionMessage('❌ Token association failed: ' + data.error, 'error');
+                this.disableGame('invalid_token');
+              }
+            }
+          });
+
+          this.socket.on('tokenStatusUpdate', (data) => {
+            console.log('Token status updated:', data);
+          });
+
+          this.socket.on('server_shutdown', (data) => {
+            this.showSessionMessage('Server is shutting down', 'warning');
+          });
+
+          // Game events - only process if authenticated
+          this.socket.on('addCone', (name) => {
+            if (!this.authenticated) {
+              console.log('🚫 Cone drop blocked - not authenticated');
+              return;
+            }
+            this.coneManager.addCone(name);
+          });
+          
+          this.socket.on('restart', () => {
+            // Restart should ALWAYS work regardless of authentication status
+            // This ensures all windows refresh when server restarts
+            console.log('🔄 Server restart signal received - reloading page');
+            location.reload(); // This reloads the page to restart the game
+          });
+
+          // Simple force refresh event - no bullshit, just reload
+          this.socket.on('forceRefresh', (data) => {
+            console.log('🔄 Force refresh signal received - reloading page immediately');
+            console.log('Refresh reason:', data.message);
+            location.reload();
+          });
+
+          this.socket.on('goldSkin', (data) => {
+            if (!this.authenticated) {
+              console.log('🚫 Gold skin update blocked - not authenticated');
+              return;
+            }
+            this.currentTopPlayer = data;
+          });
+
+          this.socket.on('newGoldCelebration', (name) => {
+            if (!this.authenticated) {
+              console.log('🚫 Gold celebration blocked - not authenticated');
+              return;
+            }
+            goldAnimation(name);
+          });
+
+          this.socket.on('skinRefresh', async () => {
+            if (!this.authenticated) {
+              console.log('🚫 Skin refresh blocked - not authenticated');
+              return;
+            }
+            console.log('DEBUG: Received skinRefresh event, reloading skin data...');
+            // Refresh available skins library FIRST to ensure all skins are loaded
+            await this.coneManager.refreshAvailableSkins();
+            // Then refresh player skin assignments
+            await this.updatePlayerSkins();
+            
+            console.log('DEBUG: Skin refresh completed. Available skins:', Object.keys(this.coneManager.availableSkins).length);
+            console.log('DEBUG: Player skin assignments:', Object.keys(this.playerSkins).length);
+          });
+
+          this.socket.on('unboxConfigRefresh', async () => {
+            if (!this.authenticated) {
+              console.log('🚫 Unbox config refresh blocked - not authenticated');
+              return;
+            }
+            console.log('DEBUG: Received unboxConfigRefresh event, reloading skin data...');
+            // Refresh available skins library FIRST to ensure all skins are loaded
+            await this.coneManager.refreshAvailableSkins();
+            // Then refresh player skin assignments
+            await this.updatePlayerSkins();
+            
+            console.log('DEBUG: Unbox config refresh completed. Available skins:', Object.keys(this.coneManager.availableSkins).length);
+          });
+
+          this.socket.on('userSkinUpdate', (data) => {
+            if (!this.authenticated) {
+              console.log('🚫 User skin update blocked - not authenticated');
+              return;
+            }
+            console.log('🎨 RECEIVED USER SKIN UPDATE EVENT:', data);
+
+            // Update the specific player's skin in our local cache
+            this.playerSkins[data.playerName] = data.skinName;
+            console.log('📦 Updated playerSkins cache:', this.playerSkins);
+
+            // Find and update any existing cones for this player
+            this.coneManager.updatePlayerSkinVisually(data.playerName, data.skinPath);
+
+            console.log(`✅ SKIN UPDATE COMPLETE: ${data.playerName} → ${data.skinName}`);
+          });
+
+          // Trail events - NO AUTH CHECK NEEDED FOR TRAIL UPDATES
+          this.socket.on('trailRefresh', async () => {
+            console.log('🔄 RECEIVED trailRefresh event, reloading trail data...');
+            await this.trailManager.loadTrailConfigs();
+            await this.updatePlayerTrails();
+            console.log('✅ Trail refresh completed.');
+          });
+
+          this.socket.on('userTrailUpdate', (data) => {
+            console.log('✨ RECEIVED USER TRAIL UPDATE EVENT:', data);
+
+            // Update the specific player's trail in our local cache
+            this.playerTrails[data.playerName] = data.trailName;
+            this.trailManager.playerTrails[data.playerName] = data.trailName;
+            console.log('🎆 Updated playerTrails cache:', this.playerTrails);
+
+            console.log(`✅ TRAIL UPDATE COMPLETE: ${data.playerName} → ${data.trailName}`);
+          });
+
+          // Listen for volume updates from admin panel
+          this.socket.on('volumeUpdate', (data) => {
+            console.log('🔊 Volume update received:', data.volume);
+            this.setAudioVolume(data.volume);
+          });
+
+          // Listen for XP popup events
+          this.socket.on('xp_popup', (data) => {
+            console.log('✨ XP popup received:', data);
+            this.showXPPopup(data);
+          });
+
+          // Listen for level up events
+          this.socket.on('level_up', (data) => {
+            console.log('🎉 Level up received:', data);
+            this.showLevelUpCelebration(data);
+          });
+
+          this.socket.on('addConeDuel', (p1, p2) => {
+            if (!this.authenticated) {
+              console.log('🚫 Cone duel blocked - not authenticated');
+              return;
+            }
+            this.coneManager.addConeDuel(p1, p2);
+          });
+
+          Events.on(this.engine, 'afterUpdate', () => {
+            this.coneManager.updateCones();
+            this.trailManager.updateTrails();
+          });
+
+          window.addEventListener('resize', () => this.onResize());
+        }
+
+                associateToken() {
+          if (!this.token) {
+            console.error('No token found in URL parameters');
+            // Clear authentication timeout since we have immediate failure
+            if (this.authTimeout) {
+              clearTimeout(this.authTimeout);
+              this.authTimeout = null;
+            }
+            this.showSessionMessage('No token provided. Use admin panel to generate access tokens.', 'error');
+            this.disableGame();
+            return;
+          }
+          console.log(`Sending token association request with token: ${this.token.substring(0, 8)}...`);
+          this.socket.emit('associate_token', { token: this.token });
+        }
+
+        enableGame() {
+          // Remove any existing overlay
+          const overlay = document.getElementById('game-disabled-overlay');
+          if (overlay) {
+            overlay.remove();
+          }
+          
+          // Re-enable the game interface
+          const gameCanvas = document.getElementById('world');
+          if (gameCanvas) {
+            gameCanvas.style.pointerEvents = 'auto';
+            gameCanvas.style.opacity = '1';
+            gameCanvas.style.filter = 'none';
+          }
+          
+          console.log('🎮 Game interface enabled');
+        }
+
+        disableGameSilent() {
+          // Disable the game interface without showing error overlay
+          const gameCanvas = document.getElementById('world');
+          if (gameCanvas) {
+            gameCanvas.style.pointerEvents = 'none';
+            gameCanvas.style.opacity = '0.3';
+            gameCanvas.style.filter = 'blur(5px)';
+          }
+          console.log('🔇 Game interface disabled silently');
+        }
+
+        disableGame(reason = 'unauthorized') {
+          // Remove any existing overlay first
+          const existingOverlay = document.getElementById('game-disabled-overlay');
+          if (existingOverlay) {
+            existingOverlay.remove();
+          }
+          
+          // For token_locked, just show a simple banner at the top
+          if (reason === 'token_locked') {
+            this.showSessionMessage('🔒 Token locked to different IP address. Admin can revoke if needed.', 'error');
+            return;
+          }
+          
+          // For other errors, disable the game interface
+          const gameCanvas = document.getElementById('world');
+          if (gameCanvas) {
+            gameCanvas.style.pointerEvents = 'none';
+            gameCanvas.style.opacity = '0.3';
+            gameCanvas.style.filter = 'blur(5px)';
+          }
+          
+          // Show simple overlay for critical errors only
+          const overlay = document.createElement('div');
+          overlay.id = 'game-disabled-overlay';
+          overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            font-family: Arial, sans-serif;
+            color: white;
+            text-align: center;
+            padding: 20px;
+          `;
+          
+          let overlayContent = '';
+          
+          switch(reason) {
+            case 'invalid_token':
+              overlayContent = `
+                <div style="background: rgba(50, 50, 50, 0.9); padding: 30px; border-radius: 8px; max-width: 400px;">
+                  <h2 style="margin-bottom: 20px;">🚫 Invalid Token</h2>
+                  <p style="margin-bottom: 15px;">The provided token is not valid.</p>
+                  <a href="/admin" style="display: inline-block; margin-top: 20px; padding: 10px 20px; background: #3b82f6; color: white; text-decoration: none; border-radius: 4px;">Admin Panel</a>
+                </div>
+              `;
+              break;
+            default:
+              overlayContent = `
+                <div style="background: rgba(50, 50, 50, 0.9); padding: 30px; border-radius: 8px; max-width: 400px;">
+                  <h2 style="margin-bottom: 20px;">🔒 Access Required</h2>
+                  <p style="margin-bottom: 15px;">This game requires authorization to access.</p>
+                  <a href="/admin" style="display: inline-block; margin-top: 20px; padding: 10px 20px; background: #3b82f6; color: white; text-decoration: none; border-radius: 4px;">Admin Panel</a>
+                </div>
+              `;
+          }
+          
+          overlay.innerHTML = overlayContent;
+          document.body.appendChild(overlay);
+          
+          console.log(`🚫 Game disabled - reason: ${reason}`);
+        }
+
+        showSessionMessage(message, type = 'info') {
+          // Remove any existing message
+          this.hideSessionMessage();
+          
+          const messageDiv = document.createElement('div');
+          messageDiv.id = 'session-message';
+          messageDiv.style.cssText = `
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 25px;
+            border-radius: 8px;
+            font-family: 'Duru Sans', sans-serif;
+            font-weight: 600;
+            font-size: 16px;
+            z-index: 9999;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+            max-width: 600px;
+            text-align: center;
+          `;
+          
+          switch(type) {
+            case 'error':
+              messageDiv.style.backgroundColor = 'rgba(239, 68, 68, 0.9)';
+              messageDiv.style.color = 'white';
+              messageDiv.style.border = '2px solid #ef4444';
+              break;
+            case 'warning':
+              messageDiv.style.backgroundColor = 'rgba(245, 158, 11, 0.9)';
+              messageDiv.style.color = 'white';
+              messageDiv.style.border = '2px solid #f59e0b';
+              break;
+            default:
+              messageDiv.style.backgroundColor = 'rgba(59, 130, 246, 0.9)';
+              messageDiv.style.color = 'white';
+              messageDiv.style.border = '2px solid #3b82f6';
+          }
+          
+          messageDiv.textContent = message;
+          document.body.appendChild(messageDiv);
+          
+          // Auto-hide after 5 seconds for non-error messages
+          if (type !== 'error') {
+            setTimeout(() => this.hideSessionMessage(), 5000);
+          }
+        }
+
+        hideSessionMessage() {
+          const existing = document.getElementById('session-message');
+          if (existing) {
+            existing.remove();
+          }
+        }
+
+        onResize() {
+          const { render, ground } = this;
+          render.canvas.width = window.innerWidth;
+          render.canvas.height = window.innerHeight;
+          Render.setPixelRatio(render, window.devicePixelRatio);
+
+          Body.setPosition(ground, {
+            x: window.innerWidth / 2,
+            y: window.innerHeight + 10,
+          });
+          Body.setVertices(ground, [
+            { x: 0, y: window.innerHeight - 10 },
+            { x: window.innerWidth, y: window.innerHeight - 10 },
+            { x: window.innerWidth, y: window.innerHeight + 10 },
+            { x: 0, y: window.innerHeight + 10 },
+          ]);
+
+          this.coneManager.updatePositions();
+        }
+
+        async updatePlayerSkins() {
+          try {
+            const resp = await fetch('/api/skins/users');
+            const response = await resp.json();
+            const data = response.data || response; // Handle both new and old API format
+            this.playerSkins = data.reduce((acc, { name, skin }) => {
+              acc[name] = skin;
+              return acc;
+            }, {});
+          } catch (err) {
+            console.error('[GameManager] Error fetching skins:', err);
+          }
+        }
+
+        async initializeTrails() {
+          try {
+            console.log('🔄 Initializing trail system...');
+            await this.trailManager.loadTrailConfigs();
+            await this.trailManager.initializeParticles();
+            await this.updatePlayerTrails();
+            console.log('✨ Trail system initialized');
+            console.log('🎮 Current player trails after init:', this.playerTrails);
+          } catch (error) {
+            console.error('❌ Failed to initialize trail system:', error);
+          }
+        }
+
+        async updatePlayerTrails() {
+          try {
+            console.log('🔄 GameManager: Updating player trails...');
+            // First update the TrailManager's player trails
+            await this.trailManager.updatePlayerTrails();
+
+            // Then sync with GameManager's cache
+            this.playerTrails = { ...this.trailManager.playerTrails };
+
+            console.log('✨ GameManager: Updated player trails:', Object.keys(this.playerTrails).length);
+            console.log('🎮 GameManager: Current trails:', this.playerTrails);
+          } catch (err) {
+            console.error('❌ [GameManager] Error fetching trails:', err);
+          }
+        }
+
+        async loadAudioVolume() {
+          try {
+            const response = await fetch('/api/debug/settings/volume/public');
+            const data = await response.json();
+            this.setAudioVolume(data.volume ?? 100);
+          } catch (error) {
+            console.error('Failed to load audio volume:', error);
+            this.setAudioVolume(100);
+          }
+        }
+
+        setAudioVolume(volumePercent) {
+          const volume = Math.max(0, Math.min(100, volumePercent)) / 100;
+          const audioIds = ['coolSound', 'failSound', 'newGold', 'slowin', 'slowout', 'fight', 'winner'];
+
+          audioIds.forEach(id => {
+            const audio = document.getElementById(id);
+            if (audio) {
+              audio.volume = volume;
+            }
+          });
+
+          console.log(`🔊 Audio volume set to ${volumePercent}%`);
+        }
+
+        // Show XP popup near the player's cone
+        showXPPopup(data) {
+          const { playerName, xpAwarded, streakBonus } = data;
+          const playerNameLower = playerName.toLowerCase();
+
+          // Find the cone for this player to get position
+          const cone = this.coneManager.cones.find(c => c.name && c.name.toLowerCase() === playerNameLower);
+          let xPos, yPos;
+
+          if (cone && cone.body) {
+            // Position above the cone
+            xPos = cone.body.position.x;
+            yPos = cone.body.position.y - 120;
+          } else if (this.lastConePositions.has(playerNameLower)) {
+            // Use stored position (for duels where cones are removed before XP event)
+            const storedPos = this.lastConePositions.get(playerNameLower);
+            xPos = storedPos.x;
+            yPos = storedPos.y - 120;
+            // Clean up stored position after use
+            this.lastConePositions.delete(playerNameLower);
+          } else {
+            // Fallback to center of screen with random offset
+            xPos = window.innerWidth / 2 + (Math.random() - 0.5) * 200;
+            yPos = window.innerHeight / 2;
+          }
+
+          // Create popup element
+          const popup = document.createElement('div');
+          popup.className = 'xp-popup';
+          popup.style.left = `${xPos}px`;
+          popup.style.top = `${yPos}px`;
+          popup.style.transform = 'translateX(-50%)';
+
+          let popupHTML = `+${xpAwarded} XP`;
+          if (streakBonus > 0) {
+            popupHTML += `<span class="streak-bonus">+${streakBonus} streak!</span>`;
+          }
+          popup.innerHTML = popupHTML;
+
+          document.body.appendChild(popup);
+
+          // Remove after animation
+          setTimeout(() => popup.remove(), 2000);
+        }
+
+        // Show subtle level up text
+        showLevelUpCelebration(data) {
+          const { playerName, newLevel } = data;
+          const playerNameLower = playerName.toLowerCase();
+
+          // Find the cone for this player to get position
+          const cone = this.coneManager.cones.find(c => c.name && c.name.toLowerCase() === playerNameLower);
+          let xPos, yPos;
+
+          if (cone && cone.body) {
+            // Position above the cone (slightly higher than XP popup)
+            xPos = cone.body.position.x;
+            yPos = cone.body.position.y - 160;
+          } else if (this.lastConePositions.has(playerNameLower)) {
+            // Use stored position (for duels where cones are removed before event)
+            const storedPos = this.lastConePositions.get(playerNameLower);
+            xPos = storedPos.x;
+            yPos = storedPos.y - 160;
+          } else {
+            // Fallback to center of screen
+            xPos = window.innerWidth / 2;
+            yPos = window.innerHeight / 2 - 50;
+          }
+
+          // Create subtle level up text
+          const levelText = document.createElement('div');
+          levelText.className = 'level-up-text';
+          levelText.style.left = `${xPos}px`;
+          levelText.style.top = `${yPos}px`;
+          levelText.innerHTML = `Level ${newLevel}!<span class="player-name">${playerName}</span>`;
+
+          document.body.appendChild(levelText);
+
+          // Remove after animation
+          setTimeout(() => levelText.remove(), 2500);
+        }
+
+        async getPlayerSkin(playerName, freshFetch = false) {
+          // When freshFetch is true, fetch the latest skin from the server
+          // to pick up shuffle changes without emitting socket events
+          if (freshFetch) {
+            try {
+              const resp = await fetch(`/api/skins/user/${encodeURIComponent(playerName)}?_t=${Date.now()}`);
+              const json = await resp.json();
+              if (json.data && json.data.skin) {
+                console.log(`🔄 Fresh skin fetch for ${playerName}: ${json.data.skin} (was: ${this.playerSkins[playerName] || 'none'})`);
+                this.playerSkins[playerName] = json.data.skin;
+              }
+            } catch (e) {
+              console.warn(`Failed to fetch fresh skin for ${playerName}:`, e);
+            }
+          }
+
+          const assignedSkin = this.playerSkins[playerName] || 'default';
+          let skinPath = this.coneManager.availableSkins[assignedSkin];
+
+          // If skin not found, IMMEDIATELY refresh config and try again
+          if (!skinPath && assignedSkin !== 'default') {
+            console.warn(`🚨 SKIN NOT FOUND! Refreshing config immediately for: ${assignedSkin}`);
+            console.warn(`Available skins before refresh: ${Object.keys(this.coneManager.availableSkins).join(', ')}`);
+
+            // FORCE refresh both available skins and player assignments
+            await this.coneManager.refreshAvailableSkins();
+            await this.updatePlayerSkins();
+
+            // Check again after refresh
+            const newAssignedSkin = this.playerSkins[playerName] || 'default';
+            skinPath = this.coneManager.availableSkins[newAssignedSkin];
+
+            console.log(`Available skins after refresh: ${Object.keys(this.coneManager.availableSkins).join(', ')}`);
+            console.log(`Player assignment after refresh: ${playerName} → ${newAssignedSkin}`);
+
+            if (skinPath) {
+              console.log(`✅ FOUND after refresh: ${newAssignedSkin} → ${skinPath}`);
+              // Ensure image is preloaded before returning
+              await preloadImage(skinPath);
+              return skinPath;
+            }
+          }
+
+          if (skinPath) {
+            console.log(`✅ Resolved skin for ${playerName}: ${assignedSkin} → ${skinPath}`);
+            // Ensure image is preloaded before returning
+            await preloadImage(skinPath);
+            return skinPath;
+          }
+
+          // Final fallback to default
+          const defaultPath = this.coneManager.availableSkins.default || '/skins/cone_default.png';
+          console.log(`🔄 Using default skin for ${playerName}: ${defaultPath}`);
+          // Ensure default image is preloaded before returning
+          await preloadImage(defaultPath);
+          return defaultPath;
+        }
+
+        triggerSlowMotion() {
+          if (this.isSlowMotion) return;
+          this.isSlowMotion = true;
+          this.engine.timing.timeScale = 0.1;
+          document.getElementById('slowin').play();
+
+          setTimeout(() => {
+            this.engine.timing.timeScale = 1;
+            this.isSlowMotion = false;
+            document.getElementById('slowout').play();
+          }, 3500);
+        }
+      }
+
+      class ConeManager {
+        constructor(gameManager) {
+          this.gameManager = gameManager;
+          this.cones = [];
+          this.coneQueue = [];
+          this.duelQueue = []; // Queue for all duels
+          this.isProcessingDuel = false; // Flag to track if we're currently processing a duel
+          this.positions = [
+            { x: (2 * window.innerWidth) / 5, occupied: false },
+            { x: (3 * window.innerWidth) / 5, occupied: false },
+            { x: (4 * window.innerWidth) / 5, occupied: false },
+            { x: (1 * window.innerWidth) / 5, occupied: false },
+          ];
+          this.duel = null;
+          this.duelBodies = { bodyA: null, bodyB: null };
+          this.duelCones = [];
+          this.duelFailedCones = 0;
+
+          this.availableSkins = {};
+          this.loadAvailableSkins();
+
+          const hitbox = document.querySelector('#hitbox');
+          this.coneVertices = Svg.pathToVertices(hitbox).map(v => ({
+            x: v.x * 0.24,
+            y: v.y * 0.24,
+          }));
+        }
+
+        async addCone(name) {
+          const position = this.positions.find(p => !p.occupied);
+          if (!position) {
+            this.coneQueue.push(name);
+            return;
+          }
+
+          // Check if the player name is an emote (with 3s timeout)
+          fetchWithTimeout(`/api/skins/emote/${encodeURIComponent(name)}`)
+            .then(async response => {
+              const data = await response.json();
+              const dataContent = data.data;
+              const tex = await this.gameManager.getPlayerSkin(name, true);
+              const emoteUrl = (dataContent.isEmote && dataContent.url) ? dataContent.url : null;
+
+              const cone = new Cone(
+                name,
+                position.x,
+                tex,
+                this.gameManager.engine,
+                this.coneVertices,
+                this.gameManager.world,
+                this,
+                this.gameManager,
+                false,
+                emoteUrl
+              );
+              this.cones.push(cone);
+
+              position.occupied = true;
+              setTimeout(() => {
+                position.occupied = false;
+                this.processConeQueue();
+              }, 5000);
+
+              setTimeout(() => cone.launch(), 1000);
+            })
+            .catch(async error => {
+              console.error('Error checking emote for regular cone:', error);
+              // If there's an error, create cone without emote
+              const tex = await this.gameManager.getPlayerSkin(name, true);
+              
+              const cone = new Cone(
+                name,
+                position.x,
+                tex,
+                this.gameManager.engine,
+                this.coneVertices,
+                this.gameManager.world,
+                this,
+                this.gameManager,
+                false,
+                null
+              );
+              this.cones.push(cone);
+
+              position.occupied = true;
+              setTimeout(() => {
+                position.occupied = false;
+                this.processConeQueue();
+              }, 5000);
+
+              setTimeout(() => cone.launch(), 1000);
+            });
+        }
+
+        addConeDuel(p1, p2) {
+          // Add duel to queue
+          this.duelQueue.push({ player1: p1, player2: p2 });
+          console.log(`[ConeManager] Duel queued: ${p1} vs ${p2}. Queue length: ${this.duelQueue.length}`);
+          
+          // Only start processing if we're not already processing a duel
+          if (!this.isProcessingDuel && (!this.duel || this.duel.isFinished)) {
+            this.processNextDuel();
+          }
+        }
+
+        processNextDuel() {
+          if (this.duelQueue.length === 0 || this.isProcessingDuel) return;
+          
+          this.isProcessingDuel = true;
+          const nextDuel = this.duelQueue.shift();
+          console.log(`[ConeManager] Processing next duel: ${nextDuel.player1} vs ${nextDuel.player2}`);
+
+          // Check both players for emotes (with 3s timeout to prevent blocking)
+          Promise.all([
+            fetchWithTimeout(`/api/skins/emote/${encodeURIComponent(nextDuel.player1)}`).then(response => response.json()).then(res => res.data),
+            fetchWithTimeout(`/api/skins/emote/${encodeURIComponent(nextDuel.player2)}`).then(response => response.json()).then(res => res.data)
+          ]).then(([p1Data, p2Data]) => {
+            if (this.duel && !this.duel.isFinished) {
+              console.log('[ConeManager] Another duel is still active, requeuing this duel');
+              this.duelQueue.unshift(nextDuel);
+              this.isProcessingDuel = false;
+              return;
+            }
+
+            this.duel = {
+              player1: nextDuel.player1,
+              player2: nextDuel.player2,
+              p1Result: null,
+              p2Result: null,
+              isFinished: false,
+              p1IsEmote: p1Data.isEmote && p1Data.url ? true : false,
+              p2IsEmote: p2Data.isEmote && p2Data.url ? true : false,
+              p1EmoteUrl: p1Data.isEmote ? p1Data.url : null,
+              p2EmoteUrl: p2Data.isEmote ? p2Data.url : null
+            };
+
+            setTimeout(async () => {
+              const [cone1, cone2] = await Promise.all([
+                this.addDuelCone(nextDuel.player1, 0.35),
+                this.addDuelCone(nextDuel.player2, 0.65)
+              ]);
+              setTimeout(() => {
+                if (cone1) cone1.launchDuel(0.35);
+                if (cone2) cone2.launchDuel(0.65);
+              }, 2000);
+            }, 2000);
+          }).catch(error => {
+            console.error('Error checking emotes:', error);
+            if (this.duel && !this.duel.isFinished) {
+              console.log('[ConeManager] Another duel is still active, requeuing this duel');
+              this.duelQueue.unshift(nextDuel);
+              this.isProcessingDuel = false;
+              return;
+            }
+
+            this.duel = {
+              player1: nextDuel.player1,
+              player2: nextDuel.player2,
+              p1Result: null,
+              p2Result: null,
+              isFinished: false,
+              p1IsEmote: false,
+              p2IsEmote: false,
+              p1EmoteUrl: null,
+              p2EmoteUrl: null
+            };
+
+            setTimeout(async () => {
+              const [cone1, cone2] = await Promise.all([
+                this.addDuelCone(nextDuel.player1, 0.35),
+                this.addDuelCone(nextDuel.player2, 0.65)
+              ]);
+              setTimeout(() => {
+                if (cone1) cone1.launchDuel(0.35);
+                if (cone2) cone2.launchDuel(0.65);
+              }, 2000);
+            }, 2000);
+          });
+        }
+
+        async addDuelCone(name, ratio) {
+          const xPos = window.innerWidth * ratio;
+          const tex = await this.gameManager.getPlayerSkin(name, true);
+
+          const cone = new Cone(
+            name,
+            xPos,
+            tex,
+            this.gameManager.engine,
+            this.coneVertices,
+            this.gameManager.world,
+            this,
+            this.gameManager,
+            true,
+            this.duel && name === this.duel.player1 ? this.duel.p1EmoteUrl : 
+            this.duel && name === this.duel.player2 ? this.duel.p2EmoteUrl : null
+          );
+          this.cones.push(cone);
+
+          if (!this.duelBodies.bodyA) {
+            this.duelBodies.bodyA = cone.body;
+            this.duelCones[0] = cone;
+          } else if (!this.duelBodies.bodyB) {
+            this.duelBodies.bodyB = cone.body;
+            this.duelCones[1] = cone;
+          }
+          return cone;
+        }
+
+        reportResult(playerName, result, isUpsideDown = false) {
+          if (!this.duel || this.duel.isFinished) return;
+
+          const { player1, player2, p1Result, p2Result } = this.duel;
+          if (playerName !== player1 && playerName !== player2) return;
+
+          if (playerName === player1) {
+            this.duel.p1Result = result;
+            if (isUpsideDown) this.duel.p1UpsideDown = true;
+          } else {
+            this.duel.p2Result = result;
+            if (isUpsideDown) this.duel.p2UpsideDown = true;
+          }
+
+          if (this.duel.p1Result === 'win' && this.duel.p2Result !== 'win') {
+            this.finishDuel(player1, this.duel.p1UpsideDown);
+            return;
+          }
+          if (this.duel.p2Result === 'win' && this.duel.p1Result !== 'win') {
+            this.finishDuel(player2, this.duel.p2UpsideDown);
+            return;
+          }
+
+          if (this.duel.p1Result === 'fail' && this.duel.p2Result !== 'fail') {
+            this.finishDuel(player2, this.duel.p2UpsideDown);
+            return;
+          }
+          if (this.duel.p2Result === 'fail' && this.duel.p1Result !== 'fail') {
+            this.finishDuel(player1, this.duel.p1UpsideDown);
+            return;
+          }
+
+          if (this.duel.p1Result === 'fail' && this.duel.p2Result === 'fail') {
+            this.relaunchDuelConesTowardsEachOther();
+          }
+        }
+
+        finishDuel(winnerName, isUpsideDown = false) {
+          console.log('[ConeManager] finishDuel =>', winnerName, 'isUpsideDown:', isUpsideDown);
+
+          // Get the loser name before cleaning up duel state
+          let loserName = null;
+          if (this.duel) {
+            loserName = this.duel.player1 === winnerName ? this.duel.player2 : this.duel.player1;
+            this.duel.isFinished = true;
+          }
+
+          if (isUpsideDown) {
+            // Emit upside_down event for special duel bonus (+10 for winner, -10 for loser)
+            this.gameManager.socket.emit('upside_down', {
+              playerName: winnerName,
+              gameType: 'duel',
+              loserName: loserName
+            });
+          } else {
+            // Emit regular duel-specific win event for chat announcements
+            this.gameManager.socket.emit('duel_win', {
+              winner: winnerName,
+              loser: loserName
+            });
+          }
+
+          // Note: Removed generic 'win' event to prevent double processing
+          // The duel_win/upside_down event handles both stats tracking and chat announcements
+
+          // Store cone positions before removing (for XP popup positioning)
+          this.duelCones.forEach(cone => {
+            if (cone && cone.body && cone.name) {
+              this.gameManager.lastConePositions.set(cone.name.toLowerCase(), {
+                x: cone.body.position.x,
+                y: cone.body.position.y
+              });
+              // Remove from cones array immediately so XP popup uses lastConePositions
+              const idx = this.cones.indexOf(cone);
+              if (idx !== -1) this.cones.splice(idx, 1);
+            }
+          });
+
+          // Capture cones reference before clearing state
+          const conesToRemove = [...this.duelCones];
+
+          // Start fading both cones out slowly while winner banner is shown
+          setTimeout(() => {
+            conesToRemove.forEach(cone => {
+              if (cone && !cone.isRemoved) {
+                if (cone.element) {
+                  cone.element.style.transition = 'opacity 2s ease';
+                  cone.element.style.opacity = '0';
+                }
+                if (cone.nameWrapper) {
+                  cone.nameWrapper.style.transition = 'opacity 2s ease';
+                  cone.nameWrapper.style.opacity = '0';
+                }
+              }
+            });
+          }, 300);
+
+          // Remove cones from DOM/physics after fade completes
+          setTimeout(() => {
+            conesToRemove.forEach(cone => {
+              if (cone && !cone.isRemoved) {
+                cone.isRemoved = true;
+                if (cone.trail && this.gameManager.trailManager) {
+                  this.gameManager.trailManager.removeTrail(cone.trail.id);
+                }
+                if (cone.nameWrapper) cone.nameWrapper.remove();
+                if (cone.element) cone.element.remove();
+                Composite.remove(this.gameManager.world, cone.body);
+              }
+            });
+          }, 2500);
+
+          this.duelBodies.bodyA = null;
+          this.duelBodies.bodyB = null;
+          this.duelCones = [];
+          this.duelFailedCones = 0;
+          this.duel = null;
+          this.isProcessingDuel = false;
+
+          // Process next duel in queue after a short delay (increased to account for cone removal delay)
+          setTimeout(() => {
+            this.processNextDuel();
+          }, 3000);
+
+        
+          
+          const container = document.getElementById('winner-container');
+          const playerNameElem = document.getElementById('winner-player-name');
+
+          // Check if the winner is an emote (with 3s timeout)
+          fetchWithTimeout(`/api/skins/emote/${encodeURIComponent(winnerName)}`)
+            .then(response => response.json())
+            .then(response => {
+              const data = response.data;
+              if (data.isEmote && data.url) {
+                // If winner is an emote, show the emote image
+                playerNameElem.innerHTML = "<span class='winner-name'>";
+                const emoteImg = document.createElement('img');
+                emoteImg.src = data.url;
+                emoteImg.className = 'emote-inline-winner';
+                playerNameElem.querySelector('.winner-name').appendChild(emoteImg);
+              } else {
+                // If not an emote, show normal text with paint
+                playerNameElem.innerHTML = "<span class='winner-name'>" + winnerName + "</span>";
+                let winnerSpan = playerNameElem.querySelector('.winner-name');
+                if (winnerSpan) {
+                  applyPaintToName(winnerSpan, winnerName);
+                }
+              }
+              // Show container and trigger animate-in
+              container.classList.remove('hidden', 'animate-out');
+              container.classList.add('animate-in');
+            })
+            .catch(error => {
+              console.error('Error checking emote:', error);
+              // If there's an error, show normal text with paint
+              playerNameElem.innerHTML = "<span class='winner-name'>" + winnerName + "</span>";
+              let winnerSpan = playerNameElem.querySelector('.winner-name');
+              if (winnerSpan) {
+                applyPaintToName(winnerSpan, winnerName);
+              }
+              // Show container and trigger animate-in
+              container.classList.remove('hidden', 'animate-out');
+              container.classList.add('animate-in');
+            });
+
+          // Start retract animation after 2.5s, then hide after animation completes
+          setTimeout(() => {
+            container.classList.remove('animate-in');
+            container.classList.add('animate-out');
+            setTimeout(() => {
+              container.classList.remove('animate-out');
+              container.classList.add('hidden');
+            }, 500);
+          }, 2500);
+        }
+
+        relaunchDuelConesTowardsEachOther() {
+          console.log('[ConeManager] Both duel cones failed on ground. Relaunching towards each other.');
+          if (!this.duelCones[0] || !this.duelCones[1]) return;
+
+          const coneA = this.duelCones[0];
+          const coneB = this.duelCones[1];
+
+          [coneA, coneB].forEach(cone => {
+            cone.resetForRelaunch();
+          });
+
+          // find center point between cone A and B and launch them towards each other
+          const centerCones = (coneA.body.position.x + coneB.body.position.x) / 2;
+          const centerX = window.innerWidth / 2;
+          const directionA = (coneA.body.position.x < centerCones) ? 1 : -1;
+          const directionB = (coneB.body.position.x > centerCones) ? -1 : 1;
+          const forceMagnitudeX = 1;
+          const forceMagnitudeY = -2;
+
+          Body.applyForce(coneA.body, coneA.body.position, {
+            x: forceMagnitudeX * directionA,
+            y: forceMagnitudeY
+          });
+
+          Body.applyForce(coneB.body, coneB.body.position, {
+            x: forceMagnitudeX * directionB,
+            y: forceMagnitudeY
+          });
+
+          const angularVelocityA = Math.random() * (0.2 - 0.5) + 0.05;
+          const angularVelocityB = Math.random() * (0.2 - 0.5) + 0.05;
+          Body.setAngularVelocity(coneA.body, angularVelocityA * directionA);
+          Body.setAngularVelocity(coneB.body, angularVelocityB * directionB);
+
+          this.duelFailedCones = 0;
+        }
+
+        processConeQueue() {
+          if (!this.coneQueue.length) return;
+          const nextName = this.coneQueue.shift();
+          this.addCone(nextName);
+        }
+
+        updateCones() {
+          this.cones.forEach(c => c.update());
+
+          // Stuck cone cleanup - only when more than 10 cones on field
+          if (this.cones.length > 10) {
+            const now = Date.now();
+            const STUCK_TIME_THRESHOLD = 15000; // 15 seconds
+            const MOVEMENT_THRESHOLD = 50; // pixels
+
+            this.cones.forEach(cone => {
+              if (cone.isRemoved || cone.isDuelCone || cone.hasReportedResult) return;
+
+              const age = now - cone.spawnTime;
+
+              // Only check cones older than 15 seconds
+              if (age > STUCK_TIME_THRESHOLD) {
+                // Initialize position tracking if not set
+                if (!cone.lastCheckPosition || !cone.stuckCheckTime) {
+                  cone.lastCheckPosition = { x: cone.body.position.x, y: cone.body.position.y };
+                  cone.stuckCheckTime = now;
+                  return;
+                }
+
+                // Check every 3 seconds
+                if (now - cone.stuckCheckTime > 3000) {
+                  const dx = Math.abs(cone.body.position.x - cone.lastCheckPosition.x);
+                  const dy = Math.abs(cone.body.position.y - cone.lastCheckPosition.y);
+                  const movement = Math.sqrt(dx * dx + dy * dy);
+
+                  if (movement < MOVEMENT_THRESHOLD) {
+                    // Cone is stuck - treat as a fail (play sound, award 20 XP)
+                    console.log(`[ConeManager] Removing stuck cone: ${cone.name} (age: ${Math.round(age/1000)}s, movement: ${Math.round(movement)}px)`);
+                    cone.hasReportedResult = true; // Prevent duplicate reports
+                    this.gameManager.socket.emit('fail', cone.name);
+                    document.getElementById('failSound').play();
+                    cone.startFadeOut();
+                  } else {
+                    // Update position for next check
+                    cone.lastCheckPosition = { x: cone.body.position.x, y: cone.body.position.y };
+                    cone.stuckCheckTime = now;
+                  }
+                }
+              }
+            });
+          }
+        }
+
+        updatePositions() {
+          this.positions[0].x = (1 * window.innerWidth) / 5;
+          this.positions[1].x = (3 * window.innerWidth) / 5;
+          this.positions[2].x = (4 * window.innerWidth) / 5;
+          this.positions[3].x = (2 * window.innerWidth) / 5;
+        }
+
+        removeCone(c) {
+          const ix = this.cones.indexOf(c);
+          if (ix !== -1) this.cones.splice(ix, 1);
+        }
+
+        handleCollision(evt) {
+          if (!this.duel || !this.duelBodies.bodyA || !this.duelBodies.bodyB) return;
+
+          for (const pair of evt.pairs) {
+            const A = pair.bodyA.parent;
+            const B = pair.bodyB.parent;
+
+            const isDuelPair =
+              (A === this.duelBodies.bodyA && B === this.duelBodies.bodyB) ||
+              (A === this.duelBodies.bodyB && B === this.duelBodies.bodyA);
+
+            if (isDuelPair) {
+              this.applyBeybladeForce(A, B);
+            }
+          }
+        }
+
+        applyBeybladeForce(bodyA, bodyB) {
+          const dx = bodyB.position.x - bodyA.position.x;
+          const dy = bodyB.position.y - bodyA.position.y;
+          const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+
+          const pushStrength = 4 + Math.random() * 5;
+          const pushStrength2 = 4 + Math.random() * 5;
+          const nx = dx / dist;
+          const ny = dy / dist;
+
+          const baseSpin = Math.random() * 0.3;
+          const baseSpin2 = Math.random() * 0.3;
+          const spinA = baseSpin * (Math.random() > 0.5 ? 1 : -1) * pushStrength;
+          const spinB = baseSpin2 * (Math.random() > 0.5 ? 1 : -1) * pushStrength2;
+
+          Body.setAngularVelocity(bodyA, spinA);
+          Body.setAngularVelocity(bodyB, spinB);
+
+          Body.applyForce(bodyA, bodyA.position, {
+            x: -nx * pushStrength,
+            y: -ny * pushStrength
+          });
+          Body.applyForce(bodyB, bodyB.position, {
+            x: nx * pushStrength,
+            y: ny * pushStrength
+          });
+        }
+
+        duelConeFailed() {
+          this.duelFailedCones += 1;
+          console.log(`[ConeManager] Duel cone failed. Total failed: ${this.duelFailedCones}`);
+          if (this.duelFailedCones >= 2 && this.duel && !this.duel.isFinished) {
+            this.relaunchDuelConesTowardsEachOther();
+          }
+        }
+
+        async loadAvailableSkins() {
+          try {
+            const response = await fetch('/api/skins/available?' + Date.now());
+            const result = await response.json();
+            this.availableSkins = result.data || result;
+            console.log('DEBUG: ConeManager loaded available skins:', Object.keys(this.availableSkins).length);
+
+            // Preload all skin images to prevent blank cones
+            preloadAllSkins(this.availableSkins);
+          } catch (error) {
+            console.error('Error loading available skins:', error);
+          }
+        }
+
+        async refreshAvailableSkins() {
+          console.log('DEBUG: ConeManager refreshing available skins...');
+          await this.loadAvailableSkins();
+        }
+
+        updatePlayerSkinVisually(playerName, skinPath) {
+          console.log(`🔧 UPDATING VISUAL SKIN: ${playerName} → ${skinPath}`);
+          console.log(`🔍 Current cones on screen:`, this.cones.map(c => ({ name: c.name, removed: c.isRemoved })));
+          
+          // Find all cones belonging to this player and update their visuals
+          const playerCones = this.cones.filter(cone => cone.name === playerName);
+          console.log(`👤 Found ${playerCones.length} cone(s) for ${playerName}`);
+          
+          let updatedCount = 0;
+          for (const cone of playerCones) {
+            if (cone.element && !cone.isRemoved) {
+              console.log(`🎯 Updating cone element for ${playerName}...`);
+              
+              // Update the cone's visual element
+              if (skinPath.includes('holo_doppler')) {
+                // Handle holo doppler skins with random phase
+                const phase = Math.floor(Math.random() * 4) + 1;
+                const phasedPath = `${skinPath}_${phase}.jpg`;
+                
+                if (cone.element.style) {
+                  cone.element.style.backgroundImage = `url(${phasedPath})`;
+                  updatedCount++;
+                }
+                console.log(`✨ Updated holo doppler skin for ${playerName} with phase ${phase}`);
+              } else if (skinPath.includes('holo_')) {
+                // Handle regular holo skins
+                if (cone.element.style) {
+                  cone.element.style.backgroundImage = `url(${skinPath})`;
+                  updatedCount++;
+                }
+                console.log(`✨ Updated holo skin for ${playerName}`);
+              } else {
+                // Handle regular skins
+                if (cone.element.src !== undefined) {
+                  cone.element.src = skinPath;
+                  updatedCount++;
+                } else if (cone.element.style) {
+                  cone.element.style.backgroundImage = `url(${skinPath})`;
+                  updatedCount++;
+                }
+                console.log(`✨ Updated regular skin for ${playerName}`);
+              }
+            } else {
+              console.log(`⚠️ Skipping cone for ${playerName} - element missing or removed`);
+            }
+          }
+          
+          console.log(`✅ VISUAL UPDATE COMPLETE: Updated ${updatedCount}/${playerCones.length} cone(s) for ${playerName}`);
+        }
+      }
+
+      class Cone {
+        constructor(
+          name,
+          positionX,
+          texture,
+          engine,
+          coneVertices,
+          world,
+          coneManager,
+          gameManager,
+          isDuelCone = false,
+          emoteUrl = null
+        ) {
+          this.name = name;
+          this.engine = engine;
+          this.world = world;
+          this.coneManager = coneManager;
+          this.gameManager = gameManager;
+          this.isDuelCone = isDuelCone;
+          this.isRemoved = false;
+          this.emoteUrl = emoteUrl;
+
+          this.hasLaunched = false;
+          this.celebrated = false;
+          this.hasReportedResult = false; // Prevent duplicate win/fail reports
+          this.trail = null; // Will be initialized when the cone launches
+
+          // Track consecutive frames nearly still
+          this.stillFrameCount = 0;
+          this.stillFrameThreshold = 120;
+
+          // Track spawn time and position for stuck cone detection
+          this.spawnTime = Date.now();
+          this.lastCheckPosition = null;
+          this.stuckCheckTime = null;
+
+          this.body = Bodies.fromVertices(positionX, window.innerHeight - 85, coneVertices, {
+            restitution: 0.2,
+            density: 0.0011,
+            friction: 0.2,
+            frictionAir: 0.02,
+            render: DEBUG_MODE
+              ? { fillStyle: 'rgba(255,0,0,0.5)', visible: true }
+              : { visible: false }
+          }, true);
+          Body.setStatic(this.body, true);
+          Composite.add(this.world, this.body);
+
+          this.nameWrapper = document.createElement('span');
+          this.nameWrapper.className = 'userName';
+          if (this.emoteUrl) {
+            this.nameWrapper.classList.add('has-emote');
+          }
+          document.body.appendChild(this.nameWrapper);
+
+          this.nameWrapper.style.opacity = "0";
+          setTimeout(() => {
+            this.nameWrapper.style.opacity = "1";
+          }, 300);
+
+          this.nameText = document.createElement('span');
+          if (this.emoteUrl) {
+            const emoteImg = document.createElement('img');
+            emoteImg.src = this.emoteUrl;
+            emoteImg.className = 'emote-inline';
+            this.nameText.appendChild(emoteImg);
+          } else {
+            this.nameText.textContent = name;
+            // Apply the new layered paint+shadow logic.
+            applyPaintToName(this.nameText, name);
+          }
+          this.nameWrapper.appendChild(this.nameText);
+
+          // Ensure texture is a string and has a fallback
+          const safeTexture = texture || '/skins/cone_default.png';
+          
+          if (safeTexture.includes('holo_doppler')) {
+ 
+            this.overlay = document.createElement('img');
+            this.overlay.src = 'skins/transparent.png';
+            this.overlay.className = 'cone';
+
+            this.element = document.createElement('div');
+            this.element.className = 'cone_holo'; 
+            const phase = Math.floor(Math.random() * 4) + 1;
+            this.element.style.backgroundImage = `url(${safeTexture}_${phase}.jpg)`;
+            console.log(`[Cone] ${this.name} has holo_doppler with phase ${phase} url(${safeTexture}_${phase}.jpg)`);
+            this.element.appendChild(this.overlay);
+          } else if (safeTexture.includes('holo_')) {
+            this.overlay = document.createElement('img');
+            this.overlay.src = 'skins/transparent.png';
+            this.overlay.className = 'cone';
+
+            this.element = document.createElement('div');
+            this.element.className = 'cone_holo';
+            this.element.style.backgroundImage = `url(${safeTexture})`;
+            this.element.appendChild(this.overlay);
+          } else {
+            this.element = document.createElement('img');
+            this.element.src = safeTexture;
+            this.element.className = 'cone';
+          }
+          document.body.appendChild(this.element);
+
+          this.element.style.opacity = "0";
+          setTimeout(() => {
+            this.element.style.opacity = "1";
+          }, 300);
+
+          this.updateNameLabelPosition();
+        }
+
+        launch() {
+          if (this.isDuelCone) {
+            this.launchDuel(0.5);
+            return;
+          }
+          Body.setStatic(this.body, false);
+          this.applyRandomUpwardForceAndSpin();
+          this.hasLaunched = true;
+
+          // Initialize trail effect when cone launches
+          if (this.gameManager.trailManager) {
+            this.trail = this.gameManager.trailManager.createTrailForCone(this);
+          }
+
+          setTimeout(() => {
+            if (Math.random() < 1 / slowOdds) {
+              this.gameManager.triggerSlowMotion();
+            }
+          }, 500);
+        }
+
+        launchDuel(ratio) {
+          Body.setStatic(this.body, false);
+
+          const dir = ratio < 0.5 ? 1 : -1;
+          const horizontalForce = 0.5 * dir;
+          const upwardForce = 1.6;
+
+          Body.applyForce(this.body, this.body.position, {
+            x: horizontalForce,
+            y: -upwardForce
+          });
+
+          const spinVelocity = 0.1;
+          const spinDir = Math.random() > 0.5 ? 1 : -1;
+          Body.setAngularVelocity(this.body, spinVelocity * spinDir);
+
+          this.hasLaunched = true;
+
+          // Initialize trail effect for duel cones too
+          if (this.gameManager.trailManager) {
+            this.trail = this.gameManager.trailManager.createTrailForCone(this);
+          }
+        }
+
+        applyRandomUpwardForceAndSpin() {
+          const base = 1.63;
+          const total = base + Math.random() * 0.2;
+          const xforce = (Math.random() - 0.5) * 0.4;
+          Body.applyForce(this.body, this.body.position, {
+            x: xforce,
+            y: -total
+          });
+
+          const spin = 0.2 + Math.random() * 0.8;
+          const dir = Math.random() > 0.5 ? 1 : -1;
+          Body.setAngularVelocity(this.body, spin * dir);
+        }
+
+        update() {
+          this.updatePosition();
+          this.updateNameLabelPosition();
+          this.handleStationary();
+          this.checkOffScreen();
+        }
+
+        updatePosition() {
+          if (!this.element) return;
+          const { x, y } = this.body.position;
+          const angle = this.body.angle;
+
+          const w = 488, h = 645;
+          const scale = 0.24;
+          const cW = w * scale, cH = h * scale;
+          const xOffset = cW / 2, yOffset = cH / 2;
+
+          const vertAdjust = -17, horizAdjust = -1;
+          const adjustedX = x + horizAdjust * Math.cos(angle) - vertAdjust * Math.sin(angle);
+          const adjustedY = y + vertAdjust * Math.cos(angle) + horizAdjust * Math.sin(angle);
+
+          this.element.style.top = `${adjustedY - yOffset}px`;
+          this.element.style.left = `${adjustedX - xOffset}px`;
+          this.element.style.backgroundPositionY = `${(adjustedY - yOffset) / 2}px`;
+          this.element.style.backgroundPositionX = `${(adjustedX - xOffset) / 2}px`;
+          this.element.style.transform = `rotate(${angle}rad)`;
+          this.element.style.transformOrigin = 'center center';
+        }
+
+        updateNameLabelPosition() {
+          if (!this.nameWrapper) return;
+          this.nameWrapper.style.top = `${this.body.position.y - 150}px`;
+          this.nameWrapper.style.left = `${this.body.position.x - this.nameWrapper.offsetWidth / 2}px`;
+        }
+
+        handleStationary() {
+          if (!this.hasLaunched) return;
+          const still =
+            Math.abs(this.body.velocity.x) < 0.12 &&
+            Math.abs(this.body.velocity.y) < 0.12 &&
+            Math.abs(this.body.angularVelocity) < 0.12;
+
+          if (still) {
+            // Clamp tiny velocities to zero to stop jitter
+            if (Math.abs(this.body.velocity.x) < 0.12) this.body.velocity.x = 0;
+            if (Math.abs(this.body.velocity.y) < 0.12) this.body.velocity.y = 0;
+            if (Math.abs(this.body.angularVelocity) < 0.12) this.body.angularVelocity = 0;
+            this.stillFrameCount++;
+          } else {
+            this.stillFrameCount = 0;
+            this.celebrated = false;
+          }
+
+          if (!this.celebrated && this.stillFrameCount > this.stillFrameThreshold) {
+            this.celebrated = true;
+            const uprightOrUpsideDown = this.isUprightOrUpsideDown();
+            const isUpsideDown = this.isUpsideDown();
+            console.log(`[Cone] ${this.name} isUprightOrUpsideDown: ${uprightOrUpsideDown}, isUpsideDown: ${isUpsideDown}, Angle: ${this.body.angle.toFixed(2)} radians`);
+            if (uprightOrUpsideDown) {
+              document.getElementById('coolSound').play();
+              triggerConfetti(this.body.position);
+              if (this.isDuelCone) {
+                this.coneManager.reportResult(this.name, 'win', isUpsideDown);
+              } else {
+                // Only check hasReportedResult for regular cones (not duels)
+                if (!this.hasReportedResult) {
+                  this.hasReportedResult = true;
+                  if (isUpsideDown) {
+                    // Emit upside_down event for special +5 bonus
+                    this.gameManager.socket.emit('upside_down', { playerName: this.name, gameType: 'coneflip' });
+                  } else {
+                    this.gameManager.socket.emit('win', this.name);
+                  }
+                }
+              }
+              this.startFadeOut();
+            } else {
+              if (this.isDuelCone && this.coneManager.duel && !this.coneManager.duel.isFinished) {
+                this.coneManager.duelConeFailed();
+              } else {
+                // Only check hasReportedResult for regular cones (not duels)
+                if (!this.hasReportedResult) {
+                  this.hasReportedResult = true;
+                  console.log(`[Cone] Regular cone "${this.name}" failed on ground. Removing.`);
+                  this.gameManager.socket.emit('fail', this.name);
+                  document.getElementById('failSound').play();
+                }
+                this.startFadeOut();
+              }
+            }
+          }
+        }
+
+        resetForRelaunch() {
+          Body.setPosition(this.body, {
+            x: this.body.position.x,
+            y: window.innerHeight - 85
+          });
+          Body.setVelocity(this.body, { x: 0, y: 0 });
+          Body.setAngularVelocity(this.body, 0);
+
+          Body.setStatic(this.body, false);
+          this.hasLaunched = true;
+          this.celebrated = false;
+          this.hasReportedResult = false; // Reset for relaunch
+          this.stillFrameCount = 0;
+        }
+
+        isUprightOrUpsideDown() {
+          let a = this.body.angle % (2 * Math.PI);
+          if (a < 0) a += 2 * Math.PI;
+          const eps = 0.35;
+          // Check for upright (0) or upside down (π)
+          return (a < eps || a > 2 * Math.PI - eps || Math.abs(a - Math.PI) < eps);
+        }
+
+        isUpsideDown() {
+          let a = this.body.angle % (2 * Math.PI);
+          if (a < 0) a += 2 * Math.PI;
+          const eps = 0.35;
+          // Check specifically for upside down (angle near π)
+          return Math.abs(a - Math.PI) < eps;
+        }
+
+        checkOffScreen() {
+          const floorY = window.innerHeight + 1000;
+          const { y } = this.body.position;
+          if (y > floorY) {
+            // Duel cones - no duplicate prevention needed
+            if (this.isDuelCone && this.coneManager.duel && !this.coneManager.duel.isFinished) {
+              const duel = this.coneManager.duel;
+              if (duel && !duel.isFinished) {
+                const { player1, player2 } = duel;
+                const loser = this.name;
+                const winner = (loser === player1) ? player2 : player1;
+                this.coneManager.reportResult(loser, 'fail');
+              } else {
+                this.coneManager.reportResult(this.name, 'fail');
+              }
+            }
+            this.remove();
+          }
+        }
+
+        startFadeOut() {
+          if (!DEBUG_MODE) {
+            this.element.style.opacity = '0';
+            this.nameWrapper.style.opacity = '0';
+            setTimeout(() => this.remove(), 500);
+          } else {
+            this.remove();
+          }
+        }
+
+        remove() {
+          if (this.isRemoved) return;
+          this.isRemoved = true;
+
+          // Clean up trail when cone is removed
+          if (this.trail && this.gameManager.trailManager) {
+            this.gameManager.trailManager.removeTrail(this.trail.id);
+          }
+
+          if (this.nameWrapper) this.nameWrapper.remove();
+          if (this.element) this.element.remove();
+          Composite.remove(this.world, this.body);
+
+          this.coneManager.removeCone(this);
+        }
+      }
+
+      const triggerConfetti = (pos) => {
+        const origin = {
+          x: pos.x / window.innerWidth,
+          y: Math.max(0, Math.min(1, (pos.y - 120) / window.innerHeight)),
+        };
+        const steps = [
+          { spread: 26, startVelocity: 55, particleCount: 50 },
+          { spread: 60, particleCount: 40 },
+          { spread: 100, decay: 0.91, scalar: 0.8, particleCount: 70 },
+          { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2, particleCount: 20 },
+          { spread: 120, startVelocity: 45, particleCount: 20 },
+        ];
+        steps.forEach((opts) => confetti({ origin, ...opts }));
+      };
+
+      const goldAnimation = (playerName) => {
+        document.getElementById('newGold').play();
+        const container = document.getElementById('celebration-container');
+        const playerNameElement = document.getElementById('player-name');
+
+        // Check if the player is an emote (with 3s timeout)
+        fetchWithTimeout(`/api/skins/emote/${encodeURIComponent(playerName)}`)
+          .then(response => response.json())
+          .then(response => {
+            const data = response.data;
+            if (data.isEmote && data.url) {
+              // If player is an emote, show the emote image
+              playerNameElement.innerHTML = '';
+              const emoteImg = document.createElement('img');
+              emoteImg.src = data.url;
+              emoteImg.className = 'emote-inline-winner';
+              playerNameElement.appendChild(emoteImg);
+            } else {
+              // If not an emote, show normal text with paint
+              playerNameElement.innerHTML = '<span class="winner-name">' + playerName + '</span>';
+              let winnerSpan = playerNameElement.querySelector('.winner-name');
+              if (winnerSpan) {
+                applyPaintToName(winnerSpan, playerName);
+              }
+            }
+            container.classList.remove('hidden');
+            
+            setTimeout(() => {
+              container.classList.add('fadeoutgold');
+              setTimeout(() => {
+                container.classList.remove('fadeoutgold');
+                container.classList.add('hidden');
+              }, 1000);
+            }, 4000);
+          })
+          .catch(error => {
+            console.error('Error checking emote in goldAnimation:', error);
+            // If there's an error, show normal text with paint
+            playerNameElement.innerHTML = '<span class="winner-name">' + playerName + '</span>';
+            let winnerSpan = playerNameElement.querySelector('.winner-name');
+            if (winnerSpan) {
+              applyPaintToName(winnerSpan, playerName);
+            }
+            container.classList.remove('hidden');
+            
+            setTimeout(() => {
+              container.classList.add('fadeoutgold');
+              setTimeout(() => {
+                container.classList.remove('fadeoutgold');
+                container.classList.add('hidden');
+              }, 1000);
+            }, 4000);
+          });
+      };
+
+      function showMortalKombatNotification(name1, name2) {
+        const notification = document.getElementById('mk-notification');
+        notification.style.opacity = '1';
+        notification.textContent = name1 + " VS " + name2;
+        notification.style.animation = 'fadeIn 0.5s forwards';
+
+        setTimeout(() => {
+          notification.innerHTML = '<img src="fight.png" alt="FIGHT" style="width: 100%; height: auto; max-width: 500px;">';
+        }, 1500);
+
+        setTimeout(() => {
+          notification.style.animation = 'fadeOut 0.5s forwards';
+          notification.addEventListener('animationend', () => {
+            notification.innerHTML = '';
+          }, { once: true });
+        }, 3000);
+      }
+
+      const gameManager = new GameManager();
+    })();
+  </script>
+</body>
+
+</html>

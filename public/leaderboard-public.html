@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ConeFlip Leaderboard</title>
+    
+    <!-- Web Embed Metadata -->
+    <meta name="description" content="Top 100 ConeFlip players - Check out the leaderboard with stats, win rates, and streaks! ">
+    <meta name="keywords" content="ConeFlip, leaderboard, gaming, competitive, cone flipping, stats, win rate, streaks">
+    <meta name="author" content="@drippycatcs">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="leaderboard-public.html">
+    <meta property="og:title" content="ConeFlip Leaderboard - Top 100 Players">
+    <meta property="og:description" content="Check out the top ConeFlip players! View stats, win rates, streaks, and rankings. ">
+    <meta property="og:image" content="leaderboard-OG.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:site_name" content="ConeFlip">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="leaderboard-public.html">
+    <meta property="twitter:title" content="ConeFlip Leaderboard - Top 100 Players">
+    <meta property="twitter:description" content="Check out the top ConeFlip players! View stats, win rates, streaks, and rankings. ">
+    <meta property="twitter:image" content="/leaderboard-OG.png">
+    <meta property="twitter:creator" content="@drippycatcs">
+    
+    <!-- Discord -->
+    <meta name="theme-color" content="#3b82f6">
+    <meta name="color-scheme" content="light dark">
+    
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/site.webmanifest">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Light mode colors */
+            --bg-gradient: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #f0fdf4 100%);
+            --text-primary: #1f2937;
+            --text-secondary: #4b5563;
+            --text-tertiary: #6b7280;
+            --text-link: #3b82f6;
+            --text-code: #1f2937;
+            --card-bg: rgba(255, 255, 255, 0.4);
+            --card-border: rgba(255, 255, 255, 0.3);
+            --input-bg: rgba(255, 255, 255, 0.6);
+            --input-border: rgba(156, 163, 175, 0.3);
+            --status-bg: rgba(255, 255, 255, 0.3);
+            --status-border: rgba(0, 0, 0, 0.1);
+            --pre-bg: rgba(255, 255, 255, 0.4);
+            --scrollbar-track: rgba(255, 255, 255, 0.2);
+            --scrollbar-thumb: #4b5563;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] {
+            /* Dark mode colors */
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f1419 100%);
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-tertiary: #94a3b8;
+            --text-link: #60a5fa;
+            --text-code: #e2e8f0;
+            --card-bg: rgba(30, 41, 59, 0.4);
+            --card-border: rgba(51, 65, 85, 0.5);
+            --input-bg: rgba(30, 41, 59, 0.6);
+            --input-border: rgba(71, 85, 105, 0.5);
+            --status-bg: rgba(30, 41, 59, 0.3);
+            --status-border: rgba(51, 65, 85, 0.3);
+            --pre-bg: rgba(15, 23, 42, 0.6);
+            --scrollbar-track: rgba(30, 41, 59, 0.3);
+            --scrollbar-thumb: #64748b;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+        }
+
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            padding: 25px 30px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 8px 32px var(--shadow-color);
+            text-align: left!important;
+        }
+
+        .header h1 {
+            color: var(--text-primary);
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 4px var(--shadow-color);
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .leaderboard-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 30px;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 8px 32px var(--shadow-color);
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .leaderboard-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px var(--shadow-color);
+        }
+
+        .card-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid var(--input-border);
+            padding-bottom: 15px;
+        }
+
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .leaderboard-table th,
+        .leaderboard-table td {
+            padding: 15px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--input-border);
+        }
+
+        .leaderboard-table th {
+            background: var(--status-bg);
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .leaderboard-table td {
+            color: var(--text-secondary);
+        }
+
+        .rank-cell {
+            font-weight: 700;
+            color: var(--text-primary);
+            text-align: center;
+            width: 60px;
+        }
+
+        .rank-1 {
+            color: #ffd700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        .rank-2 {
+            color: #c0c0c0;
+            text-shadow: 0 0 10px rgba(192, 192, 192, 0.5);
+        }
+
+        .rank-3 {
+            color: #cd7f32;
+            text-shadow: 0 0 10px rgba(205, 127, 50, 0.5);
+        }
+
+        .player-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .player-name:hover {
+            color: var(--text-link);
+        }
+
+        .winrate-cell {
+            font-weight: 600;
+        }
+
+        .winrate-excellent {
+            color: #10b981;
+        }
+
+        .winrate-good {
+            color: #3b82f6;
+        }
+
+        .winrate-poor {
+            color: #ef4444;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--status-bg);
+            border: 1px solid var(--status-border);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+            line-height: 1.2;
+        }
+
+        .stat-value .player-name {
+            font-size: 0.8rem;
+            font-weight: 400;
+            color: var(--text-tertiary);
+            display: block;
+            margin-top: 2px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+
+        .error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        /* Ranking Toggle Styles - SaaS Pricing Style */
+        .ranking-toggle-container {
+            display: flex;
+            align-items: center;
+            margin-left: auto;
+        }
+
+        .toggle-pills {
+            display: flex;
+            background: var(--status-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 8px;
+            padding: 4px;
+            gap: 4px;
+        }
+
+        .toggle-pill {
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            background: transparent;
+            white-space: nowrap;
+        }
+
+        .toggle-pill:hover {
+            color: var(--text-primary);
+        }
+
+        .toggle-pill.active {
+            background: white;
+            color: #1f2937;
+            font-weight: 600;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+        }
+
+        [data-theme="dark"] .toggle-pill.active {
+            background: #e2e8f0;
+            color: #0f172a;
+        }
+
+        .ranking-description {
+            font-size: 0.85rem;
+            color: var(--text-tertiary);
+            margin-top: -10px;
+            margin-bottom: 10px;
+        }
+
+        /* Rank 1 row highlight */
+        .leaderboard-table tbody tr.rank-1-row {
+            background: linear-gradient(90deg, rgba(255, 215, 0, 0.08) 0%, transparent 100%);
+            border-left: 3px solid #ffd700;
+        }
+
+        [data-theme="dark"] .leaderboard-table tbody tr.rank-1-row {
+            background: linear-gradient(90deg, rgba(255, 215, 0, 0.06) 0%, transparent 100%);
+        }
+
+        /* Level column style */
+        .level-cell {
+            font-weight: 600;
+            color: var(--text-primary);
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .leaderboard-table {
+                font-size: 0.9rem;
+            }
+
+            .leaderboard-table th,
+            .leaderboard-table td {
+                padding: 10px 8px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>ConeFlip V2 Leaderboard</h1>
+            <p>By <a href="https://x.com/drippycatcs" target="_blank" style="color: var(--text-link);">@drippycatcs</a></p>
+        </div>
+
+        <div class="leaderboard-card">
+            <h2 class="card-title">📊 Overall Statistics</h2>
+            <div class="stats-grid" id="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="total-players">-</div>
+                    <div class="stat-label">Total Players</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="total-games">-</div>
+                    <div class="stat-label">Total Games</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="avg-winrate">-</div>
+                    <div class="stat-label">Average Winrate</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="top-streak">Soon</div>
+                    <div class="stat-label">Highest Streak</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="leaderboard-card">
+            <h2 class="card-title">
+                🥇 Top 100 Players
+                <div class="ranking-toggle-container">
+                    <div class="toggle-pills">
+                        <button class="toggle-pill active" data-sort="points">Points</button>
+                        <button class="toggle-pill" data-sort="level">XP</button>
+                    </div>
+                </div>
+            </h2>
+            <p class="ranking-description" id="ranking-description">Ranked by points — win a flip to gain +1, lose to drop -1</p>
+            <div id="leaderboard-content">
+                <div class="loading">Loading leaderboard...</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/shared-components.js"></script>
+    <script>
+        class LeaderboardManager {
+            constructor() {
+                this.currentSortBy = 'points';
+                this.init();
+            }
+
+            async init() {
+                // Theme will be handled by shared components
+                this.setupToggle();
+                await this.loadLeaderboard();
+                await this.loadStats();
+            }
+
+            setupToggle() {
+                const pills = document.querySelectorAll('.toggle-pill');
+
+                pills.forEach(pill => {
+                    pill.addEventListener('click', async () => {
+                        // Update active state
+                        pills.forEach(p => p.classList.remove('active'));
+                        pill.classList.add('active');
+
+                        // Update sort mode and description
+                        this.currentSortBy = pill.dataset.sort;
+                        this.updateDescription();
+
+                        // Reload leaderboard
+                        await this.loadLeaderboard();
+                    });
+                });
+            }
+
+            updateDescription() {
+                const desc = document.getElementById('ranking-description');
+                if (this.currentSortBy === 'points') {
+                    desc.textContent = 'Ranked by points \u2014 win a flip to gain +1, lose to drop -1';
+                } else {
+                    desc.textContent = 'Ranked by XP \u2014 earn XP every game to level up, win or lose';
+                }
+            }
+
+            async loadLeaderboard() {
+                try {
+                    const response = await fetch(`/api/leaderboard?page=1&limit=100&sortBy=${this.currentSortBy}`);
+                    const data = await response.json();
+
+                    if (data.status === 'success' && data.data) {
+                        this.displayLeaderboard(data.data);
+                    } else {
+                        this.showError('Failed to load leaderboard data');
+                    }
+                } catch (error) {
+                    console.error('Error loading leaderboard:', error);
+                    this.showError('Failed to load leaderboard');
+                }
+            }
+
+            async loadStats() {
+                try {
+                    const response = await fetch('/api/leaderboard/stats');
+                    const data = await response.json();
+                    
+                    if (data.status === 'success' && data.data) {
+                        this.displayStats(data.data);
+                    }
+                } catch (error) {
+                    console.error('Error loading stats:', error);
+                }
+            }
+
+
+
+            displayLeaderboard(players) {
+                const container = document.getElementById('leaderboard-content');
+
+                if (!players || players.length === 0) {
+                    container.innerHTML = '<div class="loading">No players found</div>';
+                    return;
+                }
+
+                const tableHTML = `
+                    <table class="leaderboard-table">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Player</th>
+                                <th>Level</th>
+                                <th>Points</th>
+                                <th>Current Streak</th>
+                                <th>Best Streak</th>
+                                <th>Total W/L</th>
+                                <th>Duels</th>
+                                <th>Coneflips</th>
+                                <th>Win Rate</th>
+                                <th>Last Played</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${players.map((player, index) => this.createPlayerRow(player, index + 1)).join('')}
+                        </tbody>
+                    </table>
+                `;
+
+                container.innerHTML = tableHTML;
+            }
+
+            createPlayerRow(player, rank) {
+                const winrate = Math.round(player.winrate * 100) / 100 || 0;
+                let winrateClass = 'winrate-poor';
+                if (winrate >= 60) winrateClass = 'winrate-excellent';
+                else if (winrate >= 40) winrateClass = 'winrate-good';
+
+                let rankClass = '';
+                if (rank === 1) rankClass = 'rank-1';
+                else if (rank === 2) rankClass = 'rank-2';
+                else if (rank === 3) rankClass = 'rank-3';
+
+                const lastPlayed = player.last_played ?
+                    new Date(player.last_played).toLocaleDateString() :
+                    'Never';
+
+                const totalWL = `${player.wins || 0}/${player.fails || 0}`;
+                const duelStats = `${player.duel_wins || 0}/${player.duel_losses || 0}`;
+                const coneflipStats = `${player.coneflip_wins || 0}/${player.coneflip_losses || 0}`;
+                const currentStreak = player.current_streak || 0;
+                const level = player.level || 1;
+
+                return `
+                    <tr${rank === 1 ? ' class="rank-1-row"' : ''}>
+                        <td class="rank-cell ${rankClass}">#${rank}</td>
+                        <td class="player-name" onclick="window.open('/u/${encodeURIComponent(player.name)}', '_blank')">${player.name}</td>
+                        <td class="level-cell">${level}</td>
+                        <td>${player.points || 0}</td>
+                        <td>${currentStreak > 0 ? `🔥${currentStreak}` : '—'}</td>
+                        <td class="text-center">${player.highest_streak || 0}</td>
+                        <td>${totalWL}</td>
+                        <td>${duelStats}</td>
+                        <td>${coneflipStats}</td>
+                        <td class="winrate-cell ${winrateClass}">${winrate}%</td>
+                        <td>${lastPlayed}</td>
+                    </tr>
+                `;
+            }
+
+            displayStats(stats) {
+                document.getElementById('total-players').textContent = stats.playerCount || 0;
+                document.getElementById('total-games').textContent = stats.totalGamesPlayed || 0;
+                document.getElementById('avg-winrate').textContent = stats.averageWinRate ? `${stats.averageWinRate}%` : '0%';
+                
+                // Display highest streak with player name and date
+                const streakValue = stats.highestGlobalStreak || 0;
+                const streakPlayer = stats.highestGlobalStreakPlayer;
+                const streakDate = stats.highestGlobalStreakAt;
+                const topStreakElement = document.getElementById('top-streak');
+                
+                if (streakValue > 0 && streakPlayer) {
+                    let dateDisplay = '';
+                    if (streakDate) {
+                        const date = new Date(streakDate);
+                        dateDisplay = ` - ${date.toLocaleDateString()}`;
+                    }
+                    topStreakElement.innerHTML = `${streakValue}<span class="player-name">(${streakPlayer}${dateDisplay})</span>`;
+                } else {
+                    topStreakElement.textContent = streakValue;
+                }
+            }
+
+            showError(message) {
+                const container = document.getElementById('leaderboard-content');
+                container.innerHTML = `<div class="error">${message}</div>`;
+            }
+        }
+
+        // Initialize the leaderboard manager when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            window.leaderboardManager = new LeaderboardManager();
+        });
+    </script>
+</body>
+</html> 

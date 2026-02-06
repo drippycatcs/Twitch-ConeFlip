@@ -1,0 +1,10 @@
+{
+  "name": "default",
+  "displayName": "No Trail",
+  "type": "none",
+  "author": "system",
+  "description": "No trail effect",
+  "visuals": {
+    "type": "none"
+  }
+} 

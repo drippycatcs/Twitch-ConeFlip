@@ -1,0 +1,35 @@
+{
+  "name": "glue",
+  "displayName": "Glue",
+  "type": "particle",
+  "author": "drippycatcs",
+  "description": "Sticky dripping glue",
+  "visuals": {
+    "type": "glue",
+    "shape": "glue",
+    "colors": ["#ffffff", "#fafafa", "#f5f5f5"],
+    "particleCount": 3,
+    "size": {
+      "min": 14,
+      "max": 22
+    },
+    "lifetime": 1400,
+    "emissionRate": 4,
+    "physics": {
+      "gravity": 0.3,
+      "velocityX": {
+        "min": -3,
+        "max": 3
+      },
+      "velocityY": {
+        "min": 20,
+        "max": 45
+      }
+    },
+    "effects": {
+      "glow": true,
+      "glowIntensity": 0.4,
+      "fadeOut": true
+    }
+  }
+}

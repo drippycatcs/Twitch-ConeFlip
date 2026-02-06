@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ConeFlip V2 Changelog</title>
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="manifest" href="/site.webmanifest">
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg-gradient: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #f0fdf4 100%);
+      --text-primary: #1f2937;
+      --text-secondary: #4b5563;
+      --text-tertiary: #6b7280;
+      --text-link: #3b82f6;
+      --card-bg: rgba(255, 255, 255, 0.4);
+      --card-border: rgba(255, 255, 255, 0.3);
+      --input-bg: rgba(255, 255, 255, 0.6);
+      --shadow-color: rgba(0, 0, 0, 0.1);
+    }
+    [data-theme='dark'] {
+      --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f1419 100%);
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-tertiary: #64748b;
+      --text-link: #60a5fa;
+      --card-bg: rgba(30, 41, 59, 0.4);
+      --card-border: rgba(148, 163, 184, 0.2);
+      --input-bg: rgba(30, 41, 59, 0.6);
+      --shadow-color: rgba(0, 0, 0, 0.3);
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-primary);
+      min-height: 100vh;
+      transition: all 0.3s ease;
+      padding-top: 80px; /* Space for navigation */
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .changelog-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 30px;
+      margin-bottom: 25px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 20px var(--shadow-color);
+      transition: all 0.3s ease;
+    }
+    .changelog-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px var(--shadow-color);
+    }
+
+    .card-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .version-badge {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+
+    .changelog-content {
+      line-height: 1.6;
+    }
+    .changelog-content h2 {
+      font-size: 1.3rem;
+      color: var(--text-primary);
+      margin: 25px 0 15px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--card-border);
+    }
+    .changelog-content h3 {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      margin: 20px 0 10px;
+      font-weight: 600;
+    }
+    .changelog-content ul {
+      margin: 10px 0 20px 20px;
+    }
+    .changelog-content li {
+      margin: 8px 0;
+      color: var(--text-secondary);
+    }
+    .changelog-content a {
+      color: var(--text-link);
+      text-decoration: none;
+    }
+    .changelog-content a:hover {
+      text-decoration: underline;
+    }
+    .changelog-content code {
+      background: var(--input-bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Monaco','Menlo','Ubuntu Mono',monospace;
+      font-size: 0.9rem;
+    }
+
+    /* Loading & error states */
+    .loading, .error {
+      text-align: center;
+      padding: 40px;
+      font-size: 1.1rem;
+    }
+    .loading { color: var(--text-secondary); }
+    .error { color: #ef4444; }
+
+    .last-updated {
+      color: var(--text-tertiary);
+      font-size: 0.9rem;
+      text-align: center;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid var(--card-border);
+    }
+
+    /* Tables */
+    .changelog-content table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1em 0;
+    }
+    .changelog-content th,
+    .changelog-content td {
+      border: 1px solid var(--card-border);
+      padding: 0.5em 1em;
+      text-align: center;
+      color: var(--text-secondary);
+    }
+    .changelog-content thead {
+      background: rgba(255,255,255,0.2);
+    }
+
+    /* Images */
+    .changelog-content img {
+      width: 80vw;
+      max-width: 600px !important;
+      display: block;
+      
+      height: auto;
+    }
+
+    /* Force single line breaks */
+    .changelog-content br {
+      line-height: 1.6;
+    }
+
+    @media (max-width: 768px) {
+      .container { padding: 15px; }
+      .changelog-card {
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+      body { padding-top: 100px; }
+    }
+  </style>
+
+  <!-- highlight.js styles -->
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css">
+</head>
+<body>
+  <div class="container">
+    <div class="changelog-card">
+      <h1 class="card-title">
+        Changelog
+        <span class="version-badge">Updates</span>
+      </h1>
+
+      <div id="changelog-content" class="changelog-content">
+        <div class="loading">Loading changelog...</div>
+      </div>
+      <div class="last-updated" id="last-updated"></div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/shared-components.js"></script>
+
+  <!-- Markdown-it & plugins -->
+  <script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/markdown-it-multimd-table/dist/markdown-it-multimd-table.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/markdown-it-emoji/dist/markdown-it-emoji.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/markdown-it-footnote/dist/markdown-it-footnote.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/markdown-it-abbr/dist/markdown-it-abbr.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/markdown-it-container/dist/markdown-it-container.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/markdown-it-task-lists/dist/markdown-it-task-lists.min.js"></script>
+
+  <!-- highlight.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+
+  <script>
+    const md = window.markdownit({
+      html: true,           // raw HTML
+      linkify: true,        // auto-link URLs
+      typographer: true,    // smart quotes, dashes
+      breaks: true          // single line breaks -> <br>
+    })
+    .use(window.markdownitMultimdTable, {
+      multiline: true,
+      rowspan:   true,
+      headerless:false
+    })
+    .use(window.markdownitEmoji)
+    .use(window.markdownitFootnote)
+    .use(window.markdownitAbbr)
+    .use(window.markdownitContainer, 'info')
+    .use(window.markdownitTaskLists, { enabled: true });
+
+    async function loadChangelog() {
+      try {
+        const res = await fetch('/changelog.md');
+        if (!res.ok) throw new Error(res.statusText);
+        const text = await res.text();
+        document.getElementById('changelog-content').innerHTML = md.render(text);
+        document.getElementById('last-updated').textContent =
+          `Last updated: ${new Date().toLocaleDateString()}`;
+        document.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
+      } catch (err) {
+        console.error(err);
+        document.getElementById('changelog-content').innerHTML =
+          '<div class="error">Failed to load changelog. Please try again later.</div>';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      new SharedComponents().init();
+      loadChangelog();
+    });
+  </script>
+</body>
+</html>

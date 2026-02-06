@@ -1,0 +1,37 @@
+{
+  "name": "sparkle",
+  "displayName": "Sparkle",
+  "type": "particle",
+  "author": "drippycatcs",
+  "description": "Twinkling golden sparkles",
+  "visuals": {
+    "type": "sparkle",
+    "shape": "sparkle",
+    "colors": ["#ffd700", "#ffec8b", "#fff8dc", "#ffffff", "#ffff99"],
+    "particleCount": 4,
+    "size": {
+      "min": 8,
+      "max": 14
+    },
+    "lifetime": 1000,
+    "emissionRate": 6,
+    "physics": {
+      "gravity": 0.1,
+      "velocityX": {
+        "min": -20,
+        "max": 20
+      },
+      "velocityY": {
+        "min": -15,
+        "max": 12
+      }
+    },
+    "effects": {
+      "glow": true,
+      "glowIntensity": 1.8,
+      "fadeOut": true,
+      "rotate": true,
+      "twinkle": true
+    }
+  }
+}

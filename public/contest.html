@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ConeFlip Contest</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/site.webmanifest">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Light mode colors */
+            --bg-gradient: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #f0fdf4 100%);
+            --text-primary: #1f2937;
+            --text-secondary: #4b5563;
+            --text-tertiary: #6b7280;
+            --text-link: #3b82f6;
+            --text-code: #1f2937;
+            --card-bg: rgba(255, 255, 255, 0.4);
+            --card-border: rgba(255, 255, 255, 0.3);
+            --input-bg: rgba(255, 255, 255, 0.6);
+            --input-border: rgba(156, 163, 175, 0.3);
+            --status-bg: rgba(255, 255, 255, 0.3);
+            --status-border: rgba(0, 0, 0, 0.1);
+            --pre-bg: rgba(255, 255, 255, 0.4);
+            --scrollbar-track: rgba(255, 255, 255, 0.2);
+            --scrollbar-thumb: #4b5563;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] {
+            /* Dark mode colors */
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f1419 100%);
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-tertiary: #94a3b8;
+            --text-link: #60a5fa;
+            --text-code: #e2e8f0;
+            --card-bg: rgba(30, 41, 59, 0.4);
+            --card-border: rgba(51, 65, 85, 0.5);
+            --input-bg: rgba(30, 41, 59, 0.6);
+            --input-border: rgba(71, 85, 105, 0.5);
+            --status-bg: rgba(30, 41, 59, 0.3);
+            --status-border: rgba(51, 65, 85, 0.3);
+            --pre-bg: rgba(15, 23, 42, 0.6);
+            --scrollbar-track: rgba(30, 41, 59, 0.3);
+            --scrollbar-thumb: #64748b;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+        }
+
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 25px;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 8px 32px var(--shadow-color);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px var(--shadow-color);
+        }
+
+        h1 {
+            color: var(--text-primary);
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 4px var(--shadow-color);
+            text-align: center;
+        }
+
+        h2 {
+            color: var(--text-primary);
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        h3 {
+            color: var(--text-primary);
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+        }
+
+        .contest-info {
+            background: var(--status-bg);
+            border: 1px solid var(--status-border);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .prize-banner {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: var(--text-link);
+            text-align: center;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .entries-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .entry-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 15px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .entry-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 50px var(--shadow-color);
+        }
+
+        .entry-image {
+            width: 100%;
+            height: 200px;
+            border-radius: 10px;
+            object-fit: contain;
+            margin-bottom: 15px;
+            border: 1px solid var(--card-border);
+            background: var(--card-bg);
+        }
+
+        .entry-details h4 {
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+
+        .entry-author {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+
+        .vote-section {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 15px;
+            border-top: 1px solid var(--card-border);
+        }
+
+        .vote-count {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .vote-btn {
+            background: var(--card-bg);
+            border: 2px solid var(--card-border);
+            color: var(--text-primary);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            backdrop-filter: blur(10px);
+        }
+
+        .vote-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px var(--shadow-color);
+            border-color: var(--text-link);
+        }
+
+        .vote-btn:disabled {
+            background: var(--status-bg);
+            border-color: var(--status-border);
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .vote-btn.voted {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: #10b981;
+            color: #10b981;
+        }
+
+        .no-entries {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .no-entries h3 {
+            margin-bottom: 10px;
+            color: var(--text-tertiary);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid;
+            display: none;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            border-left-color: #10b981;
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border-left-color: #ef4444;
+        }
+
+        .alert-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+            border-left-color: #f59e0b;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .entries-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .vote-section {
+                flex-direction: column;
+                gap: 10px;
+                align-items: stretch;
+            }
+            
+            .vote-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+     
+
+        <div id="alert" class="alert"></div>
+
+        <div class="card" id="contest-info-section">
+            <div class="loading">Loading contest information...</div>
+        </div>
+
+        <div class="card" id="entries-section" style="display: none;">
+            <h2>📋 Contest Entries</h2>
+            
+            <div id="entries-container">
+                <div class="loading">Loading contest entries...</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/shared-components.js"></script>
+    <script>
+        let contestData = null;
+        let contestEntries = [];
+        let userVotes = new Set();
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadContestInfo();
+            await loadContestEntries();
+        });
+
+        async function loadContestInfo() {
+            try {
+                const response = await fetch('/api/debug/contest/public');
+                const result = await response.json();
+                
+                if (result.data) {
+                    contestData = result.data;
+                    displayContestInfo();
+                } else {
+                    showContestNotActive();
+                }
+            } catch (error) {
+                console.error('Error loading contest info:', error);
+                showContestError();
+            }
+        }
+
+        function displayContestInfo() {
+            const infoSection = document.getElementById('contest-info-section');
+            
+            if (!contestData.enabled) {
+                showContestNotActive();
+                return;
+            }
+
+            infoSection.innerHTML = `
+                <div class="contest-info">
+                    <h2>Contest Information</h2>
+                    
+                    ${contestData.prize ? `
+                        <div class="prize-banner">
+                            Prize: ${contestData.prize}
+                        </div>
+                    ` : ''}
+                    
+                    ${contestData.description ? `
+                        <div style="line-height: 1.8; color: var(--text-secondary); margin-bottom: 20px;">
+                            ${contestData.description}
+                        </div>
+                    ` : ''}
+                    
+                    <h3>📝 How to participate:</h3>
+                    <ul style="color: var(--text-secondary); line-height: 1.8; margin-left: 20px;">
+                        <li>Submit your cone skin through the <a href="/skins/submissions" style="color: #3b82f6; text-decoration: none;">submissions page</a></li>
+                        <li>Check the "Submit for contest" option when uploading</li>
+                        <li>Your skin will appear here immediately for voting!</li>
+                        <li>Vote for your favorite contest entries (multiple votes possible)</li>
+                        <li>Admin approval is needed to add winning skins to the game</li>
+                    </ul>
+                    
+                    <div style="margin-top: 20px; padding: 15px; background: rgba(59, 130, 246, 0.1); border-radius: 10px; border-left: 4px solid #3b82f6;">
+                        <strong style="color: #3b82f6;">Contest Rules:</strong>
+                        <ul style="margin: 8px 0 0 20px; color: var(--text-secondary);">
+                            <li>Bypassing voting restrictions is not allowed</li>
+                            <li>Contest voting is separate from game approval</li>
+                            <li>Winners may be added to the game at admin discretion</li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('entries-section').style.display = 'block';
+        }
+
+        function showContestNotActive() {
+            const infoSection = document.getElementById('contest-info-section');
+            infoSection.innerHTML = `
+                <div class="contest-info">
+                    <h2>🚫 Contest Not Active</h2>
+                    <div style="text-align: center; padding: 40px;">
+                        <p style="font-size: 1.2rem; color: var(--text-secondary); margin-bottom: 20px;">
+                            There is currently no active contest.
+                        </p>
+                        <p style="color: var(--text-tertiary);">
+                            Check back later or follow the stream for announcements!
+                        </p>
+                    </div>
+                </div>
+            `;
+            document.getElementById('entries-section').style.display = 'none';
+        }
+
+        function showContestError() {
+            const infoSection = document.getElementById('contest-info-section');
+            infoSection.innerHTML = `
+                <div class="contest-info">
+                    <h2>❌ Error Loading Contest</h2>
+                    <div style="text-align: center; padding: 40px;">
+                        <p style="color: #ef4444;">
+                            Failed to load contest information. Please try refreshing the page.
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function loadContestEntries() {
+            if (!contestData || !contestData.enabled) {
+                return;
+            }
+
+            try {
+                const [submissionsResponse, votesResponse, userVotesResponse] = await Promise.all([
+                    fetch('/api/contest/entries'),
+                    fetch('/api/contest/votes'),
+                    fetch('/api/contest/user-votes', { credentials: 'include' })
+                ]);
+
+                const submissionsResult = await submissionsResponse.json();
+                const votesResult = await votesResponse.json();
+                const userVotesResult = await userVotesResponse.json();
+
+                if (submissionsResponse.ok && submissionsResult.data) {
+                    contestEntries = submissionsResult.data;
+                    const voteData = votesResponse.ok ? votesResult.data : [];
+                    const userVoteData = userVotesResponse.ok ? userVotesResult.data : [];
+                    
+                    // Track user's votes
+                    userVotes.clear();
+                    userVoteData.forEach(vote => userVotes.add(vote.submission_id));
+                    
+                    displayContestEntries(voteData);
+                } else {
+                    showNoEntries();
+                }
+            } catch (error) {
+                console.error('Error loading contest entries:', error);
+                showEntriesError();
+            }
+        }
+
+        function displayContestEntries(voteData) {
+            const container = document.getElementById('entries-container');
+            
+            if (contestEntries.length === 0) {
+                showNoEntries();
+                return;
+            }
+
+            // Create vote count map
+            const voteCounts = {};
+            voteData.forEach(vote => {
+                voteCounts[vote.submission_id] = vote.vote_count || 0;
+            });
+
+            // Sort entries by vote count (highest first)
+            const sortedEntries = [...contestEntries].sort((a, b) => {
+                const votesA = voteCounts[a.id] || 0;
+                const votesB = voteCounts[b.id] || 0;
+                return votesB - votesA;
+            });
+
+            let html = '<div class="entries-grid">';
+            
+            sortedEntries.forEach((entry, index) => {
+                const voteCount = voteCounts[entry.id] || 0;
+                const isWinning = index === 0 && voteCount > 0;
+                const hasVoted = userVotes.has(entry.id);
+                
+                html += `
+                    <div class="entry-card ${isWinning ? 'winning-entry' : ''}">
+                        ${isWinning ? '<div style="text-align: center; margin-bottom: 10px; color: #f59e0b; font-weight: bold;">🥇 Leading</div>' : ''}
+                        
+                        <img src="/api/skins/submissions/preview/${entry.id}" 
+                             class="entry-image" 
+                             alt="${entry.name}"
+                             onerror="handleImageError(this, '${entry.id}', '${entry.name}', '${entry.finalName || ''}', ${entry.isHolo || false}, '${entry.finalFilename || ''}', '${entry.status || 'pending'}')">
+                        
+                        <div class="entry-details">
+                            <h4>${entry.name}</h4>
+                            <div class="entry-author">by ${entry.author}</div>
+                            <div class="entry-status" style="margin-top: 5px;">
+                                <span style="
+                                    display: inline-block;
+                                    padding: 2px 8px;
+                                    border-radius: 12px;
+                                    font-size: 0.75rem;
+                                    font-weight: 500;
+                                    text-transform: uppercase;
+                                    background: rgba(59, 130, 246, 0.1);
+                                    color: #3b82f6;
+                                    border: 1px solid #3b82f6;
+                                ">
+                                    Contest Entry
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="vote-section">
+                            <div class="vote-count">
+                                <span>👍</span>
+                                <span><span id="vote-count-${entry.id}">${voteCount}</span> vote${voteCount !== 1 ? 's' : ''}</span>
+                            </div>
+                            
+                            <button class="vote-btn ${hasVoted ? 'voted' : ''}" 
+                                    id="vote-btn-${entry.id}"
+                                    onclick="${hasVoted ? 'unvoteEntry' : 'voteForEntry'}('${entry.id}')"
+                                    data-entry-id="${entry.id}">
+                                <span>${hasVoted ? '✅' : '🗳️'}</span>
+                                ${hasVoted ? 'Unvote' : 'Vote'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function showNoEntries() {
+            const container = document.getElementById('entries-container');
+            container.innerHTML = `
+                <div class="no-entries">
+                    <h3>No Contest Entries Yet</h3>
+                    <p>Contest entries will appear here once they're submitted and approved.</p>
+                    <p style="margin-top: 10px;">
+                        <a href="/skins/submissions" style="color: #3b82f6; text-decoration: none;">Submit your skin →</a>
+                    </p>
+                </div>
+            `;
+        }
+
+        function showEntriesError() {
+            const container = document.getElementById('entries-container');
+            container.innerHTML = `
+                <div class="no-entries">
+                    <h3>Error Loading Entries</h3>
+                    <p style="color: #ef4444;">Failed to load contest entries. Please try refreshing the page.</p>
+                </div>
+            `;
+        }
+
+        async function voteForEntry(entryId) {
+            const button = document.getElementById(`vote-btn-${entryId}`);
+            const originalText = button.innerHTML;
+            
+            // Disable button and show loading
+            button.disabled = true;
+            button.innerHTML = '<span>⏳</span> Voting...';
+            
+            try {
+                const response = await fetch('/api/contest/vote', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ submissionId: entryId })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    // Update vote count
+                    const countElement = document.getElementById(`vote-count-${entryId}`);
+                    const currentCount = parseInt(countElement.textContent);
+                    countElement.textContent = currentCount + 1;
+                    
+                    // Mark as voted
+                    button.innerHTML = '<span>✅</span> Unvote';
+                    button.classList.add('voted');
+                    button.onclick = () => unvoteEntry(entryId);
+                    userVotes.add(entryId);
+                    
+                    showAlert('Vote submitted successfully!', 'success');
+                } else if (response.status === 401) {
+                    // Not authenticated - show login prompt
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                    showLoginPrompt();
+                } else {
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                    showAlert(result.message || 'Failed to submit vote', 'error');
+                }
+            } catch (error) {
+                console.error('Error voting:', error);
+                button.innerHTML = originalText;
+                button.disabled = false;
+                showAlert('Network error. Please try again.', 'error');
+            } finally {
+                button.disabled = false;
+            }
+        }
+
+        async function unvoteEntry(entryId) {
+            const button = document.getElementById(`vote-btn-${entryId}`);
+            const originalText = button.innerHTML;
+            
+            // Disable button and show loading
+            button.disabled = true;
+            button.innerHTML = '<span>⏳</span> Removing vote...';
+            
+            try {
+                const response = await fetch('/api/contest/unvote', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ submissionId: entryId })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    // Update vote count
+                    const countElement = document.getElementById(`vote-count-${entryId}`);
+                    const currentCount = parseInt(countElement.textContent);
+                    countElement.textContent = Math.max(0, currentCount - 1);
+                    
+                    // Mark as not voted
+                    button.innerHTML = '<span>🗳️</span> Vote';
+                    button.classList.remove('voted');
+                    button.onclick = () => voteForEntry(entryId);
+                    userVotes.delete(entryId);
+                    
+                    showAlert('Vote removed successfully!', 'success');
+                } else if (response.status === 401) {
+                    // Not authenticated - show login prompt
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                    showLoginPrompt();
+                } else {
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                    showAlert(result.message || 'Failed to remove vote', 'error');
+                }
+            } catch (error) {
+                console.error('Error removing vote:', error);
+                button.innerHTML = originalText;
+                button.disabled = false;
+                showAlert('Network error. Please try again.', 'error');
+            } finally {
+                button.disabled = false;
+            }
+        }
+
+        function showAlert(message, type) {
+            const alert = document.getElementById('alert');
+            alert.textContent = message;
+            alert.className = `alert alert-${type}`;
+            alert.style.display = 'block';
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 5000);
+        }
+
+        // Handle image loading errors with smart fallbacks
+        function handleImageError(img, entryId, entryName, finalName, isHolo, finalFilename, status) {
+            console.log('🔍 Image error for:', {entryId, entryName, finalName, isHolo, finalFilename, status});
+            
+            // Remove the error handler to prevent infinite loops
+            img.onerror = null;
+            
+            // Try different fallback paths in order
+            const fallbackPaths = [];
+            
+            // If we have a finalFilename (full filename with prefix), try that first
+            if (finalFilename && finalFilename !== '') {
+                fallbackPaths.push(`/skins/${finalFilename}`);
+                console.log('📁 Added finalFilename path:', `/skins/${finalFilename}`);
+            }
+            
+            // If we have a finalName, try the approved skin path
+            if (finalName && finalName !== '') {
+                // Check if finalName already includes prefix and extension
+                if (finalName.includes('.')) {
+                    // finalName already has extension, use as-is
+                    fallbackPaths.push(`/skins/${finalName}`);
+                    console.log('📁 Added finalName with extension:', `/skins/${finalName}`);
+                } else {
+                    // Add prefix and extension
+                    const prefix = isHolo ? 'holo_' : 'cone_';
+                    fallbackPaths.push(`/skins/${prefix}${finalName}.png`);
+                    console.log('📁 Added finalName with prefix:', `/skins/${prefix}${finalName}.png`);
+                }
+            }
+            
+            // Try paths based on the original name
+            const cleanName = entryName.toLowerCase().replace(/[^a-z0-9]/g, '_');
+            const prefix = isHolo ? 'holo_' : 'cone_';
+            
+            // Try the exact name as provided (in case it already has prefix)
+            if (entryName.startsWith('cone_') || entryName.startsWith('holo_')) {
+                fallbackPaths.push(`/skins/${entryName}.png`);
+                console.log('📁 Added entryName (has prefix):', `/skins/${entryName}.png`);
+            } else {
+                fallbackPaths.push(`/skins/${prefix}${cleanName}.png`);
+                console.log('📁 Added cleanName with prefix:', `/skins/${prefix}${cleanName}.png`);
+            }
+            
+            // Try without prefix as last resort
+            fallbackPaths.push(`/skins/${cleanName}.png`);
+            console.log('📁 Added cleanName without prefix:', `/skins/${cleanName}.png`);
+            
+            // Remove duplicates
+            const uniquePaths = [...new Set(fallbackPaths)];
+            console.log('🎯 Final fallback paths:', uniquePaths);
+            
+            // Try the first fallback path
+            tryNextFallback(img, uniquePaths, 0);
+        }
+        
+        function tryNextFallback(img, paths, index) {
+            if (index >= paths.length) {
+                // All fallbacks failed, hide the image
+                console.log('❌ All fallback paths failed, hiding image');
+                img.style.display = 'none';
+                return;
+            }
+            
+            console.log(`🔄 Trying path ${index + 1}/${paths.length}:`, paths[index]);
+            
+            // Set up error handler for next fallback
+            img.onerror = () => {
+                console.log('❌ Failed:', paths[index]);
+                tryNextFallback(img, paths, index + 1);
+            };
+            
+            // Set up success handler
+            img.onload = () => {
+                console.log('✅ Success:', paths[index]);
+            };
+            
+            // Try the next path
+            img.src = paths[index];
+        }
+
+        function showLoginPrompt() {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 2000;
+            `;
+            
+            const modalContent = document.createElement('div');
+            modalContent.style.cssText = `
+                background: var(--card-bg, white);
+                padding: 24px;
+                border-radius: 12px;
+                text-align: center;
+                max-width: 400px;
+                margin: 20px;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            `;
+            
+            modalContent.innerHTML = `
+                <h3 style="margin: 0 0 16px 0; color: var(--text-primary);">Login Required</h3>
+                <p style="margin: 0 0 20px 0; color: var(--text-secondary);">You need to login with Twitch to vote in contests.</p>
+                <div style="display: flex; gap: 12px; justify-content: center;">
+                    <button onclick="window.location.href='/auth/login'" style="
+                        background: #9146ff;
+                        color: white;
+                        border: none;
+                        padding: 10px 20px;
+                        border-radius: 6px;
+                        cursor: pointer;
+                        font-weight: 500;
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                    ">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z"/>
+                        </svg>
+                        Login with Twitch
+                    </button>
+                    <button onclick="this.closest('.login-modal').remove()" style="
+                        background: var(--input-bg, #f3f4f6);
+                        color: var(--text-secondary);
+                        border: 1px solid var(--input-border, #d1d5db);
+                        padding: 10px 20px;
+                        border-radius: 6px;
+                        cursor: pointer;
+                        font-weight: 500;
+                    ">Cancel</button>
+                </div>
+            `;
+            
+            modal.className = 'login-modal';
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
+            
+            // Close modal when clicking outside
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
+        }
+
+        // Add some special styling for winning entry
+        const style = document.createElement('style');
+        style.textContent = `
+            .winning-entry {
+                border: 2px solid #f59e0b !important;
+                box-shadow: 0 0 20px rgba(245, 158, 11, 0.3) !important;
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Make functions globally accessible
+        window.voteForEntry = voteForEntry;
+        window.unvoteEntry = unvoteEntry;
+        window.showLoginPrompt = showLoginPrompt;
+    </script>
+</body>
+</html> 

@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Duru+Sans&family=Manrope:wght@200..800&display=swap" rel="stylesheet">
+  <title>Cone Unboxing Simulator</title>
+  <style>
+    body {
+      font-family: 'Duru Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      background: transparent;
+      overflow: hidden;
+      height: 170vh;
+    display: flex
+;
+    align-items: center;
+    justify-content: center;
+
+
+    }
+    /* Overlay container positioned 15% from the bottom, centered, with fade in/out */
+    #unboxOverlay {
+      display: none;
+
+      width: 70vw;
+      transform: scale(0.6);
+      max-width: 1000px;
+      z-index: 1000;
+      transition: opacity 0.5s ease;
+      opacity: 0;
+    }
+    #unboxOverlay.show {
+      opacity: 1;
+    }
+    /* Main container for unbox animation and text */
+    #unboxContainer {
+     
+ 
+      padding: 20px;
+      border-radius: 10px;
+
+      width: 100%;
+      max-width: 1000px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    /* Header and footer areas have fixed height to reserve space */
+    #unboxHeader, #unboxFooter {
+      width: 100%;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #unboxUserName {
+      font-size: 35px;
+      font-weight: bold;
+      color: #fff;
+      text-shadow: 1px 1px 2px #000;
+    }
+    #result {
+      font-size: 35px;
+      font-weight: bold;
+      color: #fff;
+      text-shadow: 1px 1px 3px #000;
+    }
+    /* Container for the animation itself */
+    #animationContainer {
+      width: 100%;
+      height: 200px;
+      position: relative;
+    }
+    #caseContainer {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+  
+     
+      border-radius: 5px;
+      position: relative;
+      margin: 0 auto;
+    }
+    #itemRibbon {
+      display: flex;
+      position: absolute;
+      height: 100%;
+    }
+    .item {
+      width: 150px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-color: rgba(51, 51, 51, 0.5);
+      backdrop-filter: blur(10px);
+      color: white;
+      margin: 5px;
+      border-radius: 5px;
+      padding-bottom: 5px;
+      position: relative;
+    }
+    .item img {
+      max-width: 100px;
+      max-height: 100px;
+    }
+    
+    .item-holo-container {
+      position: relative;
+      width: 100px;
+      height: 100px;
+    }
+    
+    .item-holo-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100px;
+      height: 100px;
+      background-size: 400%;
+      background-position: center;
+      background-repeat: no-repeat;
+      -webkit-mask-image: url(skins/cone_mask.png);
+      mask-image: url(skins/cone_mask.png);
+      -webkit-mask-repeat: no-repeat;
+      mask-repeat: no-repeat;
+      -webkit-mask-size: contain;
+      mask-size: contain;
+      -webkit-mask-position: center center;
+      mask-position: center center;
+    }
+    
+    .item-holo-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100px;
+      height: 100px;
+    }
+    .item span {
+      font-size: 14px;
+      margin-top: 5px;
+      font-weight: bold;
+    }
+    .rarity-line {
+      width: 100%;
+      height: 5px;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      border-radius: 0 0 5px 5px;
+    }
+    #pointer {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 4px;
+      height: 100%;
+      background-color: #ff5500;
+      transform: translateX(-50%);
+      z-index: 1010;
+    }
+  </style>
+</head>
+<body>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <!-- Overlay container with fixed header, animation area, and footer -->
+  <div id="unboxOverlay">
+    <div id="unboxContainer">
+      <div id="unboxHeader">
+        <span id="unboxUserName"></span>
+      </div>
+      <div id="animationContainer">
+        <div id="caseContainer">
+          <div id="pointer"></div>
+          <div id="itemRibbon"></div>
+        </div>
+      </div>
+      <div id="unboxFooter">
+        <span id="result"></span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Socket.io connection
+    const socket = io();
+    // Queue system for unbox animations
+    const unboxQueue = [];
+    let isAnimating = false;
+    
+    // Socket connected (no authentication needed for unboxfinished events)
+    socket.on('connect', () => {
+      console.log('DEBUG: Socket connected to unbox page');
+      console.log('DEBUG: Socket ID:', socket.id);
+      console.log('DEBUG: Socket connected:', socket.connected);
+    });
+
+    // Handle socket disconnection
+    socket.on('disconnect', (reason) => {
+      console.log('DEBUG: Socket disconnected:', reason);
+    });
+
+    // Handle reconnection
+    socket.on('reconnect', (attemptNumber) => {
+      console.log('DEBUG: Socket reconnected after', attemptNumber, 'attempts');
+      // Reload cone configuration when reconnecting (in case server restarted)
+      console.log('DEBUG: Reloading cone configuration after reconnection...');
+      loadConesConfigurationAsync(); // Use async version for consistency
+    });
+
+    // Handle reconnection attempts
+    socket.on('reconnect_attempt', (attemptNumber) => {
+      console.log('DEBUG: Socket reconnection attempt', attemptNumber);
+    });
+
+    // Handle reconnection errors
+    socket.on('reconnect_error', (error) => {
+      console.log('DEBUG: Socket reconnection error:', error);
+    });
+    
+    socket.on('authSuccess', () => {
+      console.log('DEBUG: Socket authenticated successfully');
+    });
+    
+    socket.on('authError', (data) => {
+      console.error('DEBUG: Socket authentication failed:', data);
+    });
+    
+    // Listen for the 'unboxSkinAnim' event which sends skin, userName, and message.
+    socket.on('unboxSkinAnim', (skin, userName, message) => {
+      console.log('DEBUG: ===== UNBOX EVENT RECEIVED =====');
+      console.log('DEBUG: Socket connected:', socket.connected);
+      console.log('DEBUG: Socket ID:', socket.id);
+      console.log('DEBUG: Event data:', { skin, userName, message });
+      console.log('DEBUG: Cones array length:', cones.length);
+      console.log('DEBUG: Available cone names:', cones.map(c => c.name));
+      console.log('DEBUG: ===== QUEUEING UNBOX =====');
+      queueUnbox(skin, userName, message);
+    });
+
+
+    socket.on('restart', () => {
+            location.reload(); // This reloads the page to restart the game
+    });
+
+    // Simple force refresh event - no bullshit, just reload
+    socket.on('forceRefresh', (data) => {
+      console.log('🔄 Force refresh signal received - reloading page immediately');
+      console.log('Refresh reason:', data.message);
+      location.reload();
+    });
+
+    // Flag to track if a refresh is pending
+    let pendingRefresh = false;
+
+    // Listen for configuration refresh events
+    socket.on('unboxConfigRefresh', () => {
+      console.log('DEBUG: ===== UNBOX CONFIG REFRESH EVENT =====');
+      console.log('DEBUG: Current animation state - isAnimating:', isAnimating, 'queueLength:', unboxQueue.length);
+      console.log('DEBUG: Current cones count:', cones.length);
+      console.log('DEBUG: Current cones:', cones.map(c => c.name));
+      
+      if (isAnimating || unboxQueue.length > 0) {
+        console.log('DEBUG: 🔄 Animation in progress or queue not empty, deferring refresh...');
+        pendingRefresh = true;
+      } else {
+        console.log('DEBUG: ✅ Safe to reload configuration immediately');
+        loadConesConfigurationAsync().then(() => {
+          console.log('DEBUG: ✅ Unbox config refresh completed. New cones:', cones.map(c => c.name));
+        });
+      }
+    });
+
+    // Also listen for general skin refresh events (for deletions/edits)
+    socket.on('skinRefresh', () => {
+      console.log('DEBUG: ===== SKIN REFRESH EVENT =====');
+      console.log('DEBUG: Current animation state - isAnimating:', isAnimating, 'queueLength:', unboxQueue.length);
+      console.log('DEBUG: Current cones count:', cones.length);
+      console.log('DEBUG: Current cones:', cones.map(c => c.name));
+      
+      if (isAnimating || unboxQueue.length > 0) {
+        console.log('DEBUG: 🔄 Animation in progress or queue not empty, deferring refresh...');
+        pendingRefresh = true;
+      } else {
+        console.log('DEBUG: ✅ Safe to reload configuration immediately');
+        loadConesConfigurationAsync().then(() => {
+          console.log('DEBUG: ✅ Skin refresh completed. New cones:', cones.map(c => c.name));
+        });
+      }
+    });
+
+    // Function to check and apply pending refresh
+    function checkPendingRefresh() {
+      if (pendingRefresh && !isAnimating && unboxQueue.length === 0) {
+        console.log('DEBUG: ===== APPLYING PENDING REFRESH =====');
+        console.log('DEBUG: Clearing pending refresh flag and reloading configuration...');
+        console.log('DEBUG: Current cones before pending refresh:', cones.map(c => c.name));
+        pendingRefresh = false;
+        loadConesConfigurationAsync().then(() => {
+          console.log('DEBUG: ✅ Pending refresh completed. New cones:', cones.map(c => c.name));
+        });
+      } else if (pendingRefresh) {
+        console.log('DEBUG: Pending refresh exists but conditions not met - isAnimating:', isAnimating, 'queueLength:', unboxQueue.length);
+      }
+    }
+
+    // CS:GO-like rarity colors - updated for new tier system
+    const rarityColors = {
+      "mil-spec": "#4A69FF",
+      restricted: "#8847ff",
+      classified: "#d32ce6",
+      covert: "#eb4b4b",
+      gold: "#FFA500"  // Orange for gold tier
+    };
+
+    // Fixed tier percentages
+    const tierOdds = {
+      'gold': 2.4,
+      'covert': 2.4,
+      'classified': 6.8,
+      'restricted': 18,
+      'mil-spec': 68.4
+    };
+
+    // Assign rarity based on unboxWeight using new tier system.
+    function assignRarity(weight) {
+      if (weight >= 30) return { label: "Mil-Spec", color: rarityColors["mil-spec"], tier: "mil-spec" };
+      if (weight >= 15) return { label: "Restricted", color: rarityColors.restricted, tier: "restricted" };
+      if (weight >= 9)  return { label: "Classified", color: rarityColors.classified, tier: "classified" };
+      if (weight >= 5)  return { label: "Covert", color: rarityColors.covert, tier: "covert" };
+      return { label: "Gold", color: rarityColors.gold, tier: "gold" };
+    }
+
+    // Global array to hold unboxable cones.
+    let cones = [];
+
+    // Function to load cone configuration
+    function loadConesConfiguration() {
+      console.log('DEBUG: Starting configuration reload...');
+      // Clear existing cone data first to prevent stale references
+      cones = [];
+      
+      fetch('/skins/config.json?' + Date.now()) // Add cache buster
+        .then(response => response.json())
+        .then(data => {
+          console.log('DEBUG: Raw config.json data:', data);
+          
+          // Group skins by tier first
+          const skinsByTier = {
+            'gold': [],
+            'covert': [],
+            'classified': [],
+            'restricted': [],
+            'mil-spec': []
+          };
+
+          // Filter and group unboxable skins by tier
+          const unboxableSkins = data.filter(cone => cone.canUnbox);
+          for (const cone of unboxableSkins) {
+            const rarity = assignRarity(cone.unboxWeight || 0);
+            if (skinsByTier[rarity.tier]) {
+              skinsByTier[rarity.tier].push(cone);
+            }
+          }
+
+          // Calculate individual skin odds using new tier system
+          cones = [];
+          for (const [tier, tierPercentage] of Object.entries(tierOdds)) {
+            const tierSkins = skinsByTier[tier] || [];
+            if (tierSkins.length === 0) continue;
+
+            // Calculate total weight within this tier
+            const totalTierWeight = tierSkins.reduce((sum, skin) => sum + (skin.unboxWeight || 0), 0);
+
+            for (const skin of tierSkins) {
+              const rarity = assignRarity(skin.unboxWeight || 0);
+              let skinProbability;
+              
+              if (totalTierWeight === 0) {
+                // If no weights in tier, equal distribution
+                skinProbability = tierPercentage / tierSkins.length;
+              } else {
+                // Weight-based distribution within tier
+                const skinWeightRatio = (skin.unboxWeight || 0) / totalTierWeight;
+                skinProbability = tierPercentage * skinWeightRatio;
+              }
+
+              cones.push({
+                ...skin,
+                rarityLabel: rarity.label,
+                rarityColor: rarity.color,
+                imageUrl: `/skins/${skin.visuals}`,
+                tier: rarity.tier,
+                tierOdds: tierPercentage,
+                actualOdds: skinProbability
+              });
+            }
+          }
+          // Add special trail unbox item (gold tier)
+          cones.push({
+            name: '__trail__',
+            visuals: 'trail_special_item.png',
+            rarityLabel: 'Gold',
+            rarityColor: rarityColors.gold,
+            imageUrl: '/trail_special_item.png',
+            tier: 'gold',
+            tierOdds: tierOdds.gold,
+            actualOdds: tierOdds.gold,
+            isTrail: true
+          });
+
+          console.log('DEBUG: Processed cones array:', cones);
+          console.log('DEBUG: Cone names:', cones.map(c => c.name));
+          console.log('DEBUG: Available cone files:', cones.map(c => c.imageUrl));
+          console.log('DEBUG: Configuration reloaded successfully');
+        })
+        .catch(error => {
+          console.error('Error loading JSON:', error);
+          // Ensure cones array is cleared on error too
+          cones = [];
+        });
+    }
+
+    // Async version for use in unbox animation
+    async function loadConesConfigurationAsync() {
+      try {
+        console.log('DEBUG: Starting async configuration reload...');
+        // Clear existing cone data first to prevent stale references
+        cones = [];
+        
+        const response = await fetch('/skins/config.json?' + Date.now());
+        const data = await response.json();
+        console.log('DEBUG: Raw config.json data (async):', data);
+        
+        // Group skins by tier first
+        const skinsByTier = {
+          'gold': [],
+          'covert': [],
+          'classified': [],
+          'restricted': [],
+          'mil-spec': []
+        };
+
+        // Filter and group unboxable skins by tier
+        const unboxableSkins = data.filter(cone => cone.canUnbox);
+        for (const cone of unboxableSkins) {
+          const rarity = assignRarity(cone.unboxWeight || 0);
+          if (skinsByTier[rarity.tier]) {
+            skinsByTier[rarity.tier].push(cone);
+          }
+        }
+
+        // Calculate individual skin odds using new tier system
+        cones = [];
+        for (const [tier, tierPercentage] of Object.entries(tierOdds)) {
+          const tierSkins = skinsByTier[tier] || [];
+          if (tierSkins.length === 0) continue;
+
+          // Calculate total weight within this tier
+          const totalTierWeight = tierSkins.reduce((sum, skin) => sum + (skin.unboxWeight || 0), 0);
+
+          for (const skin of tierSkins) {
+            const rarity = assignRarity(skin.unboxWeight || 0);
+            let skinProbability;
+            
+            if (totalTierWeight === 0) {
+              // If no weights in tier, equal distribution
+              skinProbability = tierPercentage / tierSkins.length;
+            } else {
+              // Weight-based distribution within tier
+              const skinWeightRatio = (skin.unboxWeight || 0) / totalTierWeight;
+              skinProbability = tierPercentage * skinWeightRatio;
+            }
+
+            cones.push({
+              ...skin,
+              rarityLabel: rarity.label,
+              rarityColor: rarity.color,
+              imageUrl: `/skins/${skin.visuals}`,
+              tier: rarity.tier,
+              tierOdds: tierPercentage,
+              actualOdds: skinProbability
+            });
+          }
+        }
+        // Add special trail unbox item (gold tier)
+        cones.push({
+          name: '__trail__',
+          visuals: 'trail_special_item.png',
+          rarityLabel: 'Gold',
+          rarityColor: rarityColors.gold,
+          imageUrl: '/trail_special_item.png',
+          tier: 'gold',
+          tierOdds: tierOdds.gold,
+          actualOdds: tierOdds.gold,
+          isTrail: true
+        });
+
+        console.log('DEBUG: Processed cones array (async):', cones);
+        console.log('DEBUG: Cone names (async):', cones.map(c => c.name));
+        console.log('DEBUG: Available cone files (async):', cones.map(c => c.imageUrl));
+        console.log('DEBUG: Configuration reloaded successfully (async)');
+      } catch (error) {
+        console.error('Error loading JSON (async):', error);
+        // Ensure cones array is cleared on error too
+        cones = [];
+      }
+    }
+
+    // Initial load of cone configuration
+    loadConesConfiguration();
+
+    // Select a cone using the new tier-based system for filler items.
+    function getWeightedRandomCone() {
+      // Step 1: Roll for tier based on fixed percentages
+      const tierRoll = Math.random() * 100;
+      let cumulativeOdds = 0;
+      let selectedTier = null;
+
+      for (const [tier, percentage] of Object.entries(tierOdds)) {
+        cumulativeOdds += percentage;
+        if (tierRoll <= cumulativeOdds) {
+          selectedTier = tier;
+          break;
+        }
+      }
+
+      // Step 2: Get skins in the selected tier (exclude trail from fillers)
+      const tierCones = cones.filter(cone => cone.tier === selectedTier && !cone.isTrail);
+
+      if (tierCones.length === 0) {
+        // Fallback to mil-spec tier if selected tier has no skins
+        const fallbackCones = cones.filter(cone => cone.tier === 'mil-spec' && !cone.isTrail);
+        if (fallbackCones.length === 0) {
+          // Ultimate fallback to any non-trail cone
+          return cones.find(c => !c.isTrail) || cones[0] || null;
+        }
+        return selectFromTierCones(fallbackCones);
+      }
+
+      // Step 3: Select specific skin within tier using weights
+      return selectFromTierCones(tierCones);
+    }
+
+    // Helper function to select from cones within a specific tier
+    function selectFromTierCones(tierCones) {
+      if (tierCones.length === 1) {
+        return tierCones[0];
+      }
+
+      // Use weighted selection within the tier
+      const totalWeight = tierCones.reduce((sum, cone) => sum + (cone.unboxWeight || 0), 0);
+      
+      if (totalWeight === 0) {
+        // If no weights, select randomly
+        const randomIndex = Math.floor(Math.random() * tierCones.length);
+        return tierCones[randomIndex];
+      }
+
+      let random = Math.random() * totalWeight;
+      
+      for (const cone of tierCones) {
+        random -= (cone.unboxWeight || 0);
+        if (random <= 0) {
+          return cone;
+        }
+      }
+      
+      // Fallback to last cone in tier
+      return tierCones[tierCones.length - 1];
+    }
+
+    // Returns a weighted random cone not matching lastConeName.
+    function getNonDuplicateWeightedRandomCone(lastConeName) {
+      let cone;
+      let attempts = 0;
+      do {
+        cone = getWeightedRandomCone();
+        attempts++;
+      } while (lastConeName && cone.name.toLowerCase() === lastConeName.toLowerCase() && attempts < 10);
+      return cone;
+    }
+
+    // Generate an array of filler cones ensuring no two consecutive items share the same name.
+    function generateFillerItems(count, initialLastName) {
+      const fillerItems = [];
+      let lastName = initialLastName;
+      for (let i = 0; i < count; i++) {
+        const fillerCone = getNonDuplicateWeightedRandomCone(lastName);
+        fillerItems.push(fillerCone);
+        lastName = fillerCone.name;
+      }
+      return fillerItems;
+    }
+
+    // Create an element for a single cone item.
+    function createItemElement(cone) {
+      const div = document.createElement("div");
+      div.className = "item";
+      div.setAttribute("data-name", cone.name);
+
+      let content = '';
+      if (cone.isTrail) {
+        // Trail special item
+        content = `<img src="/trail_special_item.png" alt="Trail" style="object-fit: contain;">`;
+      } else if (cone.visuals.includes('holo_doppler')) {
+        // Special handling for doppler skins with random phases
+        const phase = Math.floor(Math.random() * 4) + 1;
+        const dopplerUrl = `/skins/holo_doppler_${phase}.jpg`;
+        content = `
+          <div class="item-holo-container">
+            <div class="item-holo-bg" style="background-image: url('${dopplerUrl}')"></div>
+            <img class="item-holo-overlay" src="/skins/transparent.png" alt="${cone.name}">
+          </div>
+        `;
+      } else if (cone.visuals.startsWith('holo_')) {
+        // Handle other holo skins
+        content = `
+          <div class="item-holo-container">
+            <div class="item-holo-bg" style="background-image: url('${cone.imageUrl}')"></div>
+            <img class="item-holo-overlay" src="/skins/transparent.png" alt="${cone.name}">
+          </div>
+        `;
+      } else {
+        // Regular cone skins
+        content = `<img src="${cone.imageUrl}" alt="${cone.name}">`;
+      }
+
+      div.innerHTML = `
+        ${content}
+        <div class="rarity-line" style="background-color: ${cone.rarityColor}"></div>
+      `;
+      return div;
+    }
+
+    // Generate the item ribbon: 20 filler items, the winning cone, then 5 filler items.
+    function generateRibbon(winningCone) {
+      const itemRibbon = document.getElementById("itemRibbon");
+      itemRibbon.innerHTML = "";
+
+      // Generate 20 filler items before the winning cone.
+      const fillerBefore = generateFillerItems(20, null);
+      if (fillerBefore.length > 0 && fillerBefore[fillerBefore.length - 1].name.toLowerCase() === winningCone.name.toLowerCase()) {
+        let previousName = fillerBefore.length > 1 ? fillerBefore[fillerBefore.length - 2].name : null;
+        let newCone = getNonDuplicateWeightedRandomCone(previousName);
+        while (newCone.name.toLowerCase() === winningCone.name.toLowerCase()) {
+          newCone = getNonDuplicateWeightedRandomCone(previousName);
+        }
+        fillerBefore[fillerBefore.length - 1] = newCone;
+      }
+
+      // Generate 5 filler items after the winning cone.
+      const fillerAfter = generateFillerItems(5, winningCone.name);
+
+      fillerBefore.forEach(cone => itemRibbon.appendChild(createItemElement(cone)));
+      itemRibbon.appendChild(createItemElement(winningCone));
+      fillerAfter.forEach(cone => itemRibbon.appendChild(createItemElement(cone)));
+    }
+
+    // Fade out and hide the overlay, then process the next item in the queue.
+    function resetUI() {
+      const overlay = document.getElementById("unboxOverlay");
+      const itemRibbon = document.getElementById("itemRibbon");
+      const resultSpan = document.getElementById("result");
+      const userNameSpan = document.getElementById("unboxUserName");
+
+      itemRibbon.style.transition = "";
+      itemRibbon.style.transform = "";
+      itemRibbon.innerHTML = "";
+      resultSpan.textContent = "";
+      userNameSpan.textContent = "";
+
+      overlay.classList.remove("show");
+      setTimeout(() => {
+        overlay.style.display = "none";
+        isAnimating = false;
+        checkPendingRefresh(); // Check if we need to refresh configuration
+        processQueue(); // processQueue handles its own async operations
+      }, 500);
+    }
+
+    // Queue an unbox request.
+    function queueUnbox(skin, userName, message) {
+      console.log('DEBUG: Queueing unbox request:', { skin, userName, message });
+      console.log('DEBUG: Queue length before adding:', unboxQueue.length);
+      unboxQueue.push({ skin, userName, message });
+      console.log('DEBUG: Queue length after adding:', unboxQueue.length);
+      processQueue(); // processQueue handles its own async operations
+    }
+
+    // Process the next unbox in the queue if not currently animating.
+    async function processQueue() {
+      console.log('DEBUG: ===== PROCESSING QUEUE =====');
+      console.log('DEBUG: isAnimating:', isAnimating, 'queueLength:', unboxQueue.length);
+      
+      if (!isAnimating && unboxQueue.length > 0) {
+        const next = unboxQueue.shift();
+        console.log('DEBUG: Processing next unbox from queue:', next);
+        console.log('DEBUG: Remaining queue length:', unboxQueue.length);
+        isAnimating = true;
+        await unboxAnimation(next.skin, next.userName, next.message);
+      } else {
+        if (isAnimating) {
+          console.log('DEBUG: Cannot process queue - animation in progress');
+        } else if (unboxQueue.length === 0) {
+          console.log('DEBUG: Queue is empty - nothing to process');
+        }
+      }
+    }
+
+    // Main unbox animation function with auto-refresh capability
+    async function unboxAnimation(skinName, userName, message) {
+      console.log('DEBUG: ===== STARTING UNBOX ANIMATION =====');
+      console.log('DEBUG: Requested skin:', skinName);
+      console.log('DEBUG: Player:', userName);
+      console.log('DEBUG: Current cones count:', cones.length);
+      console.log('DEBUG: Current cone names:', cones.map(c => c.name));
+      
+      // ALWAYS refresh config before EVERY unbox to catch deletions and additions
+      console.log('🔄 FORCE REFRESHING CONFIG BEFORE UNBOX');
+      await loadConesConfigurationAsync();
+      console.log('🔄 Config refresh completed. Updated cones:', cones.map(c => c.name));
+      
+      // Now look for the winning cone
+      let winningCone = cones.find(cone => cone.name.toLowerCase() === skinName.toLowerCase());
+      console.log('DEBUG: Looking for winning cone after refresh:', winningCone);
+      
+      if (!winningCone) {
+        console.log('DEBUG: ⚠️ Skin still not found after config refresh');
+        console.log('DEBUG: Looking for skin:', skinName);
+        console.log('DEBUG: Available cones after refresh:', cones.map(c => c.name));
+      }
+      
+      if (cones.length === 0) {
+        console.error("DEBUG: ===== NO CONES AVAILABLE =====");
+        console.error("Cones still not loaded after refresh. Configuration may be invalid or all skins deleted.");
+        
+        // Clear the animation state and process next in queue
+        isAnimating = false;
+        processQueue(); // Try processing next item in queue if any
+        return;
+      }
+      
+      if (!winningCone) {
+        console.error('DEBUG: ===== SKIN NOT FOUND AFTER RELOAD =====');
+        console.error(`Requested skin: "${skinName}"`);
+        console.error('Available cones after reload:', cones.map(c => c.name));
+        console.error('Available cone files after reload:', cones.map(c => c.imageUrl));
+        console.error('This skin may have been deleted or is not unboxable');
+        
+        // Clear the animation state and process next in queue
+        isAnimating = false;
+        processQueue(); // Try processing next item in queue if any
+        return;
+      }
+
+      const overlay = document.getElementById("unboxOverlay");
+      overlay.style.display = "block";
+      setTimeout(() => {
+        overlay.classList.add("show");
+      }, 10);
+
+      // Set unboxer's name in the header (space is pre-allocated)
+      document.getElementById("unboxUserName").textContent = `Unboxing by: ${userName}`;
+      generateRibbon(winningCone);
+
+              // Odds are now calculated server-side using the new tier-based system
+        // Individual skin odds are: tier probability × (skin weight / tier total weight)
+
+      // Wait 1 second after the overlay fades in before starting the roll animation.
+      setTimeout(() => {
+        const containerWidth = document.getElementById("caseContainer").offsetWidth;
+        const itemWidth = 160; // Approximate width per item (including margins)
+        const winningIndex = 20;
+        const pointerOffset = containerWidth / 2;
+        const winningConeCenter = itemWidth * winningIndex + itemWidth / 2;
+        const winningPosition = pointerOffset - winningConeCenter;
+
+        const itemRibbon = document.getElementById("itemRibbon");
+        itemRibbon.style.transition = "transform 5s cubic-bezier(0.25, 1, 0.5, 1)";
+        itemRibbon.style.transform = `translateX(${winningPosition}px)`;
+
+        // After the animation ends, display the result in the footer.
+        setTimeout(() => {
+          const resultName = winningCone.isTrail ? 'a Trail!' : winningCone.name;
+          document.getElementById("result").innerHTML = `
+            You unboxed:<span style="color: ${winningCone.rarityColor}"> ${resultName}</span>
+          `;
+          // Emit finish event after a short delay then reset the UI.
+          setTimeout(() => {
+            setTimeout(() => {
+              console.log('DEBUG: Emitting unboxfinished event with message:', message);
+              socket.emit('unboxfinished', message);
+            }, 1000);
+            resetUI();
+          }, 3000);
+        }, 5000);
+      }, 1000); // 1000 ms wait after fade in
+    }
+  </script>
+</body>
+</html>

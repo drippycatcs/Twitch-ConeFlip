@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Duru+Sans&family=Manrope:wght@200..800&display=swap" rel="stylesheet">
+  <title>Coneflip Leaderboard</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    .leaderboard-container {
+      position: fixed;
+      top: 30px;
+      right: -600px;
+      width: 575px;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      padding: 15px 25px;
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
+      z-index: 1000;
+      font-family: 'Duru Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #fff;
+      transition: right 0.8s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.5s ease-in-out;
+      opacity: 0;
+      overflow: hidden;
+    }
+    .leaderboard-container.visible {
+      right: 20px;
+      opacity: 1;
+    }
+    .leaderboard-container h2 {
+      font-size: 30px;
+      text-align: center;
+      margin-bottom: 15px;
+      color: #94B658;
+    }
+    .leaderboard-table-wrapper {
+      max-height: 400px;
+      overflow-x: hidden;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #94B658 rgba(255, 255, 255, 0.1);
+    }
+    .leaderboard-table-wrapper::-webkit-scrollbar {
+      width: 8px;
+    }
+    .leaderboard-table-wrapper::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .leaderboard-table-wrapper::-webkit-scrollbar-thumb {
+      background-color: #94B658;
+      border-radius: 4px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: transparent;
+    }
+    th,
+    td {
+      padding: 9px 12px;
+      text-align: left;
+      font-size: 21px;
+    }
+    th {
+      position: sticky;
+      top: 0;
+      background: rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10px);
+      font-weight: normal;
+      color: #94B658;
+      z-index: 10;
+    }
+    th:after,
+    th:before {
+      content: '';
+      position: absolute;
+      left: 0;
+      width: 100%;
+    }
+    th:after {
+      bottom: 0;
+      border-bottom: 4px solid #555;
+    }
+    tr:nth-child(even) {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .top-player {
+      background: rgba(255, 215, 0, 0.2);
+    }
+    .highlight-target {
+      border: 2px solid #94B658; 
+      box-shadow: 0 0 10px 2px rgba(148, 182, 88, 0.8); 
+    }
+    .cone_skin {
+      display: block;
+      width: 50px;
+      height: 50px;
+      background-position: center center;
+      background-size: contain;
+      background-repeat: repeat-y;
+      -webkit-mask-image: url(skins/cone_default.png);
+      mask-image: url(skins/cone_default.png);
+      mask-repeat: no-repeat;
+      mask-size: 60%;
+      -webkit-mask-size: 60%;
+      -webkit-mask-repeat: no-repeat;
+      -webkit-mask-position: center center;
+      mask-position: center center;
+      margin-right: 9px;
+    }
+    .text-center {
+      text-align: center;
+    }
+    .player-rank {
+      color: #94B658;
+    }
+    .placeholder-row {
+      color: rgba(255, 255, 255, 0.3);
+    }
+    .flex_thing {
+      display: flex;
+      align-items: center;
+    }
+  
+    .player_name_wrapper {
+      position: relative;
+      display: inline-block;
+    }
+    .player_name_shadow {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+      display: none;
+    }
+    .player_name_text {
+      position: relative;
+      z-index: 2;
+    }
+    .player_name {
+      font-weight: 500;
+    }
+
+    /* User Stats Section Styles */
+    .user-stats-section {
+      margin-bottom: 15px;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      border: 1px solid rgba(148, 182, 88, 0.3);
+    }
+
+    .stats-input-group {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    #user-stats-input {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid rgba(148, 182, 88, 0.5);
+      border-radius: 6px;
+      background: rgba(0, 0, 0, 0.3);
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.3s ease;
+    }
+
+    #user-stats-input:focus {
+      border-color: #94B658;
+      box-shadow: 0 0 5px rgba(148, 182, 88, 0.3);
+    }
+
+    #user-stats-input::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    #get-user-stats-btn {
+      padding: 8px 16px;
+      background: linear-gradient(135deg, #94B658, #7a9a47);
+      border: none;
+      border-radius: 6px;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      white-space: nowrap;
+    }
+
+    #get-user-stats-btn:hover {
+      background: linear-gradient(135deg, #a5c769, #8baa58);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(148, 182, 88, 0.3);
+    }
+
+    #get-user-stats-btn:active {
+      transform: translateY(0);
+    }
+
+    .user-stats-result {
+      min-height: 20px;
+      font-size: 14px;
+      color: #fff;
+      padding: 8px;
+      border-radius: 4px;
+      background: rgba(0, 0, 0, 0.2);
+      border-left: 3px solid transparent;
+    }
+
+    .user-stats-result.success {
+      border-left-color: #94B658;
+      background: rgba(148, 182, 88, 0.1);
+    }
+
+    .user-stats-result.error {
+      border-left-color: #ff6b6b;
+      background: rgba(255, 107, 107, 0.1);
+    }
+
+    .user-stats-result.loading {
+      border-left-color: #ffd93d;
+      background: rgba(255, 217, 61, 0.1);
+    }
+
+    .user-stats-result:empty {
+      display: none;
+    }
+
+    /* Ranking Toggle Styles */
+    .ranking-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+      gap: 12px;
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 56px;
+      height: 28px;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #94B658;
+      border-radius: 28px;
+      transition: 0.4s;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      border-radius: 50%;
+      transition: 0.4s;
+    }
+
+    input:checked + .slider {
+      background-color: #667eea;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(28px);
+    }
+
+    #ranking-label {
+      font-size: 16px;
+      font-weight: 500;
+      min-width: 50px;
+    }
+
+    .label-points {
+      color: #94B658;
+    }
+
+    .label-level {
+      color: #667eea;
+    }
+
+    /* Level badge style */
+    .level-badge {
+      color: #667eea;
+      font-weight: bold;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="leaderboard-container">
+    <h2>CONEFLIP LEADERBOARD</h2>
+    <div class="leaderboard-table-wrapper">
+      <table id="leaderboard-table">
+        <thead>
+          <tr>
+            <th class="text-center">#</th>
+            <th>Name</th>
+            <th class="text-center">Lvl</th>
+            <th class="text-center">Points</th>
+            <th class="text-center">Streak</th>
+            <th class="text-center">Best</th>
+            <th class="text-center">Total W/L</th>
+            <th class="text-center">Duels</th>
+            <th class="text-center">Coneflips</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Rows will be inserted here -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+
+
+    
+    let paintCache = {};
+    let userSkinsMap = {};
+    let skinLibrary = {};
+    let currentTarget = null;
+    let lastLeaderboardData = [];
+
+    function createTableRows(count) {
+      const tbody = document.querySelector("#leaderboard-table tbody");
+      tbody.innerHTML = '';
+      for (let i = 0; i < count; i++) {
+        const row = document.createElement('tr');
+        row.id = `row-${i + 1}`;
+        row.innerHTML = '<td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td>';
+        row.classList.add('placeholder-row');
+        tbody.appendChild(row);
+      }
+    }
+
+    // Convert a 32-bit signed integer (from 7TV) into an "rgb(r, g, b)" string.
+    function convertColor(num) {
+      let hexFull = (num >>> 0).toString(16).padStart(8, '0');
+      let hex = hexFull.substring(0, 6);
+      const r = parseInt(hex.substring(0, 2), 16);
+      const g = parseInt(hex.substring(2, 4), 16);
+      const b = parseInt(hex.substring(4, 6), 16);
+      return `rgb(${r}, ${g}, ${b})`;
+    }
+
+    function getPaintCSS(paint) {
+      if (!paint) return null;
+      if (paint.function === "LINEAR_GRADIENT") {
+        const stops = paint.gradientStops
+          .map(stop => `${convertColor(stop.color)} ${stop.at}`)
+          .join(', ');
+        let angle = "90deg"; 
+      
+        if (paint.gradientAngle && paint.gradientAngle !== "N/A") {
+          angle = paint.gradientAngle + "deg";
+        }
+        return `repeating-linear-gradient(${angle}, ${stops})`;
+      } else if (paint.function === "RADIAL_GRADIENT") {
+        const stops = paint.gradientStops
+          .map(stop => `${convertColor(stop.color)} ${stop.at}`)
+          .join(', ');
+        return `radial-gradient(circle, ${stops})`;
+      } else if (paint.function === "URL") {
+        if (paint.image) {
+          return `url('${paint.image}') no-repeat center/cover`;
+        }
+        return null;
+      } else {
+        if (paint.color && paint.color !== "N/A") {
+          return convertColor(paint.color);
+        }
+        return null;
+      }
+    }
+
+    function updateTable(data) {
+      lastLeaderboardData = data;
+      createTableRows(25);
+      const rows = document.querySelectorAll("#leaderboard-table tbody tr");
+      for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        if (data[i]) {
+          const player = data[i];
+          const playerName = player.name || '—';
+          row.setAttribute('data-player-name', playerName);
+          const isTopPlayer = (i === 0);
+          const assignedSkinKey = userSkinsMap[playerName] || 'default';
+          let skinIconPath = skinLibrary[assignedSkinKey] || skinLibrary['default'] || '';
+          if (isTopPlayer && skinLibrary['gold']) {
+            skinIconPath = skinLibrary['gold'];
+          }
+          const skinIcon = `<div style="background-image: url(${skinIconPath})" class="cone_skin"></div>`;
+          
+ 
+          const totalWL = `${player.wins ?? 0}/${player.fails ?? 0}`;
+          const duelStats = `${player.duel_wins ?? 0}/${player.duel_losses ?? 0}`;
+          const coneflipStats = `${player.coneflip_wins ?? 0}/${player.coneflip_losses ?? 0}`;
+          const currentStreak = player.current_streak ?? 0;
+          
+          row.innerHTML = `
+              <td class="player-rank text-center">${i + 1}</td>
+              <td class="flex_thing text-center">
+                ${skinIcon}
+                <span class="player_name_wrapper">
+                  <span class="player_name_shadow player_name">${playerName.substring(0, 18)}</span>
+                  <span class="player_name_text player_name">${playerName.substring(0, 18)}</span>
+                </span>
+              </td>
+              <td class="text-center level-badge">${player.level || 1}</td>
+              <td class="text-center">${player.points ?? 0}</td>
+              <td class="text-center">${currentStreak > 0 ? `🔥${currentStreak}` : '—'}</td>
+              <td class="text-center">${player.highest_streak || 0}</td>
+              <td class="text-center">${totalWL}</td>
+              <td class="text-center">${duelStats}</td>
+              <td class="text-center">${coneflipStats}</td>
+          `;
+          
+          let classes = [];
+          if (isTopPlayer) classes.push('top-player');
+          if (currentTarget && playerName === currentTarget) classes.push('highlight-target');
+          row.className = classes.join(' ');
+
+ 
+          const applyPaintStyles = (paintData) => {
+            const nameTextSpan = row.querySelector('.player_name_text');
+            const nameShadowSpan = row.querySelector('.player_name_shadow');
+            if (paintData && paintData.function) {
+              const cssValue = getPaintCSS(paintData);
+              if (cssValue) {
+
+                nameTextSpan.style.background = cssValue;
+                nameTextSpan.style.webkitBackgroundClip = "text";
+                nameTextSpan.style.backgroundClip = "text";
+                nameTextSpan.style.webkitTextFillColor = "transparent";
+                nameTextSpan.style.color = "transparent";
+                if (paintData.function === "URL") {
+                  nameTextSpan.style.backgroundSize = "cover";
+                }
+          
+                if (paintData.shadows && Array.isArray(paintData.shadows) && paintData.shadows.length > 0) {
+                  const filterValue = paintData.shadows
+                 .map(shadow =>
+                 `drop-shadow(${convertColor(shadow.color)} ${shadow.x_offset * 1}px ${shadow.y_offset * 1}px ${shadow.radius * 1}px)`
+                 )
+                 .join(' ');
+                 nameShadowSpan.style.setProperty("filter", filterValue, "important");
+                 nameShadowSpan.style.setProperty("text-shadow", "none", "important");
+                  nameShadowSpan.style.display = "inline";
+                } else {
+                  nameShadowSpan.style.display = "none";
+                  nameTextSpan.style.webkitTextStroke = "0px";
+                }
+              }
+            } else {
+              nameTextSpan.style.background = "";
+              nameTextSpan.style.webkitBackgroundClip = "";
+              nameTextSpan.style.backgroundClip = "";
+              nameTextSpan.style.webkitTextFillColor = "";
+              nameTextSpan.style.color = "white";
+              nameTextSpan.style.backgroundSize = "";
+              nameTextSpan.style.webkitTextStroke = "";
+              nameShadowSpan.style.textShadow = "";
+              nameShadowSpan.style.display = "none";
+            }
+          };
+
+          // Use cached paint data if available and fresh.
+          if (paintCache[playerName] && (Date.now() - paintCache[playerName].timestamp < 600000)) {
+            let paintData = paintCache[playerName].data;
+            applyPaintStyles(paintData);
+          } else {
+            // Otherwise, fetch the paint data.
+            fetch(`/api/skins/paint/${encodeURIComponent(playerName)}`)
+              .then(response => response.json())
+              .then(result => {
+                const paintData = result.data || result; // Handle both old and new API format
+                paintCache[playerName] = { data: paintData, timestamp: Date.now() };
+                applyPaintStyles(paintData);
+              })
+              .catch(error => {
+                console.error(`Error fetching paint for ${playerName}:`, error);
+              });
+          }
+        }
+      }
+    }
+
+    async function loadUserSkins() {
+      try {
+        const response = await fetch('/api/skins/users');
+        const result = await response.json();
+        const userSkinsList = result.data || result; // Handle both old and new API format
+        userSkinsMap = userSkinsList.reduce((map, user) => {
+          map[user.name] = user.skin;
+          return map;
+        }, {});
+      } catch (error) {
+        console.error("Error fetching user skins:", error);
+      }
+    }
+
+    async function loadSkinLibrary() {
+      try {
+        const response = await fetch('/api/skins/available');
+        const result = await response.json();
+        skinLibrary = result.data || result; // Handle both old and new API format
+      } catch (error) {
+        console.error("Error fetching skin library:", error);
+      }
+    }
+
+    async function loadLeaderboard() {
+      try {
+        const response = await fetch('/api/leaderboard');
+        const result = await response.json();
+        const data = result.data || result;
+        updateTable(data || []);
+      } catch (error) {
+        console.error("Error loading leaderboard:", error);
+        updateTable([]);
+      }
+    }
+
+    async function initialize() {
+      await loadSkinLibrary();
+      await loadUserSkins();
+      await loadLeaderboard();
+    }
+
+    let isVisible = false;
+    let hideTimeout;
+    let scrollInterval = null;
+    const socket = io();
+
+    socket.on('refreshLb', (data) => {
+      updateTable(data);
+    });
+
+    socket.on('restart', () => {
+            location.reload(); // This reloads the page to restart the game
+    });
+
+    socket.on('showLb', (target) => {
+      currentTarget = target;
+      const rows = document.querySelectorAll("#leaderboard-table tbody tr");
+      rows.forEach(row => {
+        const playerName = row.getAttribute('data-player-name');
+        if (playerName === currentTarget) {
+          row.classList.add('highlight-target');
+        } else {
+          row.classList.remove('highlight-target');
+        }
+      });
+      if (isVisible) return;
+      const leaderboard = document.querySelector('.leaderboard-container');
+      const wrapper = document.querySelector('.leaderboard-table-wrapper');
+      wrapper.scrollTop = 0;
+      leaderboard.classList.add('visible');
+      isVisible = true;
+
+      if (scrollInterval) {
+        clearInterval(scrollInterval);
+      }
+
+      setTimeout(() => {
+        let scrollAmount = 0;
+        scrollInterval = setInterval(() => {
+          wrapper.scrollTop = scrollAmount;
+          scrollAmount += 2;
+          if (
+            wrapper.scrollTop >= wrapper.scrollHeight - wrapper.clientHeight ||
+            !leaderboard.classList.contains('visible')
+          ) {
+            clearInterval(scrollInterval);
+            scrollInterval = null;
+          }
+        }, 20);
+      }, 1000);
+
+      clearTimeout(hideTimeout);
+      hideTimeout = setTimeout(() => {
+        leaderboard.classList.remove('visible');
+        isVisible = false;
+        if (scrollInterval) {
+          clearInterval(scrollInterval);
+          scrollInterval = null;
+        }
+      }, 17000);
+    });
+
+    // User Stats Functions
+    async function getUserStats(username) {
+      const resultDiv = document.getElementById('user-stats-result');
+      const input = document.getElementById('user-stats-input');
+      const button = document.getElementById('get-user-stats-btn');
+      
+      if (!username || username.trim() === '') {
+        resultDiv.textContent = 'Please enter a username';
+        resultDiv.className = 'user-stats-result error';
+        return;
+      }
+
+      // Show loading state
+      resultDiv.textContent = 'Loading stats...';
+      resultDiv.className = 'user-stats-result loading';
+      button.disabled = true;
+      button.textContent = 'Loading...';
+
+      try {
+        const response = await fetch(`/api/leaderboard/player/${encodeURIComponent(username.trim())}`);
+        const result = await response.json();
+        
+        if (response.ok && result.data) {
+          const player = result.data;
+          const winRate = player.winrate || 0;
+          const rank = player.rank || 'N/A';
+          
+          resultDiv.innerHTML = `
+            <strong>${player.name}</strong><br>
+            Rank: #${rank} | Wins: ${player.wins || 0} | Losses: ${player.fails || 0} | Win Rate: ${winRate}%
+          `;
+          resultDiv.className = 'user-stats-result success';
+        } else {
+          resultDiv.textContent = `User "${username}" not found or has no stats`;
+          resultDiv.className = 'user-stats-result error';
+        }
+      } catch (error) {
+        console.error('Error fetching user stats:', error);
+        resultDiv.textContent = 'Error fetching stats. Please try again.';
+        resultDiv.className = 'user-stats-result error';
+      } finally {
+        button.disabled = false;
+        button.textContent = 'Get User Stats';
+      }
+    }
+
+    // Event Listeners
+    document.addEventListener('DOMContentLoaded', function() {
+      const input = document.getElementById('user-stats-input');
+      const button = document.getElementById('get-user-stats-btn');
+      
+      // Button click handler
+      button.addEventListener('click', () => {
+        getUserStats(input.value);
+      });
+      
+      // Enter key handler
+      input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          getUserStats(input.value);
+        }
+      });
+    });
+
+    initialize();
+  </script>
+</body>
+</html>

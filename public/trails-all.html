@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All ConeFlip Trails</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Light mode colors */
+            --bg-gradient: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #f0fdf4 100%);
+            --text-primary: #1f2937;
+            --text-secondary: #4b5563;
+            --text-tertiary: #6b7280;
+            --text-link: #3b82f6;
+            --text-code: #1f2937;
+            --card-bg: rgba(255, 255, 255, 0.4);
+            --card-border: rgba(255, 255, 255, 0.3);
+            --input-bg: rgba(255, 255, 255, 0.6);
+            --input-border: rgba(156, 163, 175, 0.3);
+            --status-bg: rgba(255, 255, 255, 0.3);
+            --status-border: rgba(0, 0, 0, 0.1);
+            --pre-bg: rgba(255, 255, 255, 0.4);
+            --scrollbar-track: rgba(255, 255, 255, 0.2);
+            --scrollbar-thumb: #4b5563;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] {
+            /* Dark mode colors */
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f1419 100%);
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-tertiary: #94a3b8;
+            --text-link: #60a5fa;
+            --text-code: #e2e8f0;
+            --card-bg: rgba(30, 41, 59, 0.4);
+            --card-border: rgba(51, 65, 85, 0.5);
+            --input-bg: rgba(30, 41, 59, 0.6);
+            --input-border: rgba(71, 85, 105, 0.5);
+            --status-bg: rgba(30, 41, 59, 0.3);
+            --status-border: rgba(51, 65, 85, 0.3);
+            --pre-bg: rgba(15, 23, 42, 0.6);
+            --scrollbar-track: rgba(30, 41, 59, 0.3);
+            --scrollbar-thumb: #64748b;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+        }
+
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            transition: all 0.3s ease;
+            padding-top: 80px; /* Space for navigation */
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            padding: 25px 30px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 8px 32px var(--shadow-color);
+            position: relative;
+        }
+
+        .header h1 {
+            color: var(--text-primary);
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 4px var(--shadow-color);
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+        }
+
+        .preview-note {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: #3b82f6;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .trails-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 30px;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 8px 32px var(--shadow-color);
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .trails-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px var(--shadow-color);
+        }
+
+        .card-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid var(--input-border);
+            padding-bottom: 15px;
+        }
+
+        .type-section {
+            margin-bottom: 40px;
+        }
+
+        .type-header {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .trails-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .trail-item {
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            gap: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .trail-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px var(--shadow-color);
+        }
+
+        .trail-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .trail-preview {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 8px;
+            font-size: 28px;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .trail-preview img {
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .trail-details {
+            flex: 1;
+        }
+
+        .trail-details h4 {
+            margin: 0 0 8px 0;
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .trail-details p {
+            margin: 0 0 4px 0;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .trail-type-badge {
+            background: rgba(147, 51, 234, 0.2);
+            color: #9333ea;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-block;
+            margin-top: 8px;
+        }
+
+        .trail-type-badge.line {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+        }
+
+        .preview-button {
+            background: var(--input-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--input-border);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .preview-button:hover {
+            background: var(--status-bg);
+            border-color: var(--text-link);
+            transform: translateY(-1px);
+        }
+
+        .preview-button.active {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px;
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+        }
+
+        .error {
+            text-align: center;
+            padding: 60px;
+            font-size: 1.2rem;
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 12px;
+        }
+
+        .empty-section {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        /* Trail effect containers - using exact same system as index.html */
+        #trail-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1000;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        #trail-lines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1000;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        @media (max-width: 1024px) {
+            .trails-grid {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding-top: 100px; /* More space for mobile navigation */
+            }
+
+            .container {
+                padding: 15px;
+            }
+
+            .header {
+                padding: 20px;
+                text-align: center;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .trails-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>All ConeFlip Trails</h1>
+            <p>Discover all available particle effects and line trails for your cone | <a href="/skins" style="color: var(--text-link); text-decoration: none;">View Skins</a></p>
+            <div class="preview-note">
+                Click "Preview Trail" to see the effect following your cursor!
+            </div>
+        </div>
+
+        <div id="trails-content">
+            <div class="loading">Loading trails...</div>
+        </div>
+    </div>
+
+    <!-- Trail effect containers - exact same as index.html -->
+    <div id="trail-particles"></div>
+    <div id="trail-lines"></div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/shared-components.js"></script>
+    <script>
+        // Use the EXACT same TrailManager class from index.html
+        class TrailManager {
+            constructor() {
+                this.activeTrails = new Map(); // Map of cone ID to trail data
+                this.trailConfigs = {};
+                this.playerTrails = {};
+                this.particleContainer = null;
+                this.lineContainer = null;
+                this.initialized = false;
+                
+                // For preview mode
+                this.previewMode = false;
+                this.currentPreview = null;
+                this.mousePos = { x: 0, y: 0 };
+                this.mouseHistory = [];
+                this.previewInterval = null;
+                
+                this.loadTrailConfigs();
+                this.initializeParticles();
+                this.setupMouseTracking();
+            }
+
+            setupMouseTracking() {
+                document.addEventListener('mousemove', (e) => {
+                    this.mousePos = { x: e.clientX, y: e.clientY };
+                    
+                    if (this.previewMode && this.currentPreview) {
+                        this.updateMouseHistory();
+                    }
+                });
+            }
+
+            updateMouseHistory() {
+                this.mouseHistory.push({
+                    x: this.mousePos.x,
+                    y: this.mousePos.y,
+                    timestamp: Date.now()
+                });
+
+                const maxHistory = this.currentPreview.visuals.lineLength || 50;
+                if (this.mouseHistory.length > maxHistory) {
+                    this.mouseHistory.shift();
+                }
+
+                const maxAge = this.currentPreview.visuals.lifetime || 2000;
+                const now = Date.now();
+                this.mouseHistory = this.mouseHistory.filter(pos => 
+                    now - pos.timestamp < maxAge
+                );
+            }
+
+            async loadTrailConfigs() {
+                try {
+                    console.log('🔄 TrailManager: Loading trail configs...');
+                    const response = await fetch('/api/trails/config');
+                    const configs = await response.json();
+                    
+                    this.trailConfigs = {};
+                    for (const config of configs) {
+                        this.trailConfigs[config.name] = config;
+                    }
+                    
+                    console.log('✅ Loaded', Object.keys(this.trailConfigs).length, 'trail configurations');
+                } catch (error) {
+                    console.error('❌ Failed to load trail configurations:', error);
+                    this.trailConfigs = {
+                        'default': { name: 'default', type: 'none', visuals: { type: 'none' } }
+                    };
+                }
+            }
+
+            initializeParticles() {
+                if (this.initialized) return;
+                
+                // Create simple particle container
+                this.particleContainer = document.getElementById('trail-particles');
+                this.lineContainer = document.getElementById('trail-lines');
+                
+                this.initialized = true;
+                console.log('✅ Particle and line trail systems initialized');
+            }
+
+            // EXACT same methods from index.html for particle creation
+            emitParticles(trail, position, visualConfig) {
+                if (!visualConfig || visualConfig.type === 'none' || !this.particleContainer) return;
+
+                const particleCount = Math.min(visualConfig.particleCount || 3, 6);
+                const colors = visualConfig.colors || ['#FFD700'];
+                const lifetime = visualConfig.lifetime || 1200;
+                const trailType = visualConfig.type || 'default';
+
+                for (let i = 0; i < particleCount; i++) {
+                    const offsetX = (Math.random() - 0.5) * 18;
+                    const offsetY = (Math.random() - 0.5) * 14;
+                    const color = colors[Math.floor(Math.random() * colors.length)];
+
+                    let size;
+                    if (visualConfig.size && typeof visualConfig.size === 'object') {
+                        size = visualConfig.size.min + Math.random() * (visualConfig.size.max - visualConfig.size.min);
+                        if (trailType !== 'electric') {
+                            size = size * 1.3;
+                        }
+                    } else {
+                        size = 10 + Math.random() * 8;
+                    }
+
+                    this.createParticle(
+                        position.x + offsetX,
+                        position.y + offsetY,
+                        color,
+                        size,
+                        lifetime,
+                        visualConfig,
+                        trail,
+                        i
+                    );
+                }
+            }
+
+            createParticle(x, y, color, size, lifetime, visualConfig, trail, particleIndex = 0) {
+                const particle = document.createElement('div');
+                
+                const shapeInfo = this.getParticleShape(visualConfig, size, color, particleIndex);
+                
+                particle.style.cssText = `
+                    position: absolute;
+                    left: ${x - size/2}px;
+                    top: ${y - size/2}px;
+                    width: ${size}px;
+                    height: ${size}px;
+                    background-color: ${color};
+                    border-radius: 50%;
+                    box-shadow: 0 0 ${size/2}px ${color};
+                    opacity: 1;
+                    z-index: 1001;
+                    pointer-events: none;
+                    ${shapeInfo.styles}
+                `;
+                
+                if (shapeInfo.content) {
+                    particle.innerHTML = shapeInfo.content;
+                }
+                
+                this.particleContainer.appendChild(particle);
+                
+                if (trail && trail.activeParticles) {
+                    trail.activeParticles.add(particle);
+                }
+                
+                // Physics simulation - exact same as index.html
+                const physics = visualConfig.physics || {};
+                const velX = physics.velocityX ? 
+                    physics.velocityX.min + Math.random() * (physics.velocityX.max - physics.velocityX.min) :
+                    (Math.random() - 0.5) * 35;
+                const velY = physics.velocityY ? 
+                    physics.velocityY.min + Math.random() * (physics.velocityY.max - physics.velocityY.min) :
+                    Math.random() * 25 + 10;
+                const gravity = physics.gravity || 0.12;
+                
+                const trailType = visualConfig.type || 'default';
+                this.applyTrailSpecificAnimation(particle, trailType, visualConfig, lifetime, velX, velY, gravity, particleIndex);
+                
+                setTimeout(() => {
+                    if (particle.parentNode) {
+                        particle.parentNode.removeChild(particle);
+                    }
+                    if (trail && trail.activeParticles) {
+                        trail.activeParticles.delete(particle);
+                    }
+                }, lifetime + 300);
+            }
+
+            // EXACT same getParticleShape method from index.html
+            getParticleShape(visualConfig, size, color, particleIndex = 0) {
+                const shape = visualConfig.shape || 'circle';
+                const trailType = visualConfig.type || 'default';
+
+                if (visualConfig.image) {
+                    const images = Array.isArray(visualConfig.image) ? visualConfig.image : [visualConfig.image];
+                    const imageUrl = images[particleIndex % images.length];
+
+                    return {
+                        styles: `
+                            background-image: url('${imageUrl}');
+                            background-size: contain;
+                            background-repeat: no-repeat;
+                            background-position: center;
+                            background-color: transparent;
+                            filter: drop-shadow(0 0 ${size/3}px ${color});
+                        `,
+                        content: ''
+                    };
+                }
+
+                switch (trailType) {
+                    case 'sparkle':
+                        const sparkleShapes = [
+                            `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="${color}" style="filter: drop-shadow(0 0 ${size/4}px ${color});">
+                                <path d="M12 0L14.5 9.5L24 12L14.5 14.5L12 24L9.5 14.5L0 12L9.5 9.5L12 0Z"/>
+                            </svg>`,
+                            `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="${color}" style="filter: drop-shadow(0 0 ${size/4}px ${color});">
+                                <path d="M12 0L15 9L24 12L15 15L12 24L9 15L0 12L9 9L12 0Z"/>
+                                <circle cx="12" cy="12" r="2" fill="${color}"/>
+                            </svg>`,
+                            `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="${color}" style="filter: drop-shadow(0 0 ${size/4}px ${color});">
+                                <path d="M12 2L13 11L22 12L13 13L12 22L11 13L2 12L11 11L12 2Z"/>
+                            </svg>`
+                        ];
+                        return {
+                            styles: 'background: transparent; border-radius: 0;',
+                            content: sparkleShapes[particleIndex % 3]
+                        };
+
+                    case 'fire':
+                        const fireVariations = [
+                            `background: radial-gradient(ellipse at 50% 80%, #ffff80 0%, #ffcc00 15%, #ff8800 35%, ${color} 55%, #ff4400 75%, transparent 100%);
+                             border-radius: 50% 50% 50% 50% / 60% 60% 35% 35%; transform: scaleY(1.4);`,
+                            `background: radial-gradient(circle at 50% 60%, #ffffaa 0%, #ffdd00 20%, ${color} 45%, #ff3300 70%, transparent 100%);
+                             border-radius: 50%;`,
+                            `background: radial-gradient(ellipse at 50% 90%, #ffff66 0%, #ffaa00 25%, ${color} 50%, #ff2200 80%, transparent 100%);
+                             border-radius: 45% 45% 50% 50% / 55% 55% 30% 30%; transform: scaleY(1.6);`
+                        ];
+                        return {
+                            styles: `${fireVariations[particleIndex % 3]} box-shadow: 0 0 ${size*2}px ${color}, 0 0 ${size*3}px #ff6600aa;`,
+                            content: ''
+                        };
+
+                    case 'electric': {
+                        const boltSize = size * 1.8;
+                        const electricVariations = [
+                            `<svg width="${boltSize}" height="${boltSize * 1.5}" viewBox="0 0 24 36" style="filter: drop-shadow(0 0 8px #00ffff) drop-shadow(0 0 16px #00bfff);">
+                              <path d="M13 1L5 15h6l-3 20 11-18h-7l6-16z" fill="#ffffff" stroke="${color}" stroke-width="0.5"/>
+                              <path d="M12 3L6 14h5l-2 16 8-14h-5l5-13z" fill="${color}" opacity="0.8"/>
+                            </svg>`,
+                            `<svg width="${boltSize}" height="${boltSize * 1.5}" viewBox="0 0 24 36" style="filter: drop-shadow(0 0 10px #00ffff) drop-shadow(0 0 20px #00bfff);">
+                              <path d="M14 0L8 10l4 2-6 12 4 2-4 10 12-14-5-1 5-10-4-1z" fill="#ffffff" stroke="${color}" stroke-width="0.5"/>
+                            </svg>`,
+                            `<svg width="${boltSize * 1.2}" height="${boltSize}" viewBox="0 0 30 24" style="filter: drop-shadow(0 0 10px #00ffff) drop-shadow(0 0 20px ${color});">
+                              <path d="M0 12 Q5 4 10 12 T20 12 T30 12" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
+                              <path d="M0 12 Q5 4 10 12 T20 12 T30 12" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round"/>
+                            </svg>`
+                        ];
+                        return {
+                            styles: `background: transparent;`,
+                            content: electricVariations[particleIndex % 3]
+                        };
+                    }
+
+                    case 'smoke': {
+                        const smokeSize = size * 1.8;
+                        const smokeVariations = [
+                            `<svg width="${smokeSize}" height="${smokeSize}" viewBox="0 0 50 50" style="filter: blur(2px);">
+                              <ellipse cx="25" cy="30" rx="20" ry="15" fill="${color}" opacity="0.6"/>
+                              <ellipse cx="18" cy="25" rx="12" ry="10" fill="${color}" opacity="0.5"/>
+                              <ellipse cx="32" cy="22" rx="14" ry="11" fill="${color}" opacity="0.55"/>
+                            </svg>`,
+                            `<svg width="${smokeSize}" height="${smokeSize * 1.2}" viewBox="0 0 40 50" style="filter: blur(1.5px);">
+                              <path d="M20 45 Q10 35 15 25 Q8 20 12 12 Q18 5 22 10 Q28 5 32 12 Q38 18 30 25 Q35 35 20 45" fill="${color}" opacity="0.5"/>
+                            </svg>`,
+                            `<svg width="${smokeSize}" height="${smokeSize}" viewBox="0 0 50 50" style="filter: blur(2.5px);">
+                              <circle cx="25" cy="28" r="15" fill="${color}" opacity="0.5"/>
+                              <circle cx="18" cy="22" r="10" fill="${color}" opacity="0.45"/>
+                              <circle cx="32" cy="20" r="11" fill="${color}" opacity="0.4"/>
+                            </svg>`
+                        ];
+                        return {
+                            styles: `background: transparent; opacity: 0.7;`,
+                            content: smokeVariations[particleIndex % 3]
+                        };
+                    }
+
+                    case 'cosmic': {
+                        const cosmicSize = size * 1.5;
+                        const cosmicVariations = [
+                            `<svg width="${cosmicSize}" height="${cosmicSize}" viewBox="0 0 50 50" style="filter: drop-shadow(0 0 8px ${color}) drop-shadow(0 0 15px #9b59b6);">
+                              <defs><radialGradient id="neb${particleIndex}" cx="50%" cy="50%" r="50%">
+                                <stop offset="0%" stop-color="#ffffff"/><stop offset="20%" stop-color="${color}"/>
+                                <stop offset="50%" stop-color="#9b59b6"/><stop offset="100%" stop-color="transparent"/>
+                              </radialGradient></defs>
+                              <circle cx="25" cy="25" r="20" fill="url(#neb${particleIndex})"/>
+                              <circle cx="25" cy="25" r="3" fill="#ffffff"/>
+                              <circle cx="18" cy="15" r="1.5" fill="#ffffff" opacity="0.9"/>
+                              <circle cx="35" cy="20" r="1" fill="#ffffff" opacity="0.8"/>
+                            </svg>`,
+                            `<svg width="${cosmicSize}" height="${cosmicSize}" viewBox="0 0 50 50" style="filter: drop-shadow(0 0 10px ${color}) blur(0.5px);">
+                              <ellipse cx="25" cy="25" rx="18" ry="15" fill="${color}" opacity="0.7"/>
+                              <ellipse cx="20" cy="20" rx="12" ry="10" fill="#e74c3c" opacity="0.5"/>
+                              <ellipse cx="30" cy="28" rx="10" ry="8" fill="#3498db" opacity="0.5"/>
+                              <circle cx="25" cy="25" r="2" fill="#ffffff"/>
+                            </svg>`,
+                            `<svg width="${cosmicSize}" height="${cosmicSize}" viewBox="0 0 50 50" style="filter: drop-shadow(0 0 12px ${color});">
+                              <defs><radialGradient id="star${particleIndex}" cx="50%" cy="50%" r="50%">
+                                <stop offset="0%" stop-color="#ffffff"/><stop offset="30%" stop-color="${color}"/>
+                                <stop offset="100%" stop-color="transparent"/>
+                              </radialGradient></defs>
+                              <circle cx="25" cy="25" r="18" fill="url(#star${particleIndex})"/>
+                              <circle cx="25" cy="25" r="4" fill="#ffffff"/>
+                            </svg>`
+                        ];
+                        return {
+                            styles: `background: transparent;`,
+                            content: cosmicVariations[particleIndex % 3]
+                        };
+                    }
+
+                    case 'glue': {
+                        const height = size * 2.2;
+                        const width = size * 0.9;
+                        const glueVariations = [
+                            `<svg width="${width}" height="${height}" viewBox="0 0 20 50" style="filter: drop-shadow(0 0 3px rgba(255,255,255,0.8));">
+                              <defs><radialGradient id="glue${particleIndex}" cx="40%" cy="30%" r="60%">
+                                <stop offset="0%" stop-color="#ffffff"/><stop offset="50%" stop-color="#f5f5f5"/>
+                                <stop offset="100%" stop-color="#e8e8e8"/>
+                              </radialGradient></defs>
+                              <ellipse cx="10" cy="38" rx="8" ry="10" fill="url(#glue${particleIndex})"/>
+                              <path d="M10 5 Q6 20 4 30 Q2 38 10 38 Q18 38 16 30 Q14 20 10 5" fill="url(#glue${particleIndex})"/>
+                            </svg>`,
+                            `<svg width="${width}" height="${height}" viewBox="0 0 20 50" style="filter: drop-shadow(0 0 4px rgba(255,255,255,0.9));">
+                              <defs><radialGradient id="glue2_${particleIndex}" cx="35%" cy="35%" r="65%">
+                                <stop offset="0%" stop-color="#ffffff"/><stop offset="60%" stop-color="#fafafa"/>
+                                <stop offset="100%" stop-color="#eeeeee"/>
+                              </radialGradient></defs>
+                              <ellipse cx="10" cy="35" rx="9" ry="12" fill="url(#glue2_${particleIndex})"/>
+                              <path d="M10 3 Q5 15 3 28 Q2 35 10 35 Q18 35 17 28 Q15 15 10 3" fill="url(#glue2_${particleIndex})"/>
+                            </svg>`,
+                            `<svg width="${width * 0.7}" height="${height * 1.2}" viewBox="0 0 14 60" style="filter: drop-shadow(0 0 3px rgba(255,255,255,0.7));">
+                              <defs><radialGradient id="glue3_${particleIndex}" cx="40%" cy="30%" r="60%">
+                                <stop offset="0%" stop-color="#ffffff"/><stop offset="40%" stop-color="#f8f8f8"/>
+                                <stop offset="100%" stop-color="#e5e5e5"/>
+                              </radialGradient></defs>
+                              <ellipse cx="7" cy="50" rx="6" ry="8" fill="url(#glue3_${particleIndex})"/>
+                              <path d="M7 2 Q4 20 3 35 Q2 50 7 50 Q12 50 11 35 Q10 20 7 2" fill="url(#glue3_${particleIndex})"/>
+                            </svg>`
+                        ];
+                        return {
+                            styles: `background: transparent; width: ${width}px !important; height: ${height}px !important;`,
+                            content: glueVariations[particleIndex % 3]
+                        };
+                    }
+
+                    default:
+                        return {
+                            styles: `background: radial-gradient(circle, ${color} 0%, ${color}88 70%, transparent 100%);`,
+                            content: ''
+                        };
+                }
+            }
+
+            // EXACT same applyTrailSpecificAnimation method from index.html
+            applyTrailSpecificAnimation(particle, trailType, visualConfig, lifetime, velX, velY, gravity, particleIndex) {
+                const animationDelay = particleIndex * 50;
+
+                switch (trailType) {
+                    case 'sparkle':
+                        particle.style.transition = `transform ${lifetime}ms ease-out, opacity ${lifetime}ms ease-in-out`;
+                        setTimeout(() => {
+                            const finalY = velY + (gravity * lifetime / 10);
+                            const rotation = 360 + Math.random() * 720;
+                            particle.style.transform = `translate(${velX}px, ${finalY}px) rotate(${rotation}deg) scale(0.3)`;
+                            particle.style.opacity = '0';
+                        }, animationDelay);
+                        break;
+
+                    case 'fire':
+                        particle.style.transition = `transform ${lifetime}ms cubic-bezier(0.68, -0.55, 0.265, 1.55), opacity ${lifetime}ms ease-out`;
+                        setTimeout(() => {
+                            const finalY = velY + (gravity * lifetime / 15);
+                            const wobble = Math.sin(Date.now() * 0.01) * 10;
+                            particle.style.transform = `translate(${velX + wobble}px, ${-Math.abs(finalY)}px) scale(0.1)`;
+                            particle.style.opacity = '0';
+                        }, animationDelay);
+                        break;
+
+                    case 'glue':
+                        particle.style.transition = `transform ${lifetime}ms ease-in, opacity ${lifetime}ms ease-out`;
+                        setTimeout(() => {
+                            const finalY = velY + (gravity * lifetime / 8);
+                            const stretch = 1.5 + Math.random() * 1.5;
+                            particle.style.transform = `translate(${velX * 0.3}px, ${finalY}px) scaleY(${stretch}) scaleX(${1/stretch})`;
+                            particle.style.opacity = '0';
+                        }, animationDelay);
+                        break;
+
+                    case 'electric':
+                        particle.style.transition = `transform ${lifetime}ms linear, opacity ${lifetime * 0.8}ms ease-out`;
+                        const randomRotation = Math.random() * 360;
+                        particle.style.transform = `rotate(${randomRotation}deg)`;
+                        setTimeout(() => {
+                            const shootX = velX * 1.5;
+                            const shootY = velY * 1.5;
+                            particle.style.transform = `translate(${shootX}px, ${shootY}px) rotate(${randomRotation + (Math.random() - 0.5) * 90}deg) scale(0.3)`;
+                            particle.style.opacity = '0';
+                        }, animationDelay);
+                        break;
+
+                    case 'smoke':
+                        particle.style.transition = `transform ${lifetime}ms ease-out, opacity ${lifetime}ms ease-out`;
+                        setTimeout(() => {
+                            const riseY = -Math.abs(velY) - 40;
+                            const drift = (Math.random() - 0.5) * 30;
+                            const expand = 1.5 + Math.random() * 0.8;
+                            particle.style.transform = `translate(${drift}px, ${riseY}px) scale(${expand})`;
+                            particle.style.opacity = '0';
+                        }, animationDelay);
+                        break;
+
+                    case 'cosmic':
+                        particle.style.transition = `transform ${lifetime}ms ease-out, opacity ${lifetime}ms ease-out`;
+                        setTimeout(() => {
+                            const floatX = velX * 0.8;
+                            const floatY = velY * 0.8;
+                            const rotation = 180 + Math.random() * 360;
+                            const scale = 0.3 + Math.random() * 0.4;
+                            particle.style.transform = `translate(${floatX}px, ${floatY}px) rotate(${rotation}deg) scale(${scale})`;
+                            particle.style.opacity = '0';
+                        }, animationDelay);
+                        break;
+
+                    default:
+                        particle.style.transition = `transform ${lifetime}ms ease-out, opacity ${lifetime}ms ease-out`;
+                        setTimeout(() => {
+                            const finalY = velY + (gravity * lifetime / 10);
+                            particle.style.transform = `translate(${velX}px, ${finalY}px) scale(0.1)`;
+                            particle.style.opacity = '0';
+                        }, animationDelay);
+                        break;
+                }
+            }
+
+            // EXACT same line trail methods from index.html
+            createLineElement(trail) {
+                const visualConfig = trail.visuals;
+                const colors = visualConfig.colors || ['#00ffff'];
+                const lineWidth = visualConfig.lineWidth || 3;
+                const neonIntensity = visualConfig.neonIntensity || 1;
+                const rainbowEffect = visualConfig.rainbowEffect || false;
+                
+                const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                svg.style.cssText = `
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    pointer-events: none;
+                    z-index: 1000;
+                `;
+                
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                let color = colors[0];
+                
+                if (rainbowEffect) {
+                    const gradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+                    gradient.id = `rainbow-gradient-${Date.now()}`;
+                    gradient.setAttribute('gradientUnits', 'userSpaceOnUse');
+                    
+                    const rainbowColors = ['#ff0080', '#ff8000', '#ffff00', '#80ff00', '#00ff80', '#0080ff', '#8000ff'];
+                    rainbowColors.forEach((c, i) => {
+                        const stop = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+                        stop.setAttribute('offset', `${(i / (rainbowColors.length - 1)) * 100}%`);
+                        stop.setAttribute('stop-color', c);
+                        gradient.appendChild(stop);
+                    });
+                    
+                    const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+                    defs.appendChild(gradient);
+                    svg.appendChild(defs);
+                    
+                    color = `url(#${gradient.id})`;
+                    
+                    const animateGradient = document.createElementNS('http://www.w3.org/2000/svg', 'animateTransform');
+                    animateGradient.setAttribute('attributeName', 'gradientTransform');
+                    animateGradient.setAttribute('type', 'rotate');
+                    animateGradient.setAttribute('values', '0;360;0');
+                    animateGradient.setAttribute('dur', '3s');
+                    animateGradient.setAttribute('repeatCount', 'indefinite');
+                    gradient.appendChild(animateGradient);
+                }
+                
+                const glowFilter = `
+                    drop-shadow(0 0 ${2 * neonIntensity}px ${colors[0]})
+                    drop-shadow(0 0 ${4 * neonIntensity}px ${colors[0]})
+                    drop-shadow(0 0 ${8 * neonIntensity}px ${colors[0]})
+                    drop-shadow(0 0 ${16 * neonIntensity}px ${colors[0]}66)
+                `;
+                
+                path.style.cssText = `
+                    fill: none;
+                    stroke: ${color};
+                    stroke-width: ${lineWidth}px;
+                    stroke-linecap: round;
+                    stroke-linejoin: round;
+                    filter: ${glowFilter};
+                    opacity: 1;
+                `;
+                
+                svg.appendChild(path);
+                this.lineContainer.appendChild(svg);
+                return { svg, path };
+            }
+
+            updateLinePath(lineElement) {
+                if (!lineElement || this.mouseHistory.length < 2) return;
+                
+                let pathData = `M ${this.mouseHistory[0].x} ${this.mouseHistory[0].y}`;
+                
+                if (this.mouseHistory.length === 2) {
+                    pathData += ` L ${this.mouseHistory[1].x} ${this.mouseHistory[1].y}`;
+                } else {
+                    for (let i = 1; i < this.mouseHistory.length; i++) {
+                        const curr = this.mouseHistory[i];
+                        const prev = this.mouseHistory[i - 1];
+                        
+                        if (i === 1) {
+                            pathData += ` Q ${prev.x} ${prev.y} ${curr.x} ${curr.y}`;
+                        } else {
+                            const next = this.mouseHistory[i + 1];
+                            if (next) {
+                                const cpX = curr.x + (prev.x - next.x) * 0.1;
+                                const cpY = curr.y + (prev.y - next.y) * 0.1;
+                                pathData += ` Q ${cpX} ${cpY} ${curr.x} ${curr.y}`;
+                            } else {
+                                pathData += ` L ${curr.x} ${curr.y}`;
+                            }
+                        }
+                    }
+                }
+                
+                lineElement.path.setAttribute('d', pathData);
+                
+                if (this.mouseHistory.length > 0) {
+                    const age = Date.now() - this.mouseHistory[0].timestamp;
+                    const maxAge = this.currentPreview.visuals.lifetime || 2000;
+                    const opacity = Math.max(0.3, 1 - (age / maxAge));
+                    lineElement.path.style.opacity = opacity;
+                }
+            }
+
+            startPreview(trailConfig) {
+                this.stopPreview();
+                
+                this.previewMode = true;
+                this.currentPreview = trailConfig;
+                this.mouseHistory = [];
+                
+                if (trailConfig.visuals.shape === 'line' || trailConfig.visuals.type === 'line') {
+                    this.previewLineElement = this.createLineElement({ visuals: trailConfig.visuals });
+                    this.previewInterval = setInterval(() => {
+                        this.updateLinePath(this.previewLineElement);
+                    }, 16);
+                } else {
+                    this.previewInterval = setInterval(() => {
+                        if (this.mousePos.x > 0 && this.mousePos.y > 0) {
+                            this.emitParticles(null, this.mousePos, trailConfig.visuals);
+                        }
+                    }, 50);
+                }
+            }
+
+            stopPreview() {
+                this.previewMode = false;
+                this.currentPreview = null;
+                
+                if (this.previewInterval) {
+                    clearInterval(this.previewInterval);
+                    this.previewInterval = null;
+                }
+                
+                if (this.previewLineElement && this.previewLineElement.svg.parentNode) {
+                    this.previewLineElement.svg.parentNode.removeChild(this.previewLineElement.svg);
+                    this.previewLineElement = null;
+                }
+                
+                // Clear particles
+                this.particleContainer.innerHTML = '';
+                
+                this.mouseHistory = [];
+            }
+        }
+
+        class TrailsDisplayManager {
+            constructor() {
+                this.trailManager = new TrailManager();
+                this.currentPreviewTrail = null;
+                this.init();
+            }
+
+            async init() {
+                // Wait for trail configs to load
+                await this.waitForTrailConfigs();
+                this.displayTrails();
+            }
+
+            async waitForTrailConfigs() {
+                while (Object.keys(this.trailManager.trailConfigs).length <= 1) {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+            }
+
+            displayTrails() {
+                const container = document.getElementById('trails-content');
+                const trails = Object.values(this.trailManager.trailConfigs).filter(trail => trail.name !== 'default');
+                
+                if (trails.length === 0) {
+                    container.innerHTML = '<div class="error">No trails found</div>';
+                    return;
+                }
+
+                // Group trails by type
+                const particleTrails = trails.filter(trail => trail.visuals.shape !== 'line' && trail.visuals.type !== 'line');
+                const lineTrails = trails.filter(trail => trail.visuals.shape === 'line' || trail.visuals.type === 'line');
+                
+                let html = '';
+                
+                if (particleTrails.length > 0) {
+                    html += this.createTrailSection('Particle Effects', '', particleTrails);
+                }
+                
+                if (lineTrails.length > 0) {
+                    html += this.createTrailSection('Line Trails', '━', lineTrails);
+                }
+                
+                container.innerHTML = html;
+                this.setupPreviewButtons();
+            }
+
+            createTrailSection(title, icon, trails) {
+                const trailItems = trails.map(trail => this.createTrailItem(trail)).join('');
+                
+                return `
+                    <div class="trails-card">
+                        <div class="card-title">
+                            <span>${icon}</span>
+                            ${title} (${trails.length})
+                        </div>
+                        <div class="trails-grid">
+                            ${trailItems}
+                        </div>
+                    </div>
+                `;
+            }
+
+            createTrailItem(trail) {
+                const trailIcon = this.generateTrailIcon(trail);
+                const isLineTrail = trail.visuals.shape === 'line' || trail.visuals.type === 'line';
+                
+                return `
+                    <div class="trail-item">
+                        <div class="trail-info">
+                            <div class="trail-preview">${trailIcon}</div>
+                            <div class="trail-details">
+                                <h4>${trail.displayName || this.formatTrailName(trail.name)}</h4>
+                                <p><strong>Author:</strong> ${trail.author || 'Unknown'}</p>
+                                ${trail.description ? `<p><em>${trail.description}</em></p>` : ''}
+                            </div>
+                        </div>
+                        <div class="trail-type-badge ${isLineTrail ? 'line' : 'particle'}">
+                            ${isLineTrail ? 'Line Trail' : 'Particle Effect'}
+                        </div>
+                        <button class="preview-button" data-trail="${trail.name}">
+                            Preview Trail
+                        </button>
+                    </div>
+                `;
+            }
+
+            generateTrailIcon(trail) {
+                if (!trail || !trail.visuals) return '✨';
+                
+                const visuals = trail.visuals;
+                
+                if (visuals.image) {
+                    const images = Array.isArray(visuals.image) ? visuals.image : [visuals.image];
+                    const firstImage = images[0];
+                    
+                    if (firstImage.startsWith('data:image/svg+xml;base64,')) {
+                        try {
+                            return atob(firstImage.split(',')[1]);
+                        } catch (e) {
+                            console.warn('Failed to decode base64 SVG for trail:', trail.name);
+                        }
+                    } else {
+                        return `<img src="${firstImage}" alt="${trail.name}" style="width: 100%; height: 100%; object-fit: contain;">`;
+                    }
+                }
+                
+                if (visuals.colors && visuals.colors.length > 0) {
+                    const colors = visuals.colors;
+                    if (visuals.shape === 'line' || visuals.type === 'line') {
+                        if (visuals.rainbowEffect) {
+                            return `<div style="width: 40px; height: 6px; background: linear-gradient(90deg, #ff0080, #ff8000, #ffff00, #80ff00, #00ff80, #0080ff, #8000ff); border-radius: 3px; box-shadow: 0 0 8px rgba(255,255,255,0.5);"></div>`;
+                        } else {
+                            return `<div style="width: 40px; height: 6px; background: ${colors[0]}; border-radius: 3px; box-shadow: 0 0 8px ${colors[0]}66, 0 0 4px ${colors[0]};"></div>`;
+                        }
+                    } else {
+                        if (colors.length === 1) {
+                            return `<div style="width: 32px; height: 32px; border-radius: 50%; background: ${colors[0]}; border: 2px solid rgba(255,255,255,0.3); box-shadow: 0 2px 8px rgba(0,0,0,0.3);"></div>`;
+                        } else {
+                            const gradient = colors.join(', ');
+                            return `<div style="width: 32px; height: 32px; border-radius: 50%; background: conic-gradient(${gradient}); border: 2px solid rgba(255,255,255,0.3); box-shadow: 0 2px 8px rgba(0,0,0,0.3);"></div>`;
+                        }
+                    }
+                }
+                
+                switch (visuals.type) {
+                    case 'sparkle': return '✨';
+                    case 'fire': return '🔥';
+                    case 'ice': return '❄️';
+                    case 'electric': return '⚡';
+                    case 'shadow': return '🌑';
+                    case 'cosmic': return '🌌';
+                    case 'rainbow': return '🌈';
+                    case 'golden': return '✨';
+                    case 'hearts': return '💖';
+                    case 'line': return '━';
+                    default: return '✨';
+                }
+            }
+
+            setupPreviewButtons() {
+                document.querySelectorAll('.preview-button').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const trailName = button.getAttribute('data-trail');
+                        const trailConfig = this.trailManager.trailConfigs[trailName];
+                        
+                        if (this.currentPreviewTrail === trailName) {
+                            // Stop preview
+                            this.stopPreview();
+                        } else {
+                            // Start preview
+                            this.startPreview(trailName, trailConfig);
+                        }
+                    });
+                });
+            }
+
+            startPreview(trailName, trailConfig) {
+                this.stopPreview();
+                
+                this.currentPreviewTrail = trailName;
+                this.trailManager.startPreview(trailConfig);
+                
+                // Update button states
+                document.querySelectorAll('.preview-button').forEach(btn => {
+                    btn.classList.remove('active');
+                    btn.textContent = 'Preview Trail';
+                });
+                
+                const activeButton = document.querySelector(`[data-trail="${trailName}"]`);
+                if (activeButton) {
+                    activeButton.classList.add('active');
+                    activeButton.textContent = 'Stop Preview';
+                }
+            }
+
+            stopPreview() {
+                if (this.currentPreviewTrail) {
+                    this.trailManager.stopPreview();
+                    this.currentPreviewTrail = null;
+                    
+                    document.querySelectorAll('.preview-button').forEach(btn => {
+                        btn.classList.remove('active');
+                        btn.textContent = 'Preview Trail';
+                    });
+                }
+            }
+
+            formatTrailName(name) {
+                if (!name) return 'Unknown';
+                return name.charAt(0).toUpperCase() + name.slice(1).replace(/_/g, ' ').replace(/-/g, ' ');
+            }
+        }
+
+        // Add CSS animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes sparkle-twinkle {
+                0%, 100% { opacity: 1; transform: scale(1); }
+                50% { opacity: 0.7; transform: scale(1.2); }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            window.trailsManager = new TrailsDisplayManager();
+        });
+
+        // Clean up on page unload
+        window.addEventListener('beforeunload', () => {
+            if (window.trailsManager) {
+                window.trailsManager.stopPreview();
+            }
+        });
+    </script>
+</body>
+</html> 
