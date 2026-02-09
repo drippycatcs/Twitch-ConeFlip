@@ -3,6 +3,7 @@ const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs').promises;
+const fsSync = require('fs');
 const { asyncHandler } = require('../middleware/errorHandler');
 const { requireDebugAuth, requireModeratorAuth } = require('../middleware/tokenAuth');
 const { validateSetSkin, validateAddCone, createRateLimiter } = require('../middleware/validation');
@@ -20,6 +21,7 @@ const submissionRateLimit = createRateLimiter(60 * 60 * 1000, 5); // 5 submissio
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         const uploadDir = path.join(__dirname, '../../uploads/submissions');
+        fsSync.mkdirSync(uploadDir, { recursive: true });
         cb(null, uploadDir);
     },
     filename: (req, file, cb) => {
@@ -328,7 +330,7 @@ router.post('/submit',
         }
         
         // Create submission entry
-        const submission = SubmissionService.addSubmission({
+        const submission = await SubmissionService.addSubmission({
             name: skinName.trim(),
             author: authorName.trim(),
             filename: req.file.filename,

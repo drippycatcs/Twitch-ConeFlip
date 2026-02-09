@@ -261,6 +261,37 @@ router.post('/simulate/unbox',
     })
 );
 
+// Simulate buy cone (fuzzy matching test - goes through actual TwitchService chat flow)
+router.post('/simulate/buycone',
+    requireDebugAuth,
+    asyncHandler(async (req, res) => {
+        const {
+            username = 'debug_user',
+            input = ''
+        } = req.body;
+
+        if (!input.trim()) {
+            return res.status(400).json({
+                status: 'error',
+                message: 'Cone name input is required'
+            });
+        }
+
+        // Set pending state like a real redeem would, then process
+        TwitchService.pendingBuyCone.set(username, { skin: null, timestamp: Date.now() });
+        setTimeout(() => TwitchService.pendingBuyCone.delete(username), 60000);
+        await TwitchService._processBuyConeInput(username, input.trim());
+
+        logger.info('Debug buy cone simulation', { username, input });
+
+        res.json({
+            status: 'success',
+            message: `Simulated buy cone for ${username} with input "${input}" - check Twitch chat for response`,
+            data: { username, input }
+        });
+    })
+);
+
 // Add test users to leaderboard
 router.post('/populate/users',
     requireDebugAuth,

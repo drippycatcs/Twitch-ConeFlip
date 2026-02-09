@@ -1522,7 +1522,7 @@
                 try {
                     // Get skin config and seasonal skin info in parallel
                     const [configResponse, seasonalResponse] = await Promise.all([
-                        fetch('/skins/config.json'),
+                        fetch('/skins/config.json?' + Date.now()),
                         fetch('/api/skins/seasonal')
                     ]);
                     const skinConfig = await configResponse.json();

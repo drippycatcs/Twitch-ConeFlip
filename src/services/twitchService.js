@@ -37,6 +37,9 @@ class TwitchService {
             '!bombdrippycat': 5000 // 5 seconds global
         };
 
+        // Pending buy cone confirmations: Map<username, { skin, timestamp }>
+        this.pendingBuyCone = new Map();
+
         // Periodic cleanup of caches and cooldowns every 15 minutes
         this._cleanupInterval = setInterval(() => {
             this._cleanupExpiredEntries();
@@ -181,6 +184,14 @@ class TwitchService {
 
     async handleChatMessage(channel, tags, message) {
         try {
+            const username = tags.username || 'unknown';
+
+            // Check for pending buy cone confirmation before filtering on !
+            if (this.pendingBuyCone.has(username)) {
+                await this._handleBuyConeResponse(username, tags, message.trim());
+                return;
+            }
+
             // Only process messages that start with !
             if (!message.startsWith('!')) return;
 
@@ -189,7 +200,6 @@ class TwitchService {
             }
             
             // Use ONLY login name (username) - never use display name
-            const username = tags.username || 'unknown';
             const userId = tags['user-id'];
             const isMod = tags.mod || tags['user-type'] === 'mod' || tags.username === 'drippycatcs';
             const isBroadcaster = tags.badges?.broadcaster === '1';
@@ -370,32 +380,16 @@ class TwitchService {
                 }
 
                 if (!userInput || !userInput.trim()) {
-                    await this.sendChatMessage(`@${username} Please specify which cone skin you want to buy! Example: "glorp" or "fade"`);
-                    logger.info(`Buy cone redemption failed for ${username}: No skin specified`);
-                    return;
+                    const skinsUrl = `${config.BASE_URL}/skins-all`;
+                    await this.sendChatMessage(`@${username} Please type the name of the cone you want in chat! Browse all cones here: ${skinsUrl}`);
                 }
 
-                const requestedSkin = userInput.trim().toLowerCase();
-                logger.info(`Buy cone redemption: ${username} requested "${requestedSkin}"`);
+                // Set pending state - one purchase allowed per redeem, auto-expire after 60s
+                this.pendingBuyCone.set(username, { skin: null, timestamp: Date.now() });
+                setTimeout(() => this.pendingBuyCone.delete(username), 60000);
 
-                // Check if the requested skin is valid
-                if (!this.skinService.isValidSkin(requestedSkin)) {
-                    await this.sendChatMessage(`@${username} Sorry! "${requestedSkin}" is not a valid cone skin. Check /commands for available skins.`);
-                    logger.info(`Buy cone redemption failed for ${username}: Invalid skin "${requestedSkin}"`);
-                    return;
-                }
-
-                try {
-                    // Set the specific skin and add to inventory
-                    const twitchId = await this.getTwitchId(username);
-                    await this.skinService.setSkin(username, requestedSkin, twitchId);
-                    await this.skinService.addSkinToInventory(username, requestedSkin, twitchId, 1);
-                    
-                    await this.sendChatMessage(`@${username} Successfully bought the "${requestedSkin}" cone skin! 🎉`);
-                    logger.info(`Buy cone redemption successful for ${username}: ${requestedSkin}`);
-                } catch (error) {
-                    await this.sendChatMessage(`@${username} Error processing your cone purchase. Please try again.`);
-                    logger.error(`Buy cone redemption error for ${username}:`, error);
+                if (userInput && userInput.trim()) {
+                    await this._processBuyConeInput(username, userInput.trim());
                 }
                 
             } else if (rewardId === config.TWITCH.BUY_TRAIL_REWARD) {
@@ -842,6 +836,82 @@ class TwitchService {
     // Helper function to parse username from @username format
     parseUsername(input) {
         return input.replace(/^@/, '').toLowerCase().trim();
+    }
+
+    async _processBuyConeInput(username, input) {
+        // Only search buyable (canUnbox) skins - no gold, default, or special skins
+        const result = this.skinService.findClosestSkin(input, { buyableOnly: true });
+
+        if (!result) {
+            // No match at all - send link to skins page and ask to try again
+            const skinsUrl = `${config.BASE_URL}/skins-all`;
+            await this.sendChatMessage(`@${username} Couldn't find a buyable cone matching "${input}". Browse all cones here: ${skinsUrl} - then type the name in chat!`);
+            // Keep pending open for retry but don't reset (preserves single-purchase limit)
+            const pending = this.pendingBuyCone.get(username);
+            if (pending) {
+                pending.skin = null;
+                pending.timestamp = Date.now();
+            }
+            return;
+        }
+
+        if (result.exact) {
+            // Exact match - give it directly and clear pending (one purchase per redeem)
+            this.pendingBuyCone.delete(username);
+            await this._giveBuyConeSkin(username, result.match);
+        } else {
+            // Partial match - ask for confirmation
+            await this.sendChatMessage(`@${username} Did you mean "${result.match}"? Type yes or no in chat!`);
+            const pending = this.pendingBuyCone.get(username);
+            if (pending) {
+                pending.skin = result.match;
+                pending.timestamp = Date.now();
+            }
+        }
+    }
+
+    async _handleBuyConeResponse(username, tags, message) {
+        const pending = this.pendingBuyCone.get(username);
+        if (!pending) return;
+
+        // Check if expired (60 seconds)
+        if (Date.now() - pending.timestamp > 60000) {
+            this.pendingBuyCone.delete(username);
+            return;
+        }
+
+        const lower = message.toLowerCase();
+
+        if (pending.skin) {
+            // We asked "did you mean X?" - waiting for yes/no
+            if (lower === 'yes' || lower === 'y') {
+                // Clear pending BEFORE giving skin (one purchase per redeem)
+                this.pendingBuyCone.delete(username);
+                await this._giveBuyConeSkin(username, pending.skin);
+            } else if (lower === 'no' || lower === 'n') {
+                const skinsUrl = `${config.BASE_URL}/skins-all`;
+                await this.sendChatMessage(`@${username} No problem! Browse all cones here: ${skinsUrl} - then type the name in chat!`);
+                pending.skin = null;
+                pending.timestamp = Date.now();
+            }
+            // Ignore other messages while waiting for yes/no
+        } else {
+            // No skin suggested yet - treat their message as a new skin name attempt
+            await this._processBuyConeInput(username, message);
+        }
+    }
+
+    async _giveBuyConeSkin(username, skinName) {
+        try {
+            const twitchId = await this.getTwitchId(username);
+            await this.skinService.setSkin(username, skinName, twitchId);
+            await this.skinService.addSkinToInventory(username, skinName, twitchId, 1);
+            await this.sendChatMessage(`@${username} Successfully bought the "${skinName}" cone skin!`);
+            logger.info(`Buy cone redemption successful for ${username}: ${skinName}`);
+        } catch (error) {
+            await this.sendChatMessage(`@${username} Error processing your cone purchase. Please try again.`);
+            logger.error(`Buy cone redemption error for ${username}:`, error);
+        }
     }
 
     async sendChatMessage(message) {

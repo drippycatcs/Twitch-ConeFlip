@@ -1,3 +1,22 @@
+## [Release 09/02/2026]
+
+### Added
+- **Buy Cone Reward** - Use the Buy Cone channel point redeem to purchase a specific cone skin! Supports fuzzy matching so typos and partial names work. If no match is found, you'll get a link to browse all available cones
+
+### Changed
+- **Tier Rework** - Gold tier is now exclusively for trail unboxes. Updated tier odds: 55% Mil-Spec, 27.5% Restricted, 10.5% Classified, 3.5% Covert, 3.5% Gold (trails)
+- Unbox animation is now 2 seconds longer
+- Unbox chat message is delayed by 3 additional seconds
+
+### Fixed
+- Fixed cone submissions showing "submitted by undefined"
+- Fixed uploads/submissions directory not being created automatically
+- Fixed skins page caching preventing new skins from appearing
+- Fixed Buy Cone allowing purchase of non-unboxable skins (gold, default, special)
+- Fixed Buy Cone allowing infinite purchases from a single redeem
+
+---
+
 ## [Release 01/02/2026]
 
 ### Added

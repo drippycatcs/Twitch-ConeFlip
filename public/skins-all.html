@@ -593,7 +593,7 @@
         <div class="tier-filter-container">
             <div class="tier-filter-buttons">
                 <span class="tier-filter-label">Jump to Tier:</span>
-                <a href="#tier-gold" class="tier-button gold">Exceedingly Rare Grade</a>
+                <a href="#tier-gold" class="tier-button gold">Gold Grade (Trails)</a>
                 <a href="#tier-covert" class="tier-button covert">Covert Grade</a>
                 <a href="#tier-classified" class="tier-button classified">Classified Grade</a>
                 <a href="#tier-restricted" class="tier-button restricted">Restricted Grade</a>
@@ -621,9 +621,9 @@
 
             async loadSkins() {
                 try {
-                    const response = await fetch('/skins/config.json');
+                    const response = await fetch('/skins/config.json?' + Date.now());
                     const skinConfig = await response.json();
-                    
+
                     if (skinConfig && Array.isArray(skinConfig)) {
                         this.displaySkins(skinConfig);
                     } else {
@@ -645,7 +645,7 @@
                 
                 // All tiers in order - ALWAYS show all tiers, even if empty
                 const rarityOrder = [
-                    { name: 'Exceedingly Rare Grade', icon: '', id: 'tier-gold' },
+                    { name: 'Gold Grade (Trails)', icon: '', id: 'tier-gold' },
                     { name: 'Covert Grade', icon: '', id: 'tier-covert' },
                     { name: 'Classified Grade', icon: '', id: 'tier-classified' },
                     { name: 'Restricted Grade', icon: '', id: 'tier-restricted' },
@@ -682,8 +682,22 @@
 
             createRaritySection(rarity, skins, icon, allSkins, sectionId) {
                 let content;
-                
-                if (skins.length === 0) {
+
+                if (rarity === 'Gold Grade (Trails)') {
+                    content = `
+                        <div class="special-note" style="margin-bottom: 15px;">Gold tier is exclusive to trail unboxes. When you hit gold during a skin unbox, you receive a random trail instead.</div>
+                        <a href="/trails" style="text-decoration: none; display: block;">
+                            <div class="skin-item" style="cursor: pointer; text-align: center;">
+                                <div class="skin-info" style="flex-direction: column; align-items: center; gap: 12px;">
+                                    <img src="/trail_special_item.png" alt="Trail Unbox" style="width: 80px; height: 80px; object-fit: contain;">
+                                    <div class="skin-details" style="text-align: center;">
+                                        <h4 style="color: #FFA500;">Trail Unbox</h4>
+                                        <p style="color: var(--text-secondary);">Click to view all trails</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>`;
+                } else if (skins.length === 0) {
                     // Empty tier
                     content = `<div class="empty-tier">No ${rarity.toLowerCase()} tier skins yet</div>`;
                 } else {
@@ -695,11 +709,11 @@
                 // Get the percentage for this rarity tier with styling
                 const getPercentage = (rarityName) => {
                     switch(rarityName) {
-                        case 'Exceedingly Rare Grade': return '<span class="rarity-percentage gold-tier">0.26%</span>';
-                        case 'Covert Grade': return '<span class="rarity-percentage covert-tier">2.4%</span>';
-                        case 'Classified Grade': return '<span class="rarity-percentage classified-tier">6.8%</span>';
-                        case 'Restricted Grade': return '<span class="rarity-percentage restricted-tier">18%</span>';
-                        case 'Mil-Spec Grade': return '<span class="rarity-percentage milspec-tier">72.54%</span>';
+                        case 'Gold Grade (Trails)': return '<span class="rarity-percentage gold-tier">3.5%</span>';
+                        case 'Covert Grade': return '<span class="rarity-percentage covert-tier">3.5%</span>';
+                        case 'Classified Grade': return '<span class="rarity-percentage classified-tier">10.5%</span>';
+                        case 'Restricted Grade': return '<span class="rarity-percentage restricted-tier">27.5%</span>';
+                        case 'Mil-Spec Grade': return '<span class="rarity-percentage milspec-tier">55%</span>';
                         case 'Special': return ''; // No percentage for special skins
                         default: return '';
                     }
@@ -789,11 +803,10 @@
                 
                 // Use new tier-based odds calculation
                 const tierOdds = {
-                    'gold': 0.26,
-                    'covert': 2.4,
-                    'classified': 6.8,
-                    'restricted': 18,
-                    'mil-spec': 72.54
+                    'covert': 3.5,
+                    'classified': 10.5,
+                    'restricted': 27.5,
+                    'mil-spec': 55
                 };
 
                 // Determine skin's tier

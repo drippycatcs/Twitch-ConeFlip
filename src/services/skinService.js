@@ -14,11 +14,11 @@ class SkinService {
 
         // Fixed tier percentages
         this.tierOdds = {
-            'gold': 2.4,        // 2.4% for gold (trail unbox)
-            'covert': 2.4,      // 2.4% for red (covert)
-            'classified': 6.8,  // 6.8% for pink (classified)
-            'restricted': 18,   // 18% for purple (restricted)
-            'mil-spec': 68.4    // 68.4% for blue (mil-spec)
+            'gold': 3.5,        // 3.5% for gold (trail unbox ONLY)
+            'covert': 3.5,      // 3.5% for red (covert)
+            'classified': 10.5, // 10.5% for pink (classified)
+            'restricted': 27.5, // 27.5% for purple (restricted)
+            'mil-spec': 55      // 55% for blue (mil-spec)
         };
 
         this.trailService = null; // Injected later for trail unboxing
@@ -93,7 +93,6 @@ class SkinService {
     // Get skins grouped by tier for the new system
     getSkinsByTier() {
         const skinsByTier = {
-            'gold': [],
             'covert': [],
             'classified': [],
             'restricted': [],
@@ -331,6 +330,47 @@ class SkinService {
         return Object.keys(this.availableSkins).some(key => key.toLowerCase() === normalizedSkinName);
     }
 
+    // Find the closest matching skin name (fuzzy match)
+    // Returns { exact, match } where exact is true if it's a perfect match
+    findClosestSkin(input, { buyableOnly = false } = {}) {
+        const normalized = input.toLowerCase().replace(/[^a-z0-9 ]/g, '').trim();
+        let allSkins;
+
+        if (buyableOnly) {
+            // Only match skins that can be unboxed (excludes gold, default, special skins)
+            allSkins = this.skinConfig
+                .filter(s => s.canUnbox)
+                .map(s => s.name);
+        } else {
+            allSkins = Object.keys(this.availableSkins);
+        }
+
+        // 1. Exact match (case insensitive)
+        const exact = allSkins.find(s => s.toLowerCase() === normalized);
+        if (exact) return { match: exact, exact: true };
+
+        // 2. Exact match ignoring spaces/underscores
+        const compacted = normalized.replace(/[\s_-]/g, '');
+        const compactMatch = allSkins.find(s => s.toLowerCase().replace(/[\s_-]/g, '') === compacted);
+        if (compactMatch) return { match: compactMatch, exact: true };
+
+        // 3. Input contains a skin name or skin name contains input
+        const containsMatch = allSkins.find(s => {
+            const sLower = s.toLowerCase();
+            return sLower.includes(normalized) || normalized.includes(sLower);
+        });
+        if (containsMatch) return { match: containsMatch, exact: false };
+
+        // 4. Any word in the input matches part of a skin name
+        const words = normalized.split(/\s+/).filter(w => w.length >= 3);
+        for (const word of words) {
+            const wordMatch = allSkins.find(s => s.toLowerCase().includes(word));
+            if (wordMatch) return { match: wordMatch, exact: false };
+        }
+
+        return null;
+    }
+
     getSkinsAvailableToUnbox() {
         return this.skinConfig.filter(skin => skin.canUnbox);
     }
@@ -355,6 +395,10 @@ class SkinService {
         const tierSkins = skinsByTier[selectedTier] || [];
 
         if (tierSkins.length === 0) {
+            // Gold tier = trail unbox (no skins in gold tier)
+            if (selectedTier === 'gold') {
+                return { name: '__trail__', tier: 'gold', rarity: 'Gold', isTrailUnbox: true };
+            }
             // Fallback to mil-spec tier if selected tier has no skins
             const fallbackSkins = skinsByTier['mil-spec'];
             if (fallbackSkins.length === 0) {

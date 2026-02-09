@@ -322,11 +322,11 @@
 
     // Fixed tier percentages
     const tierOdds = {
-      'gold': 2.4,
-      'covert': 2.4,
-      'classified': 6.8,
-      'restricted': 18,
-      'mil-spec': 68.4
+      'gold': 3.5,
+      'covert': 3.5,
+      'classified': 10.5,
+      'restricted': 27.5,
+      'mil-spec': 55
     };
 
     // Assign rarity based on unboxWeight using new tier system.
@@ -352,9 +352,8 @@
         .then(data => {
           console.log('DEBUG: Raw config.json data:', data);
           
-          // Group skins by tier first
+          // Group skins by tier first (gold excluded - trails only)
           const skinsByTier = {
-            'gold': [],
             'covert': [],
             'classified': [],
             'restricted': [],
@@ -382,7 +381,7 @@
             for (const skin of tierSkins) {
               const rarity = assignRarity(skin.unboxWeight || 0);
               let skinProbability;
-              
+
               if (totalTierWeight === 0) {
                 // If no weights in tier, equal distribution
                 skinProbability = tierPercentage / tierSkins.length;
@@ -403,7 +402,7 @@
               });
             }
           }
-          // Add special trail unbox item (gold tier)
+          // Add special trail unbox item (gold tier - trails only)
           cones.push({
             name: '__trail__',
             visuals: 'trail_special_item.png',
@@ -439,9 +438,8 @@
         const data = await response.json();
         console.log('DEBUG: Raw config.json data (async):', data);
         
-        // Group skins by tier first
+        // Group skins by tier first (gold excluded - trails only)
         const skinsByTier = {
-          'gold': [],
           'covert': [],
           'classified': [],
           'restricted': [],
@@ -469,7 +467,7 @@
           for (const skin of tierSkins) {
             const rarity = assignRarity(skin.unboxWeight || 0);
             let skinProbability;
-            
+
             if (totalTierWeight === 0) {
               // If no weights in tier, equal distribution
               skinProbability = tierPercentage / tierSkins.length;
@@ -490,7 +488,7 @@
             });
           }
         }
-        // Add special trail unbox item (gold tier)
+        // Add special trail unbox item (gold tier - trails only)
         cones.push({
           name: '__trail__',
           visuals: 'trail_special_item.png',
@@ -784,7 +782,7 @@
         const winningPosition = pointerOffset - winningConeCenter;
 
         const itemRibbon = document.getElementById("itemRibbon");
-        itemRibbon.style.transition = "transform 5s cubic-bezier(0.25, 1, 0.5, 1)";
+        itemRibbon.style.transition = "transform 7s cubic-bezier(0.25, 1, 0.5, 1)";
         itemRibbon.style.transform = `translateX(${winningPosition}px)`;
 
         // After the animation ends, display the result in the footer.
@@ -798,10 +796,10 @@
             setTimeout(() => {
               console.log('DEBUG: Emitting unboxfinished event with message:', message);
               socket.emit('unboxfinished', message);
-            }, 1000);
+            }, 4000);
             resetUI();
           }, 3000);
-        }, 5000);
+        }, 7000);
       }, 1000); // 1000 ms wait after fade in
     }
   </script>

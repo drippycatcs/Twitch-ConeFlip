@@ -36,11 +36,11 @@ router.get('/available', asyncHandler(async (req, res) => {
 // Get trail odds for unboxing
 router.get('/odds', asyncHandler(async (req, res) => {
     const odds = {
-        'gold': 0.26,
-        'covert': 2.4,
-        'classified': 6.8,
-        'restricted': 18,
-        'mil-spec': 72.54
+        'gold': 3.5,
+        'covert': 3.5,
+        'classified': 10.5,
+        'restricted': 27.5,
+        'mil-spec': 55
     };
     res.json({
         status: 'success',
