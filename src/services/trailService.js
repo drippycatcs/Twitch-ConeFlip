@@ -12,11 +12,11 @@ class TrailService {
         
         // Fixed tier percentages (same as skins)
         this.tierOdds = {
-            'gold': 3.5,        // 3.5% for gold (trail unbox tier)
+            'gold': 2,          // 2% for gold (trail unbox tier)
             'covert': 3.5,      // 3.5% for red (covert)
             'classified': 10.5, // 10.5% for pink (classified)
             'restricted': 27.5, // 27.5% for purple (restricted)
-            'mil-spec': 55      // 55% for blue (mil-spec)
+            'mil-spec': 56.5    // 56.5% for blue (mil-spec)
         };
     }
 

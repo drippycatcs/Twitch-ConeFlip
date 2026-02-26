@@ -2278,7 +2278,7 @@
                 <div class="form-group" id="approvalWeightGroup">
                     <label for="approvalUnboxWeight">Unbox Weight (rarity):</label>
                     <input type="number" id="approvalUnboxWeight" min="1" max="100" value="15" />
-                                                <small style="color: #6b7280;">Tier ranges: ≥30 = Mil-Spec (55%), ≥15 = Restricted (27.5%), ≥9 = Classified (10.5%), ≥5 = Covert (3.5%), <5 = Gold/Trails (3.5%)</small>
+                                                <small style="color: #6b7280;">Tier ranges: ≥30 = Mil-Spec (56.5%), ≥15 = Restricted (27.5%), ≥9 = Classified (10.5%), ≥5 = Covert (3.5%), <5 = Gold/Trails (2%)</small>
                 </div>
             </div>
             <div class="modal-footer">
@@ -2311,7 +2311,7 @@
                 <div class="form-group" id="unboxWeightGroup">
                     <label for="editUnboxWeight">Unbox Weight:</label>
                     <input type="number" id="editUnboxWeight" min="0" max="100" />
-                                                <small>Tier ranges: ≥30 = Mil-Spec (55%), ≥15 = Restricted (27.5%), ≥9 = Classified (10.5%), ≥5 = Covert (3.5%), <5 = Gold/Trails (3.5%)</small>
+                                                <small>Tier ranges: ≥30 = Mil-Spec (56.5%), ≥15 = Restricted (27.5%), ≥9 = Classified (10.5%), ≥5 = Covert (3.5%), <5 = Gold/Trails (2%)</small>
                 </div>
                 
                 <div class="form-group">
@@ -3297,11 +3297,11 @@
 
         // Tier helper function for new rarity system
         function getTierFromWeight(weight) {
-            if (weight >= 30) return 'Mil-Spec (55%)';
+            if (weight >= 30) return 'Mil-Spec (56.5%)';
             if (weight >= 15) return 'Restricted (27.5%)';
             if (weight >= 9) return 'Classified (10.5%)';
             if (weight >= 5) return 'Covert (3.5%)';
-            return 'Gold / Trails (3.5%)';
+            return 'Gold / Trails (2%)';
         }
 
         // System Functions

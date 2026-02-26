@@ -1,10 +1,27 @@
+## [Release 26/02/2026]
+
+### Added
+- **New Unbox Animation** - Completely redesigned unbox overlay with crate opening animation, glassmorphism item cards, diamond pointer, vignette edges, and smooth transitions
+- **Unboxer Avatar on Crate** - The crate now shows the unboxer's 7TV avatar (falls back to Twitch profile pic, then placeholder)
+- **Tick Sound System** - Scroll ticks with velocity-based playback rate for a satisfying CS:GO-style roll feel
+- **Tier Celebrations** - Screen flash and glow pulse effects for Classified, Covert, and Gold unboxes
+- **Winner Reveal Animation** - Pop and glow animation when the winning skin is revealed
+- **New Unbox Sounds** - Dedicated tick, start, and per-tier reveal sounds
+### Changed
+- Unbox overlay now uses Chakra Petch and Rajdhani fonts
+- Unbox roll duration increased to 8 seconds with more filler items (40 before, 5 after)
+- Sound volume now syncs with the admin panel volume setting (live updates via socket)
+- Item cards now display cone names below the image
+
+---
+
 ## [Release 09/02/2026]
 
 ### Added
 - **Buy Cone Reward** - Use the Buy Cone channel point redeem to purchase a specific cone skin! Supports fuzzy matching so typos and partial names work. If no match is found, you'll get a link to browse all available cones
 
 ### Changed
-- **Tier Rework** - Gold tier is now exclusively for trail unboxes. Updated tier odds: 55% Mil-Spec, 27.5% Restricted, 10.5% Classified, 3.5% Covert, 3.5% Gold (trails)
+- **Tier Rework** - Gold tier is now exclusively for trail unboxes. Updated tier odds: 56.5% Mil-Spec, 27.5% Restricted, 10.5% Classified, 3.5% Covert, 2% Gold (trails)
 - Unbox animation is now 2 seconds longer
 - Unbox chat message is delayed by 3 additional seconds
 

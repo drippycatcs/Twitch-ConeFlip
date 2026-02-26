@@ -298,6 +298,26 @@ class SocketHandler {
             }
         });
 
+        // Handle unbox animation finished from overlay client
+        socket.on('unboxfinished', async (unboxId) => {
+            if (typeof unboxId !== 'string' || !unboxId.startsWith('unbox_')) {
+                logger.warn(`Invalid unboxfinished event from ${socket.id}: ${unboxId}`);
+                return;
+            }
+
+            try {
+                const GameService = require('../services/gameService');
+                const completed = await GameService.completeUnbox(unboxId);
+                if (completed) {
+                    logger.info(`Unbox animation confirmed: ${unboxId}`);
+                } else {
+                    logger.warn(`Unbox complete rejected for ${unboxId} from ${socket.id}`);
+                }
+            } catch (error) {
+                logger.error(`Failed to process unboxfinished for ${unboxId}:`, error);
+            }
+        });
+
         // Send welcome message
         socket.emit('connected', {
             message: 'Connected to ConeFlip server',

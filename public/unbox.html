@@ -3,125 +3,258 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cone Unboxing</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Duru+Sans&family=Manrope:wght@200..800&display=swap" rel="stylesheet">
-  <title>Cone Unboxing Simulator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
   <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg-card: rgba(18, 18, 28, 0.65);
+      --border-card: rgba(255, 255, 255, 0.06);
+      --item-w: 180px;
+      --item-gap: 6px;
+      --item-total: calc(var(--item-w) + var(--item-gap));
+      --ribbon-h: 220px;
+      --pointer-color: #FF6B2B;
+    }
+
     body {
-      font-family: 'Duru Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      margin: 0;
+      font-family: 'Chakra Petch', sans-serif;
       background: transparent;
       overflow: hidden;
-      height: 170vh;
-    display: flex
-;
-    align-items: center;
-    justify-content: center;
-
-
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding-bottom: 5vh;
     }
-    /* Overlay container positioned 15% from the bottom, centered, with fade in/out */
-    #unboxOverlay {
+
+    /* ── Overlay wrapper ── */
+    #overlay {
       display: none;
-
-      width: 70vw;
-      transform: scale(0.6);
-      max-width: 1000px;
-      z-index: 1000;
-      transition: opacity 0.5s ease;
+      width: 90vw;
+      max-width: 1400px;
+      transform: scale(0.85);
+      transform-origin: center center;
       opacity: 0;
+      transition: opacity 0.4s ease, transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
     }
-    #unboxOverlay.show {
+    #overlay.entering {
+      display: block;
+      opacity: 0;
+      transform: scale(0.80);
+    }
+    #overlay.visible {
+      display: block;
       opacity: 1;
+      transform: scale(0.85);
     }
-    /* Main container for unbox animation and text */
-    #unboxContainer {
-     
- 
-      padding: 20px;
-      border-radius: 10px;
+    #overlay.exiting {
+      display: block;
+      opacity: 0;
+      transform: scale(0.80);
+    }
 
-      width: 100%;
-      max-width: 1000px;
+    /* ── Header ── */
+    #header {
       text-align: center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-    }
-    /* Header and footer areas have fixed height to reserve space */
-    #unboxHeader, #unboxFooter {
-      width: 100%;
-      height: 60px;
+      margin-bottom: 14px;
+      height: 48px;
       display: flex;
       align-items: center;
       justify-content: center;
     }
-    #unboxUserName {
-      font-size: 35px;
-      font-weight: bold;
+    #userName {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 30px;
+      font-weight: 700;
       color: #fff;
-      text-shadow: 1px 1px 2px #000;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      text-shadow:
+        0 0 20px rgba(255, 107, 43, 0.4),
+        0 2px 4px rgba(0, 0, 0, 0.8);
     }
-    #result {
-      font-size: 35px;
-      font-weight: bold;
-      color: #fff;
-      text-shadow: 1px 1px 3px #000;
+    #userName span {
+      color: var(--pointer-color);
     }
-    /* Container for the animation itself */
-    #animationContainer {
-      width: 100%;
-      height: 200px;
+
+    /* ── Ribbon viewport ── */
+    #viewport {
       position: relative;
-    }
-    #caseContainer {
       width: 100%;
-      height: 100%;
+      height: var(--ribbon-h);
       overflow: hidden;
-  
-     
-      border-radius: 5px;
-      position: relative;
-      margin: 0 auto;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.04),
+        0 0 60px rgba(0, 0, 0, 0.5),
+        0 0 120px rgba(0, 0, 0, 0.2);
     }
-    #itemRibbon {
-      display: flex;
+
+    /* ── Vignette edges ── */
+    #viewport::before,
+    #viewport::after {
+      content: '';
       position: absolute;
+      top: 0;
+      width: 120px;
       height: 100%;
+      z-index: 5;
+      pointer-events: none;
     }
+    #viewport::before {
+      left: 0;
+      background: linear-gradient(to right, rgba(5, 5, 12, 0.95), transparent);
+    }
+    #viewport::after {
+      right: 0;
+      background: linear-gradient(to left, rgba(5, 5, 12, 0.95), transparent);
+    }
+
+    /* ── Pointer ── */
+    #pointer {
+      position: absolute;
+      top: -4px;
+      left: 50%;
+      width: 3px;
+      height: calc(100% + 8px);
+      transform: translateX(-50%);
+      z-index: 10;
+      background: var(--pointer-color);
+      box-shadow:
+        0 0 12px var(--pointer-color),
+        0 0 30px rgba(255, 107, 43, 0.3);
+      border-radius: 2px;
+    }
+    #pointer::before {
+      content: '';
+      position: absolute;
+      top: -6px;
+      left: 50%;
+      transform: translateX(-50%) rotate(45deg);
+      width: 10px;
+      height: 10px;
+      background: var(--pointer-color);
+      box-shadow: 0 0 10px var(--pointer-color);
+    }
+    #pointer::after {
+      content: '';
+      position: absolute;
+      bottom: -6px;
+      left: 50%;
+      transform: translateX(-50%) rotate(45deg);
+      width: 10px;
+      height: 10px;
+      background: var(--pointer-color);
+      box-shadow: 0 0 10px var(--pointer-color);
+    }
+
+    /* ── Ribbon track ── */
+    #ribbon {
+      display: flex;
+      gap: var(--item-gap);
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      will-change: transform;
+      padding: 0 3px;
+    }
+    #ribbon.animating {
+      transition: transform 8s cubic-bezier(0.15, 1, 0.35, 1);
+    }
+
+    /* ── Item card ── */
     .item {
-      width: 150px;
       flex-shrink: 0;
+      width: var(--item-w);
+      height: 100%;
+      position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      background-color: rgba(51, 51, 51, 0.5);
-      backdrop-filter: blur(10px);
-      color: white;
-      margin: 5px;
-      border-radius: 5px;
-      padding-bottom: 5px;
+      padding: 8px 6px 14px;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .item-inner {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      border-radius: 6px;
+      padding: 10px 6px 18px;
       position: relative;
+      background: var(--bg-card);
+      backdrop-filter: blur(16px) saturate(1.2);
+      -webkit-backdrop-filter: blur(16px) saturate(1.2);
+      border: 1px solid var(--border-card);
+      transition: filter 0.2s ease;
     }
+
+    .item-inner::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+    }
+
     .item img {
-      max-width: 100px;
-      max-height: 100px;
+      width: 112px;
+      height: 112px;
+      object-fit: contain;
+      image-rendering: auto;
+      filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.5));
+      transition: transform 0.2s ease;
     }
-    
+
+    .item-name {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.85);
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 140px;
+      letter-spacing: 0.5px;
+    }
+
+    .rarity-stripe {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      border-radius: 0 0 6px 6px;
+    }
+
+    /* ── Holo skins ── */
     .item-holo-container {
       position: relative;
-      width: 100px;
-      height: 100px;
+      width: 112px;
+      height: 112px;
     }
-    
     .item-holo-bg {
       position: absolute;
       top: 0;
       left: 0;
-      width: 100px;
-      height: 100px;
+      width: 112px;
+      height: 112px;
       background-size: 400%;
       background-position: center;
       background-repeat: no-repeat;
@@ -134,674 +267,999 @@
       -webkit-mask-position: center center;
       mask-position: center center;
     }
-    
     .item-holo-overlay {
       position: absolute;
       top: 0;
       left: 0;
-      width: 100px;
-      height: 100px;
+      width: 112px;
+      height: 112px;
     }
-    .item span {
-      font-size: 14px;
-      margin-top: 5px;
-      font-weight: bold;
+
+    /* ── Winner highlight ── */
+    .item.winner .item-inner {
+      background: rgba(18, 18, 28, 0.8);
+      border-color: rgba(255, 255, 255, 0.12);
     }
-    .rarity-line {
-      width: 100%;
+    .item.winner .rarity-stripe {
       height: 5px;
+    }
+
+    @keyframes winnerPop {
+      0% { transform: scale(1); }
+      40% { transform: scale(1.08); }
+      70% { transform: scale(0.97); }
+      100% { transform: scale(1); }
+    }
+    @keyframes winnerGlow {
+      0%, 100% { box-shadow: 0 0 15px var(--glow-color), inset 0 0 15px rgba(255,255,255,0.02); }
+      50% { box-shadow: 0 0 35px var(--glow-color), 0 0 60px var(--glow-color), inset 0 0 20px rgba(255,255,255,0.04); }
+    }
+    .item.winner.revealed .item-inner {
+      animation: winnerPop 0.5s ease forwards, winnerGlow 1.5s ease-in-out infinite 0.5s;
+      border-color: var(--glow-color);
+    }
+    .item.winner.revealed img {
+      transform: scale(1.06);
+    }
+
+    /* ── Footer result ── */
+    #footer {
+      text-align: center;
+      margin-top: 16px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #result {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 1px;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+    #result.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    #result .result-name {
+      text-shadow: 0 0 20px var(--result-color);
+    }
+
+    /* ── Celebration layers ── */
+    #celebrationLayer {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      pointer-events: none;
+    }
+
+    @keyframes screenFlash {
+      0% { opacity: 0.6; }
+      100% { opacity: 0; }
+    }
+    .screen-flash {
+      position: fixed;
+      inset: 0;
+      z-index: 99;
+      pointer-events: none;
+      animation: screenFlash 0.6s ease-out forwards;
+    }
+
+    @keyframes glowPulse {
+      0%, 100% { box-shadow: 0 0 30px var(--pulse-color), 0 0 60px var(--pulse-color); }
+      50% { box-shadow: 0 0 50px var(--pulse-color), 0 0 100px var(--pulse-color), 0 0 140px var(--pulse-color); }
+    }
+    #viewport.glow-pulse {
+      animation: glowPulse 1s ease-in-out 3;
+    }
+
+    /* ── Crate opening ── */
+    #crateContainer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+      pointer-events: none;
+      opacity: 0;
+    }
+    #crateContainer.visible { opacity: 1; transition: opacity 0.3s ease; }
+    #crateContainer.hidden { opacity: 0; transition: opacity 0.4s ease; }
+
+    #crate {
+      position: relative;
+      width: 200px;
+      height: 160px;
+      transform-style: preserve-3d;
+      perspective: 600px;
+    }
+
+    .crate-body {
       position: absolute;
       bottom: 0;
       left: 0;
-      border-radius: 0 0 5px 5px;
+      width: 100%;
+      height: 120px;
+      background: linear-gradient(180deg, #2a2510 0%, #1a1a08 60%, #12110a 100%);
+      border: 2px solid rgba(255, 215, 0, 0.35);
+      border-radius: 6px;
+      box-shadow:
+        0 4px 20px rgba(0, 0, 0, 0.6),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    #pointer {
+    .crate-avatar {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      object-fit: cover;
+      filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.3));
+      opacity: 0.85;
+    }
+    .crate-lock {
+      position: absolute;
+      top: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 20px;
+      height: 16px;
+      background: #FFD700;
+      border-radius: 3px;
+      z-index: 2;
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    }
+
+    .crate-lid {
+      position: absolute;
+      bottom: 108px;
+      left: -2px;
+      width: calc(100% + 4px);
+      height: 30px;
+      background: linear-gradient(180deg, #35301a 0%, #2a2510 100%);
+      border: 2px solid rgba(255, 215, 0, 0.35);
+      border-radius: 6px 6px 0 0;
+      transform-origin: left bottom;
+      transition: transform 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+
+    .crate-glow {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 160px;
+      height: 80px;
+      background: radial-gradient(ellipse at center bottom, rgba(255, 215, 0, 0.6), rgba(255, 215, 0, 0.2) 40%, transparent 70%);
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      filter: blur(8px);
+    }
+
+    @keyframes crateShake {
+      0%, 100% { transform: translateX(0) rotate(0deg); }
+      10% { transform: translateX(-4px) rotate(-1deg); }
+      20% { transform: translateX(4px) rotate(1deg); }
+      30% { transform: translateX(-6px) rotate(-1.5deg); }
+      40% { transform: translateX(6px) rotate(1.5deg); }
+      50% { transform: translateX(-4px) rotate(-1deg); }
+      60% { transform: translateX(4px) rotate(1deg); }
+      70% { transform: translateX(-3px) rotate(-0.5deg); }
+      80% { transform: translateX(3px) rotate(0.5deg); }
+      90% { transform: translateX(-1px) rotate(0deg); }
+    }
+    #crate.shaking {
+      animation: crateShake 0.8s ease-in-out;
+    }
+    #crate.open .crate-lid {
+      transform: rotateX(-110deg);
+    }
+    #crate.open .crate-glow {
+      opacity: 1;
+    }
+    #crate.open .crate-lock {
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    @keyframes crateZoomOut {
+      0% { transform: scale(1); opacity: 1; }
+      100% { transform: scale(2.5); opacity: 0; }
+    }
+    #crateContainer.zoom-out {
+      animation: crateZoomOut 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+    }
+
+    /* Hide viewport content during crate phase */
+    #viewport.crate-phase #ribbon,
+    #viewport.crate-phase #pointer {
+      opacity: 0;
+    }
+    #viewport.crate-phase #ribbon,
+    #viewport.crate-phase #pointer {
+      transition: opacity 0.3s ease;
+    }
+    #ribbon.reveal, #pointer.reveal {
+      opacity: 1 !important;
+      transition: opacity 0.3s ease !important;
+    }
+
+    /* ── Tick flash ── */
+    @keyframes tickFlash {
+      0% { opacity: 0.15; }
+      100% { opacity: 0; }
+    }
+    .tick-flash {
       position: absolute;
       top: 0;
       left: 50%;
-      width: 4px;
-      height: 100%;
-      background-color: #ff5500;
       transform: translateX(-50%);
-      z-index: 1010;
+      width: 60px;
+      height: 100%;
+      background: radial-gradient(ellipse at center, var(--pointer-color), transparent 70%);
+      z-index: 6;
+      pointer-events: none;
+      animation: tickFlash 0.1s ease-out forwards;
     }
+
   </style>
 </head>
 <body>
 
-  <script src="/socket.io/socket.io.js"></script>
-  <!-- Overlay container with fixed header, animation area, and footer -->
-  <div id="unboxOverlay">
-    <div id="unboxContainer">
-      <div id="unboxHeader">
-        <span id="unboxUserName"></span>
-      </div>
-      <div id="animationContainer">
-        <div id="caseContainer">
-          <div id="pointer"></div>
-          <div id="itemRibbon"></div>
-        </div>
-      </div>
-      <div id="unboxFooter">
-        <span id="result"></span>
+<div id="overlay">
+  <div id="header">
+    <div id="userName"></div>
+  </div>
+  <div id="viewport">
+    <div id="pointer"></div>
+    <div id="ribbon"></div>
+    <div id="crateContainer">
+      <div id="crate">
+        <div class="crate-glow"></div>
+        <div class="crate-body"><img id="crateAvatar" class="crate-avatar" src="" alt="" /></div>
+        <div class="crate-lock"></div>
+        <div class="crate-lid"></div>
       </div>
     </div>
   </div>
+  <div id="footer">
+    <div id="result"></div>
+  </div>
+</div>
 
-  <script>
-    // Socket.io connection
-    const socket = io();
-    // Queue system for unbox animations
-    const unboxQueue = [];
-    let isAnimating = false;
-    
-    // Socket connected (no authentication needed for unboxfinished events)
-    socket.on('connect', () => {
-      console.log('DEBUG: Socket connected to unbox page');
-      console.log('DEBUG: Socket ID:', socket.id);
-      console.log('DEBUG: Socket connected:', socket.connected);
-    });
+<div id="celebrationLayer"></div>
 
-    // Handle socket disconnection
-    socket.on('disconnect', (reason) => {
-      console.log('DEBUG: Socket disconnected:', reason);
-    });
+<script src="/socket.io/socket.io.js"></script>
+<script>
+(function() {
+  'use strict';
 
-    // Handle reconnection
-    socket.on('reconnect', (attemptNumber) => {
-      console.log('DEBUG: Socket reconnected after', attemptNumber, 'attempts');
-      // Reload cone configuration when reconnecting (in case server restarted)
-      console.log('DEBUG: Reloading cone configuration after reconnection...');
-      loadConesConfigurationAsync(); // Use async version for consistency
-    });
+  // ─── CONFIG ───
+  const tierOdds = {
+    'gold': 2,
+    'covert': 3.5,
+    'classified': 10.5,
+    'restricted': 27.5,
+    'mil-spec': 56.5
+  };
 
-    // Handle reconnection attempts
-    socket.on('reconnect_attempt', (attemptNumber) => {
-      console.log('DEBUG: Socket reconnection attempt', attemptNumber);
-    });
+  const rarityColors = {
+    'mil-spec': '#4B69FF',
+    'restricted': '#8847FF',
+    'classified': '#D32CE6',
+    'covert': '#EB4B4B',
+    'gold': '#FFA500'
+  };
 
-    // Handle reconnection errors
-    socket.on('reconnect_error', (error) => {
-      console.log('DEBUG: Socket reconnection error:', error);
-    });
-    
-    socket.on('authSuccess', () => {
-      console.log('DEBUG: Socket authenticated successfully');
-    });
-    
-    socket.on('authError', (data) => {
-      console.error('DEBUG: Socket authentication failed:', data);
-    });
-    
-    // Listen for the 'unboxSkinAnim' event which sends skin, userName, and message.
-    socket.on('unboxSkinAnim', (skin, userName, message) => {
-      console.log('DEBUG: ===== UNBOX EVENT RECEIVED =====');
-      console.log('DEBUG: Socket connected:', socket.connected);
-      console.log('DEBUG: Socket ID:', socket.id);
-      console.log('DEBUG: Event data:', { skin, userName, message });
-      console.log('DEBUG: Cones array length:', cones.length);
-      console.log('DEBUG: Available cone names:', cones.map(c => c.name));
-      console.log('DEBUG: ===== QUEUEING UNBOX =====');
-      queueUnbox(skin, userName, message);
-    });
+  const FILLER_BEFORE = 40;
+  const FILLER_AFTER = 5;
+  const WIN_INDEX = FILLER_BEFORE;
+  const ITEM_W = 180;
+  const ITEM_GAP = 6;
+  const ITEM_TOTAL = ITEM_W + ITEM_GAP;
 
+  // ─── HARDCODED SOUNDS ───
+  const SOUND_PATHS = {
+    tick: '/tick.wav',
+    start: '/start.wav',
+    'reveal_mil-spec': '/reveal_blue.wav',
+    'reveal_restricted': '/reveal_purple.wav',
+    'reveal_classified': '/reveal_pink.wav',
+    'reveal_covert': '/reveal_red.wav',
+    'reveal_gold': '/reveal_gold.wav',
+  };
 
-    socket.on('restart', () => {
-            location.reload(); // This reloads the page to restart the game
-    });
+  const audioCache = {};
+  let masterVolume = 1;
 
-    // Simple force refresh event - no bullshit, just reload
-    socket.on('forceRefresh', (data) => {
-      console.log('🔄 Force refresh signal received - reloading page immediately');
-      console.log('Refresh reason:', data.message);
-      location.reload();
-    });
-
-    // Flag to track if a refresh is pending
-    let pendingRefresh = false;
-
-    // Listen for configuration refresh events
-    socket.on('unboxConfigRefresh', () => {
-      console.log('DEBUG: ===== UNBOX CONFIG REFRESH EVENT =====');
-      console.log('DEBUG: Current animation state - isAnimating:', isAnimating, 'queueLength:', unboxQueue.length);
-      console.log('DEBUG: Current cones count:', cones.length);
-      console.log('DEBUG: Current cones:', cones.map(c => c.name));
-      
-      if (isAnimating || unboxQueue.length > 0) {
-        console.log('DEBUG: 🔄 Animation in progress or queue not empty, deferring refresh...');
-        pendingRefresh = true;
-      } else {
-        console.log('DEBUG: ✅ Safe to reload configuration immediately');
-        loadConesConfigurationAsync().then(() => {
-          console.log('DEBUG: ✅ Unbox config refresh completed. New cones:', cones.map(c => c.name));
-        });
-      }
-    });
-
-    // Also listen for general skin refresh events (for deletions/edits)
-    socket.on('skinRefresh', () => {
-      console.log('DEBUG: ===== SKIN REFRESH EVENT =====');
-      console.log('DEBUG: Current animation state - isAnimating:', isAnimating, 'queueLength:', unboxQueue.length);
-      console.log('DEBUG: Current cones count:', cones.length);
-      console.log('DEBUG: Current cones:', cones.map(c => c.name));
-      
-      if (isAnimating || unboxQueue.length > 0) {
-        console.log('DEBUG: 🔄 Animation in progress or queue not empty, deferring refresh...');
-        pendingRefresh = true;
-      } else {
-        console.log('DEBUG: ✅ Safe to reload configuration immediately');
-        loadConesConfigurationAsync().then(() => {
-          console.log('DEBUG: ✅ Skin refresh completed. New cones:', cones.map(c => c.name));
-        });
-      }
-    });
-
-    // Function to check and apply pending refresh
-    function checkPendingRefresh() {
-      if (pendingRefresh && !isAnimating && unboxQueue.length === 0) {
-        console.log('DEBUG: ===== APPLYING PENDING REFRESH =====');
-        console.log('DEBUG: Clearing pending refresh flag and reloading configuration...');
-        console.log('DEBUG: Current cones before pending refresh:', cones.map(c => c.name));
-        pendingRefresh = false;
-        loadConesConfigurationAsync().then(() => {
-          console.log('DEBUG: ✅ Pending refresh completed. New cones:', cones.map(c => c.name));
-        });
-      } else if (pendingRefresh) {
-        console.log('DEBUG: Pending refresh exists but conditions not met - isAnimating:', isAnimating, 'queueLength:', unboxQueue.length);
-      }
+  function loadSounds() {
+    for (const [key, url] of Object.entries(SOUND_PATHS)) {
+      const audio = new Audio(url);
+      audio.preload = 'auto';
+      audioCache[key] = audio;
     }
+    console.log('[Overlay] Loaded sounds:', Object.keys(SOUND_PATHS));
+  }
 
-    // CS:GO-like rarity colors - updated for new tier system
-    const rarityColors = {
-      "mil-spec": "#4A69FF",
-      restricted: "#8847ff",
-      classified: "#d32ce6",
-      covert: "#eb4b4b",
-      gold: "#FFA500"  // Orange for gold tier
+  async function loadAudioVolume() {
+    try {
+      const res = await fetch('/api/debug/settings/volume/public');
+      const data = await res.json();
+      masterVolume = Math.max(0, Math.min(100, data.volume ?? 100)) / 100;
+      console.log('[Overlay] Volume set to', Math.round(masterVolume * 100) + '%');
+    } catch (err) {
+      console.warn('[Overlay] Failed to load volume, defaulting to 100%');
+      masterVolume = 1;
+    }
+  }
+
+  function playSound(key) {
+    const audio = audioCache[key];
+    if (!audio) return;
+    const clone = audio.cloneNode();
+    clone.volume = (key === 'tick' ? 0.3 : 1.0) * masterVolume;
+    clone.play().catch(() => {});
+  }
+
+  // ─── STATE ───
+  let cones = [];
+  const unboxQueue = [];
+  let isAnimating = false;
+  let pendingRefresh = false;
+
+  // ─── DOM ───
+  const $overlay = document.getElementById('overlay');
+  const $userName = document.getElementById('userName');
+  const $viewport = document.getElementById('viewport');
+  const $ribbon = document.getElementById('ribbon');
+  const $result = document.getElementById('result');
+  const $celebration = document.getElementById('celebrationLayer');
+  const $crateContainer = document.getElementById('crateContainer');
+  const $crate = document.getElementById('crate');
+
+  // ─── SOCKET ───
+  const socket = io();
+
+  socket.on('connect', () => {
+    console.log('[Overlay] Connected:', socket.id);
+  });
+
+  socket.on('disconnect', (reason) => {
+    console.log('[Overlay] Disconnected:', reason);
+  });
+
+  socket.on('reconnect', (attemptNumber) => {
+    console.log('[Overlay] Reconnected after', attemptNumber, 'attempts');
+    loadConesConfigurationAsync();
+  });
+
+  socket.on('reconnect_attempt', (attemptNumber) => {
+    console.log('[Overlay] Reconnection attempt', attemptNumber);
+  });
+
+  socket.on('reconnect_error', (error) => {
+    console.log('[Overlay] Reconnection error:', error);
+  });
+
+  socket.on('authSuccess', () => {
+    console.log('[Overlay] Socket authenticated');
+  });
+
+  socket.on('authError', (data) => {
+    console.error('[Overlay] Socket auth failed:', data);
+  });
+
+  // Main unbox event from server (3rd param is now unboxId, not message)
+  socket.on('unboxSkinAnim', (skin, userName, unboxId) => {
+    console.log('[Overlay] unboxSkinAnim:', { skin, userName, unboxId });
+    queueUnbox(skin, userName, unboxId);
+  });
+
+  socket.on('restart', () => {
+    location.reload();
+  });
+
+  socket.on('forceRefresh', (data) => {
+    console.log('[Overlay] Force refresh:', data.message);
+    location.reload();
+  });
+
+  socket.on('unboxConfigRefresh', () => {
+    console.log('[Overlay] Config refresh event');
+    if (isAnimating || unboxQueue.length > 0) {
+      pendingRefresh = true;
+    } else {
+      loadConesConfigurationAsync();
+    }
+  });
+
+  socket.on('skinRefresh', () => {
+    console.log('[Overlay] Skin refresh event');
+    if (isAnimating || unboxQueue.length > 0) {
+      pendingRefresh = true;
+    } else {
+      loadConesConfigurationAsync();
+    }
+  });
+
+  socket.on('volumeUpdate', (data) => {
+    masterVolume = Math.max(0, Math.min(100, data.volume ?? 100)) / 100;
+    console.log('[Overlay] Volume updated to', Math.round(masterVolume * 100) + '%');
+  });
+
+  // ─── CONE LOADING ───
+  function assignRarity(weight) {
+    if (weight >= 30) return { label: 'Mil-Spec', color: rarityColors['mil-spec'], tier: 'mil-spec' };
+    if (weight >= 15) return { label: 'Restricted', color: rarityColors.restricted, tier: 'restricted' };
+    if (weight >= 9)  return { label: 'Classified', color: rarityColors.classified, tier: 'classified' };
+    if (weight >= 5)  return { label: 'Covert', color: rarityColors.covert, tier: 'covert' };
+    return { label: 'Gold', color: rarityColors.gold, tier: 'gold' };
+  }
+
+  function processConfigData(data) {
+    const skinsByTier = {
+      'covert': [],
+      'classified': [],
+      'restricted': [],
+      'mil-spec': []
     };
 
-    // Fixed tier percentages
-    const tierOdds = {
-      'gold': 3.5,
-      'covert': 3.5,
-      'classified': 10.5,
-      'restricted': 27.5,
-      'mil-spec': 55
-    };
-
-    // Assign rarity based on unboxWeight using new tier system.
-    function assignRarity(weight) {
-      if (weight >= 30) return { label: "Mil-Spec", color: rarityColors["mil-spec"], tier: "mil-spec" };
-      if (weight >= 15) return { label: "Restricted", color: rarityColors.restricted, tier: "restricted" };
-      if (weight >= 9)  return { label: "Classified", color: rarityColors.classified, tier: "classified" };
-      if (weight >= 5)  return { label: "Covert", color: rarityColors.covert, tier: "covert" };
-      return { label: "Gold", color: rarityColors.gold, tier: "gold" };
+    const unboxableSkins = data.filter(cone => cone.canUnbox);
+    for (const cone of unboxableSkins) {
+      const rarity = assignRarity(cone.unboxWeight || 0);
+      if (skinsByTier[rarity.tier]) {
+        skinsByTier[rarity.tier].push(cone);
+      }
     }
 
-    // Global array to hold unboxable cones.
-    let cones = [];
+    cones = [];
+    for (const [tier, tierPercentage] of Object.entries(tierOdds)) {
+      const tierSkins = skinsByTier[tier] || [];
+      if (tierSkins.length === 0) continue;
 
-    // Function to load cone configuration
-    function loadConesConfiguration() {
-      console.log('DEBUG: Starting configuration reload...');
-      // Clear existing cone data first to prevent stale references
-      cones = [];
-      
-      fetch('/skins/config.json?' + Date.now()) // Add cache buster
-        .then(response => response.json())
-        .then(data => {
-          console.log('DEBUG: Raw config.json data:', data);
-          
-          // Group skins by tier first (gold excluded - trails only)
-          const skinsByTier = {
-            'covert': [],
-            'classified': [],
-            'restricted': [],
-            'mil-spec': []
-          };
+      const totalTierWeight = tierSkins.reduce((sum, skin) => sum + (skin.unboxWeight || 0), 0);
 
-          // Filter and group unboxable skins by tier
-          const unboxableSkins = data.filter(cone => cone.canUnbox);
-          for (const cone of unboxableSkins) {
-            const rarity = assignRarity(cone.unboxWeight || 0);
-            if (skinsByTier[rarity.tier]) {
-              skinsByTier[rarity.tier].push(cone);
-            }
-          }
+      for (const skin of tierSkins) {
+        const rarity = assignRarity(skin.unboxWeight || 0);
+        let skinProbability;
 
-          // Calculate individual skin odds using new tier system
-          cones = [];
-          for (const [tier, tierPercentage] of Object.entries(tierOdds)) {
-            const tierSkins = skinsByTier[tier] || [];
-            if (tierSkins.length === 0) continue;
-
-            // Calculate total weight within this tier
-            const totalTierWeight = tierSkins.reduce((sum, skin) => sum + (skin.unboxWeight || 0), 0);
-
-            for (const skin of tierSkins) {
-              const rarity = assignRarity(skin.unboxWeight || 0);
-              let skinProbability;
-
-              if (totalTierWeight === 0) {
-                // If no weights in tier, equal distribution
-                skinProbability = tierPercentage / tierSkins.length;
-              } else {
-                // Weight-based distribution within tier
-                const skinWeightRatio = (skin.unboxWeight || 0) / totalTierWeight;
-                skinProbability = tierPercentage * skinWeightRatio;
-              }
-
-              cones.push({
-                ...skin,
-                rarityLabel: rarity.label,
-                rarityColor: rarity.color,
-                imageUrl: `/skins/${skin.visuals}`,
-                tier: rarity.tier,
-                tierOdds: tierPercentage,
-                actualOdds: skinProbability
-              });
-            }
-          }
-          // Add special trail unbox item (gold tier - trails only)
-          cones.push({
-            name: '__trail__',
-            visuals: 'trail_special_item.png',
-            rarityLabel: 'Gold',
-            rarityColor: rarityColors.gold,
-            imageUrl: '/trail_special_item.png',
-            tier: 'gold',
-            tierOdds: tierOdds.gold,
-            actualOdds: tierOdds.gold,
-            isTrail: true
-          });
-
-          console.log('DEBUG: Processed cones array:', cones);
-          console.log('DEBUG: Cone names:', cones.map(c => c.name));
-          console.log('DEBUG: Available cone files:', cones.map(c => c.imageUrl));
-          console.log('DEBUG: Configuration reloaded successfully');
-        })
-        .catch(error => {
-          console.error('Error loading JSON:', error);
-          // Ensure cones array is cleared on error too
-          cones = [];
-        });
-    }
-
-    // Async version for use in unbox animation
-    async function loadConesConfigurationAsync() {
-      try {
-        console.log('DEBUG: Starting async configuration reload...');
-        // Clear existing cone data first to prevent stale references
-        cones = [];
-        
-        const response = await fetch('/skins/config.json?' + Date.now());
-        const data = await response.json();
-        console.log('DEBUG: Raw config.json data (async):', data);
-        
-        // Group skins by tier first (gold excluded - trails only)
-        const skinsByTier = {
-          'covert': [],
-          'classified': [],
-          'restricted': [],
-          'mil-spec': []
-        };
-
-        // Filter and group unboxable skins by tier
-        const unboxableSkins = data.filter(cone => cone.canUnbox);
-        for (const cone of unboxableSkins) {
-          const rarity = assignRarity(cone.unboxWeight || 0);
-          if (skinsByTier[rarity.tier]) {
-            skinsByTier[rarity.tier].push(cone);
-          }
+        if (totalTierWeight === 0) {
+          skinProbability = tierPercentage / tierSkins.length;
+        } else {
+          const skinWeightRatio = (skin.unboxWeight || 0) / totalTierWeight;
+          skinProbability = tierPercentage * skinWeightRatio;
         }
 
-        // Calculate individual skin odds using new tier system
-        cones = [];
-        for (const [tier, tierPercentage] of Object.entries(tierOdds)) {
-          const tierSkins = skinsByTier[tier] || [];
-          if (tierSkins.length === 0) continue;
-
-          // Calculate total weight within this tier
-          const totalTierWeight = tierSkins.reduce((sum, skin) => sum + (skin.unboxWeight || 0), 0);
-
-          for (const skin of tierSkins) {
-            const rarity = assignRarity(skin.unboxWeight || 0);
-            let skinProbability;
-
-            if (totalTierWeight === 0) {
-              // If no weights in tier, equal distribution
-              skinProbability = tierPercentage / tierSkins.length;
-            } else {
-              // Weight-based distribution within tier
-              const skinWeightRatio = (skin.unboxWeight || 0) / totalTierWeight;
-              skinProbability = tierPercentage * skinWeightRatio;
-            }
-
-            cones.push({
-              ...skin,
-              rarityLabel: rarity.label,
-              rarityColor: rarity.color,
-              imageUrl: `/skins/${skin.visuals}`,
-              tier: rarity.tier,
-              tierOdds: tierPercentage,
-              actualOdds: skinProbability
-            });
-          }
-        }
-        // Add special trail unbox item (gold tier - trails only)
         cones.push({
-          name: '__trail__',
-          visuals: 'trail_special_item.png',
-          rarityLabel: 'Gold',
-          rarityColor: rarityColors.gold,
-          imageUrl: '/trail_special_item.png',
-          tier: 'gold',
-          tierOdds: tierOdds.gold,
-          actualOdds: tierOdds.gold,
-          isTrail: true
+          ...skin,
+          rarityLabel: rarity.label,
+          rarityColor: rarity.color,
+          imageUrl: `/skins/${skin.visuals}`,
+          tier: rarity.tier,
+          tierOdds: tierPercentage,
+          actualOdds: skinProbability
         });
+      }
+    }
 
-        console.log('DEBUG: Processed cones array (async):', cones);
-        console.log('DEBUG: Cone names (async):', cones.map(c => c.name));
-        console.log('DEBUG: Available cone files (async):', cones.map(c => c.imageUrl));
-        console.log('DEBUG: Configuration reloaded successfully (async)');
-      } catch (error) {
-        console.error('Error loading JSON (async):', error);
-        // Ensure cones array is cleared on error too
+    // Special trail unbox item (gold tier)
+    cones.push({
+      name: '__trail__',
+      visuals: 'trail_special_item.png',
+      rarityLabel: 'Gold',
+      rarityColor: rarityColors.gold,
+      imageUrl: '/trail_special_item.png',
+      tier: 'gold',
+      tierOdds: tierOdds.gold,
+      actualOdds: tierOdds.gold,
+      isTrail: true
+    });
+  }
+
+  function loadConesConfiguration() {
+    cones = [];
+    fetch('/skins/config.json?' + Date.now())
+      .then(response => response.json())
+      .then(data => {
+        processConfigData(data);
+        console.log('[Overlay] Loaded', cones.length, 'cones');
+      })
+      .catch(error => {
+        console.error('[Overlay] Failed to load config:', error);
         cones = [];
+      });
+  }
+
+  async function loadConesConfigurationAsync() {
+    try {
+      cones = [];
+      const response = await fetch('/skins/config.json?' + Date.now());
+      const data = await response.json();
+      processConfigData(data);
+      console.log('[Overlay] Loaded', cones.length, 'cones (async)');
+    } catch (error) {
+      console.error('[Overlay] Failed to load config (async):', error);
+      cones = [];
+    }
+  }
+
+  // ─── UNBOXER AVATAR ───
+  const FALLBACK_AVATAR = '/Placeholder.webp';
+
+  async function loadUnboxerAvatar(userName) {
+    const $avatar = document.getElementById('crateAvatar');
+    $avatar.src = FALLBACK_AVATAR;
+    try {
+      const res = await fetch(`/api/public/avatar/${encodeURIComponent(userName)}`);
+      const data = await res.json();
+      if (data.avatar_url) {
+        $avatar.src = data.avatar_url;
+      }
+    } catch (err) {
+      console.warn('[Overlay] Failed to load unboxer avatar:', err);
+    }
+  }
+
+  // Initial load
+  loadConesConfiguration();
+  loadSounds();
+  loadAudioVolume();
+
+  // ─── RANDOM HELPERS ───
+  function getWeightedRandomCone() {
+    const tierRoll = Math.random() * 100;
+    let cumulativeOdds = 0;
+    let selectedTier = null;
+
+    for (const [tier, percentage] of Object.entries(tierOdds)) {
+      cumulativeOdds += percentage;
+      if (tierRoll <= cumulativeOdds) {
+        selectedTier = tier;
+        break;
       }
     }
 
-    // Initial load of cone configuration
-    loadConesConfiguration();
+    const tierCones = cones.filter(cone => cone.tier === selectedTier && !cone.isTrail);
 
-    // Select a cone using the new tier-based system for filler items.
-    function getWeightedRandomCone() {
-      // Step 1: Roll for tier based on fixed percentages
-      const tierRoll = Math.random() * 100;
-      let cumulativeOdds = 0;
-      let selectedTier = null;
-
-      for (const [tier, percentage] of Object.entries(tierOdds)) {
-        cumulativeOdds += percentage;
-        if (tierRoll <= cumulativeOdds) {
-          selectedTier = tier;
-          break;
-        }
+    if (tierCones.length === 0) {
+      const fallbackCones = cones.filter(cone => cone.tier === 'mil-spec' && !cone.isTrail);
+      if (fallbackCones.length === 0) {
+        return cones.find(c => !c.isTrail) || cones[0] || null;
       }
-
-      // Step 2: Get skins in the selected tier (exclude trail from fillers)
-      const tierCones = cones.filter(cone => cone.tier === selectedTier && !cone.isTrail);
-
-      if (tierCones.length === 0) {
-        // Fallback to mil-spec tier if selected tier has no skins
-        const fallbackCones = cones.filter(cone => cone.tier === 'mil-spec' && !cone.isTrail);
-        if (fallbackCones.length === 0) {
-          // Ultimate fallback to any non-trail cone
-          return cones.find(c => !c.isTrail) || cones[0] || null;
-        }
-        return selectFromTierCones(fallbackCones);
-      }
-
-      // Step 3: Select specific skin within tier using weights
-      return selectFromTierCones(tierCones);
+      return selectFromTierCones(fallbackCones);
     }
 
-    // Helper function to select from cones within a specific tier
-    function selectFromTierCones(tierCones) {
-      if (tierCones.length === 1) {
-        return tierCones[0];
-      }
+    return selectFromTierCones(tierCones);
+  }
 
-      // Use weighted selection within the tier
-      const totalWeight = tierCones.reduce((sum, cone) => sum + (cone.unboxWeight || 0), 0);
-      
-      if (totalWeight === 0) {
-        // If no weights, select randomly
-        const randomIndex = Math.floor(Math.random() * tierCones.length);
-        return tierCones[randomIndex];
-      }
+  function selectFromTierCones(tierCones) {
+    if (tierCones.length === 1) return tierCones[0];
 
-      let random = Math.random() * totalWeight;
-      
-      for (const cone of tierCones) {
-        random -= (cone.unboxWeight || 0);
-        if (random <= 0) {
-          return cone;
-        }
-      }
-      
-      // Fallback to last cone in tier
-      return tierCones[tierCones.length - 1];
+    const totalWeight = tierCones.reduce((sum, cone) => sum + (cone.unboxWeight || 0), 0);
+
+    if (totalWeight === 0) {
+      return tierCones[Math.floor(Math.random() * tierCones.length)];
     }
 
-    // Returns a weighted random cone not matching lastConeName.
-    function getNonDuplicateWeightedRandomCone(lastConeName) {
-      let cone;
-      let attempts = 0;
-      do {
-        cone = getWeightedRandomCone();
-        attempts++;
-      } while (lastConeName && cone.name.toLowerCase() === lastConeName.toLowerCase() && attempts < 10);
-      return cone;
+    let random = Math.random() * totalWeight;
+    for (const cone of tierCones) {
+      random -= (cone.unboxWeight || 0);
+      if (random <= 0) return cone;
     }
 
-    // Generate an array of filler cones ensuring no two consecutive items share the same name.
-    function generateFillerItems(count, initialLastName) {
-      const fillerItems = [];
-      let lastName = initialLastName;
-      for (let i = 0; i < count; i++) {
-        const fillerCone = getNonDuplicateWeightedRandomCone(lastName);
-        fillerItems.push(fillerCone);
-        lastName = fillerCone.name;
+    return tierCones[tierCones.length - 1];
+  }
+
+  function getNonDuplicateWeightedRandomCone(lastConeName) {
+    let cone;
+    let attempts = 0;
+    do {
+      cone = getWeightedRandomCone();
+      attempts++;
+    } while (lastConeName && cone && cone.name.toLowerCase() === lastConeName.toLowerCase() && attempts < 10);
+    return cone;
+  }
+
+  function generateFillerItems(count, initialLastName) {
+    const items = [];
+    let lastName = initialLastName;
+    for (let i = 0; i < count; i++) {
+      const filler = getNonDuplicateWeightedRandomCone(lastName);
+      if (filler) {
+        items.push(filler);
+        lastName = filler.name;
       }
-      return fillerItems;
     }
+    return items;
+  }
 
-    // Create an element for a single cone item.
-    function createItemElement(cone) {
-      const div = document.createElement("div");
-      div.className = "item";
-      div.setAttribute("data-name", cone.name);
+  // ─── BUILD ITEM ELEMENT ───
+  function buildItem(cone, isWinner) {
+    const color = cone.rarityColor;
 
-      let content = '';
-      if (cone.isTrail) {
-        // Trail special item
-        content = `<img src="/trail_special_item.png" alt="Trail" style="object-fit: contain;">`;
-      } else if (cone.visuals.includes('holo_doppler')) {
-        // Special handling for doppler skins with random phases
-        const phase = Math.floor(Math.random() * 4) + 1;
-        const dopplerUrl = `/skins/holo_doppler_${phase}.jpg`;
-        content = `
-          <div class="item-holo-container">
-            <div class="item-holo-bg" style="background-image: url('${dopplerUrl}')"></div>
-            <img class="item-holo-overlay" src="/skins/transparent.png" alt="${cone.name}">
-          </div>
-        `;
-      } else if (cone.visuals.startsWith('holo_')) {
-        // Handle other holo skins
-        content = `
-          <div class="item-holo-container">
-            <div class="item-holo-bg" style="background-image: url('${cone.imageUrl}')"></div>
-            <img class="item-holo-overlay" src="/skins/transparent.png" alt="${cone.name}">
-          </div>
-        `;
-      } else {
-        // Regular cone skins
-        content = `<img src="${cone.imageUrl}" alt="${cone.name}">`;
-      }
+    const div = document.createElement('div');
+    div.className = 'item' + (isWinner ? ' winner' : '');
+    div.setAttribute('data-name', cone.name);
+    if (isWinner) div.style.setProperty('--glow-color', color + '80');
 
-      div.innerHTML = `
-        ${content}
-        <div class="rarity-line" style="background-color: ${cone.rarityColor}"></div>
+    let imgContent;
+    if (cone.isTrail) {
+      imgContent = `<img src="/trail_special_item.png" alt="Trail" loading="eager" />`;
+    } else if (cone.visuals && cone.visuals.includes('holo_doppler')) {
+      const phase = Math.floor(Math.random() * 4) + 1;
+      const dopplerUrl = `/skins/holo_doppler_${phase}.jpg`;
+      imgContent = `
+        <div class="item-holo-container">
+          <div class="item-holo-bg" style="background-image: url('${dopplerUrl}')"></div>
+          <img class="item-holo-overlay" src="/skins/transparent.png" alt="${cone.name}">
+        </div>
       `;
-      return div;
+    } else if (cone.visuals && cone.visuals.startsWith('holo_')) {
+      imgContent = `
+        <div class="item-holo-container">
+          <div class="item-holo-bg" style="background-image: url('${cone.imageUrl}')"></div>
+          <img class="item-holo-overlay" src="/skins/transparent.png" alt="${cone.name}">
+        </div>
+      `;
+    } else {
+      imgContent = `<img src="${cone.imageUrl}" alt="${cone.name}" loading="eager" />`;
     }
 
-    // Generate the item ribbon: 20 filler items, the winning cone, then 5 filler items.
-    function generateRibbon(winningCone) {
-      const itemRibbon = document.getElementById("itemRibbon");
-      itemRibbon.innerHTML = "";
+    const displayName = cone.isTrail ? 'Trail' : cone.name;
 
-      // Generate 20 filler items before the winning cone.
-      const fillerBefore = generateFillerItems(20, null);
-      if (fillerBefore.length > 0 && fillerBefore[fillerBefore.length - 1].name.toLowerCase() === winningCone.name.toLowerCase()) {
-        let previousName = fillerBefore.length > 1 ? fillerBefore[fillerBefore.length - 2].name : null;
-        let newCone = getNonDuplicateWeightedRandomCone(previousName);
-        while (newCone.name.toLowerCase() === winningCone.name.toLowerCase()) {
-          newCone = getNonDuplicateWeightedRandomCone(previousName);
-        }
-        fillerBefore[fillerBefore.length - 1] = newCone;
+    div.innerHTML = `
+      <div class="item-inner">
+        ${imgContent}
+        <div class="item-name">${displayName}</div>
+        <div class="rarity-stripe" style="background: ${color}; box-shadow: 0 0 8px ${color}60;"></div>
+      </div>
+    `;
+    return div;
+  }
+
+  // ─── GENERATE RIBBON ───
+  function generateRibbon(winningCone) {
+    $ribbon.innerHTML = '';
+
+    // Filler before
+    const fillerBefore = generateFillerItems(FILLER_BEFORE, null);
+    // Make sure last filler before winner doesn't match winner
+    if (fillerBefore.length > 0 && fillerBefore[fillerBefore.length - 1].name.toLowerCase() === winningCone.name.toLowerCase()) {
+      let previousName = fillerBefore.length > 1 ? fillerBefore[fillerBefore.length - 2].name : null;
+      let newCone = getNonDuplicateWeightedRandomCone(previousName);
+      while (newCone.name.toLowerCase() === winningCone.name.toLowerCase()) {
+        newCone = getNonDuplicateWeightedRandomCone(previousName);
       }
-
-      // Generate 5 filler items after the winning cone.
-      const fillerAfter = generateFillerItems(5, winningCone.name);
-
-      fillerBefore.forEach(cone => itemRibbon.appendChild(createItemElement(cone)));
-      itemRibbon.appendChild(createItemElement(winningCone));
-      fillerAfter.forEach(cone => itemRibbon.appendChild(createItemElement(cone)));
+      fillerBefore[fillerBefore.length - 1] = newCone;
     }
 
-    // Fade out and hide the overlay, then process the next item in the queue.
-    function resetUI() {
-      const overlay = document.getElementById("unboxOverlay");
-      const itemRibbon = document.getElementById("itemRibbon");
-      const resultSpan = document.getElementById("result");
-      const userNameSpan = document.getElementById("unboxUserName");
+    // Filler after
+    const fillerAfter = generateFillerItems(FILLER_AFTER, winningCone.name);
 
-      itemRibbon.style.transition = "";
-      itemRibbon.style.transform = "";
-      itemRibbon.innerHTML = "";
-      resultSpan.textContent = "";
-      userNameSpan.textContent = "";
+    fillerBefore.forEach(cone => $ribbon.appendChild(buildItem(cone, false)));
+    $ribbon.appendChild(buildItem(winningCone, true));
+    fillerAfter.forEach(cone => $ribbon.appendChild(buildItem(cone, false)));
+  }
 
-      overlay.classList.remove("show");
+  // ─── SHOW / HIDE OVERLAY ───
+  function showOverlay() {
+    return new Promise(resolve => {
+      $overlay.classList.remove('exiting', 'visible');
+      $overlay.style.display = 'block';
+      void $overlay.offsetWidth;
+      $overlay.classList.add('entering');
+      requestAnimationFrame(() => {
+        $overlay.classList.remove('entering');
+        $overlay.classList.add('visible');
+        setTimeout(resolve, 450);
+      });
+    });
+  }
+
+  function hideOverlay() {
+    return new Promise(resolve => {
+      $overlay.classList.remove('visible');
+      $overlay.classList.add('exiting');
       setTimeout(() => {
-        overlay.style.display = "none";
-        isAnimating = false;
-        checkPendingRefresh(); // Check if we need to refresh configuration
-        processQueue(); // processQueue handles its own async operations
+        $overlay.style.display = 'none';
+        $overlay.classList.remove('exiting');
+        resolve();
       }, 500);
+    });
+  }
+
+  // ─── TICK FLASH SYSTEM ───
+  let tickRafId = null;
+  let tickEdgeIndex = 0;
+  let tickEdges = [];
+  let lastTx = 0;
+  let lastTickTime = 0;
+  let tickVelocity = 0;
+
+  function startTickWatcher() {
+    const items = $ribbon.children;
+    tickEdges = [];
+    for (let i = 0; i < items.length; i++) {
+      tickEdges.push(items[i].offsetLeft + items[i].offsetWidth);
     }
 
-    // Queue an unbox request.
-    function queueUnbox(skin, userName, message) {
-      console.log('DEBUG: Queueing unbox request:', { skin, userName, message });
-      console.log('DEBUG: Queue length before adding:', unboxQueue.length);
-      unboxQueue.push({ skin, userName, message });
-      console.log('DEBUG: Queue length after adding:', unboxQueue.length);
-      processQueue(); // processQueue handles its own async operations
+    const initTransform = getComputedStyle($ribbon).transform;
+    const viewCenter = $viewport.offsetWidth / 2;
+    let initCenter = viewCenter;
+    if (initTransform && initTransform !== 'none') {
+      initCenter = Math.abs(new DOMMatrix(initTransform).m41) + viewCenter;
+    }
+    tickEdgeIndex = 0;
+    while (tickEdgeIndex < tickEdges.length && initCenter >= tickEdges[tickEdgeIndex]) {
+      tickEdgeIndex++;
     }
 
-    // Process the next unbox in the queue if not currently animating.
-    async function processQueue() {
-      console.log('DEBUG: ===== PROCESSING QUEUE =====');
-      console.log('DEBUG: isAnimating:', isAnimating, 'queueLength:', unboxQueue.length);
-      
-      if (!isAnimating && unboxQueue.length > 0) {
-        const next = unboxQueue.shift();
-        console.log('DEBUG: Processing next unbox from queue:', next);
-        console.log('DEBUG: Remaining queue length:', unboxQueue.length);
-        isAnimating = true;
-        await unboxAnimation(next.skin, next.userName, next.message);
-      } else {
-        if (isAnimating) {
-          console.log('DEBUG: Cannot process queue - animation in progress');
-        } else if (unboxQueue.length === 0) {
-          console.log('DEBUG: Queue is empty - nothing to process');
+    lastTx = 0;
+    lastTickTime = performance.now();
+    tickVelocity = 0;
+
+    const check = () => {
+      const transform = getComputedStyle($ribbon).transform;
+      if (transform && transform !== 'none') {
+        const matrix = new DOMMatrix(transform);
+        const tx = Math.abs(matrix.m41);
+        const now = performance.now();
+        const dt = now - lastTickTime;
+
+        if (dt > 0) {
+          tickVelocity = Math.abs(tx - lastTx) / dt;
+        }
+        lastTx = tx;
+        lastTickTime = now;
+
+        const currentCenter = tx + $viewport.offsetWidth / 2;
+
+        while (tickEdgeIndex < tickEdges.length && currentCenter >= tickEdges[tickEdgeIndex]) {
+          tickEdgeIndex++;
+          flashTick(tickVelocity);
         }
       }
+      tickRafId = requestAnimationFrame(check);
+    };
+    tickRafId = requestAnimationFrame(check);
+  }
+
+  function stopTickWatcher() {
+    if (tickRafId) cancelAnimationFrame(tickRafId);
+    tickRafId = null;
+  }
+
+  function flashTick(velocity) {
+    const el = document.createElement('div');
+    el.className = 'tick-flash';
+    $viewport.appendChild(el);
+    setTimeout(() => el.remove(), 120);
+
+    const audio = audioCache['tick'];
+    if (!audio) return;
+    const clone = audio.cloneNode();
+    const speed = Math.max(0, Math.min(velocity || 0, 4));
+    clone.playbackRate = 0.8 + (speed / 4) * 2.2;
+    clone.volume = 0.4 * masterVolume;
+    clone.play().catch(() => {});
+  }
+
+  // ─── CRATE OPENING ───
+  function resetCrate() {
+    $crateContainer.classList.remove('visible', 'hidden', 'zoom-out');
+    $crateContainer.style.display = 'none';
+    $crate.classList.remove('shaking', 'open');
+    $viewport.classList.remove('crate-phase');
+    $ribbon.classList.remove('reveal');
+    document.getElementById('pointer').classList.remove('reveal');
+  }
+
+  async function playCrateAnimation() {
+    resetCrate();
+
+    // Hide ribbon/pointer, show crate
+    $viewport.classList.add('crate-phase');
+    $crateContainer.style.display = 'flex';
+    void $crateContainer.offsetWidth;
+    $crateContainer.classList.add('visible');
+    await wait(300);
+
+    // Shake the crate
+    $crate.classList.add('shaking');
+    await wait(400);
+
+    // Play start sound during the shake
+    playSound('start');
+    await wait(400);
+
+    // Open the lid
+    $crate.classList.remove('shaking');
+    $crate.classList.add('open');
+    await wait(800);
+
+    // Zoom out crate, reveal ribbon
+    $crateContainer.classList.add('zoom-out');
+    await wait(200);
+    $ribbon.classList.add('reveal');
+    document.getElementById('pointer').classList.add('reveal');
+    await wait(400);
+
+    // Clean up crate
+    $viewport.classList.remove('crate-phase');
+    $ribbon.classList.remove('reveal');
+    document.getElementById('pointer').classList.remove('reveal');
+    $crateContainer.classList.remove('visible', 'zoom-out');
+    $crateContainer.style.display = 'none';
+  }
+
+  // ─── CELEBRATIONS ───
+  function celebratePink(color) {
+    $viewport.style.setProperty('--pulse-color', color + '40');
+    $viewport.classList.add('glow-pulse');
+    setTimeout(() => $viewport.classList.remove('glow-pulse'), 3200);
+  }
+
+  function celebrateRed(color) {
+    const flash = document.createElement('div');
+    flash.className = 'screen-flash';
+    flash.style.background = `radial-gradient(circle at center, ${color}50, transparent 70%)`;
+    document.body.appendChild(flash);
+    setTimeout(() => flash.remove(), 700);
+    celebratePink(color);
+  }
+
+  function celebrateGold(color) {
+    celebrateRed(color);
+  }
+
+  // ─── MAIN UNBOX ANIMATION ───
+  async function unboxAnimation(skinName, userName, unboxId) {
+    console.log('[Overlay] Starting unbox:', { skinName, userName });
+
+    // Always refresh config before every unbox
+    await loadConesConfigurationAsync();
+
+    if (cones.length === 0) {
+      console.error('[Overlay] No cones available');
+      isAnimating = false;
+      processQueue();
+      return;
     }
 
-    // Main unbox animation function with auto-refresh capability
-    async function unboxAnimation(skinName, userName, message) {
-      console.log('DEBUG: ===== STARTING UNBOX ANIMATION =====');
-      console.log('DEBUG: Requested skin:', skinName);
-      console.log('DEBUG: Player:', userName);
-      console.log('DEBUG: Current cones count:', cones.length);
-      console.log('DEBUG: Current cone names:', cones.map(c => c.name));
-      
-      // ALWAYS refresh config before EVERY unbox to catch deletions and additions
-      console.log('🔄 FORCE REFRESHING CONFIG BEFORE UNBOX');
-      await loadConesConfigurationAsync();
-      console.log('🔄 Config refresh completed. Updated cones:', cones.map(c => c.name));
-      
-      // Now look for the winning cone
-      let winningCone = cones.find(cone => cone.name.toLowerCase() === skinName.toLowerCase());
-      console.log('DEBUG: Looking for winning cone after refresh:', winningCone);
-      
-      if (!winningCone) {
-        console.log('DEBUG: ⚠️ Skin still not found after config refresh');
-        console.log('DEBUG: Looking for skin:', skinName);
-        console.log('DEBUG: Available cones after refresh:', cones.map(c => c.name));
-      }
-      
-      if (cones.length === 0) {
-        console.error("DEBUG: ===== NO CONES AVAILABLE =====");
-        console.error("Cones still not loaded after refresh. Configuration may be invalid or all skins deleted.");
-        
-        // Clear the animation state and process next in queue
-        isAnimating = false;
-        processQueue(); // Try processing next item in queue if any
-        return;
-      }
-      
-      if (!winningCone) {
-        console.error('DEBUG: ===== SKIN NOT FOUND AFTER RELOAD =====');
-        console.error(`Requested skin: "${skinName}"`);
-        console.error('Available cones after reload:', cones.map(c => c.name));
-        console.error('Available cone files after reload:', cones.map(c => c.imageUrl));
-        console.error('This skin may have been deleted or is not unboxable');
-        
-        // Clear the animation state and process next in queue
-        isAnimating = false;
-        processQueue(); // Try processing next item in queue if any
-        return;
-      }
+    // Find winning cone
+    let winningCone = cones.find(cone => cone.name.toLowerCase() === skinName.toLowerCase());
 
-      const overlay = document.getElementById("unboxOverlay");
-      overlay.style.display = "block";
-      setTimeout(() => {
-        overlay.classList.add("show");
-      }, 10);
-
-      // Set unboxer's name in the header (space is pre-allocated)
-      document.getElementById("unboxUserName").textContent = `Unboxing by: ${userName}`;
-      generateRibbon(winningCone);
-
-              // Odds are now calculated server-side using the new tier-based system
-        // Individual skin odds are: tier probability × (skin weight / tier total weight)
-
-      // Wait 1 second after the overlay fades in before starting the roll animation.
-      setTimeout(() => {
-        const containerWidth = document.getElementById("caseContainer").offsetWidth;
-        const itemWidth = 160; // Approximate width per item (including margins)
-        const winningIndex = 20;
-        const pointerOffset = containerWidth / 2;
-        const winningConeCenter = itemWidth * winningIndex + itemWidth / 2;
-        const winningPosition = pointerOffset - winningConeCenter;
-
-        const itemRibbon = document.getElementById("itemRibbon");
-        itemRibbon.style.transition = "transform 7s cubic-bezier(0.25, 1, 0.5, 1)";
-        itemRibbon.style.transform = `translateX(${winningPosition}px)`;
-
-        // After the animation ends, display the result in the footer.
-        setTimeout(() => {
-          const resultName = winningCone.isTrail ? 'a Trail!' : winningCone.name;
-          document.getElementById("result").innerHTML = `
-            You unboxed:<span style="color: ${winningCone.rarityColor}"> ${resultName}</span>
-          `;
-          // Emit finish event after a short delay then reset the UI.
-          setTimeout(() => {
-            setTimeout(() => {
-              console.log('DEBUG: Emitting unboxfinished event with message:', message);
-              socket.emit('unboxfinished', message);
-            }, 4000);
-            resetUI();
-          }, 3000);
-        }, 7000);
-      }, 1000); // 1000 ms wait after fade in
+    if (!winningCone) {
+      console.error('[Overlay] Skin not found:', skinName);
+      console.error('[Overlay] Available:', cones.map(c => c.name));
+      isAnimating = false;
+      processQueue();
+      return;
     }
-  </script>
+
+    const color = winningCone.rarityColor;
+
+    // Load unboxer's avatar for the crate
+    await loadUnboxerAvatar(userName);
+
+    // Set header
+    $userName.innerHTML = `<span>${userName}</span> is unboxing`;
+
+    // Reset state
+    $result.className = '';
+    $result.textContent = '';
+    $ribbon.classList.remove('animating', 'reveal');
+    $ribbon.style.transform = 'translateX(0)';
+    $viewport.classList.remove('glow-pulse', 'crate-phase');
+    document.getElementById('pointer').classList.remove('reveal');
+    resetCrate();
+
+    // Generate ribbon
+    generateRibbon(winningCone);
+
+    // Hide ribbon before overlay shows (crate phase)
+    $viewport.classList.add('crate-phase');
+
+    // Show overlay
+    await showOverlay();
+
+    // Calculate target position
+    const viewportWidth = $viewport.offsetWidth;
+    const pointerCenter = viewportWidth / 2;
+    const winnerCenter = WIN_INDEX * ITEM_TOTAL + ITEM_W / 2 + 3;
+    const randomOffset = (Math.random() - 0.5) * (ITEM_W * 0.35);
+    const targetX = -(winnerCenter - pointerCenter + randomOffset);
+
+    // Crate opening animation
+    await playCrateAnimation();
+
+    // Small beat then start roll
+    await wait(200);
+
+    startTickWatcher();
+
+    $ribbon.classList.add('animating');
+    $ribbon.style.transform = `translateX(${targetX}px)`;
+
+    // Wait for roll to finish
+    await wait(8000);
+
+    stopTickWatcher();
+
+    // Reveal winner
+    const winnerEl = $ribbon.querySelector('.item.winner');
+    if (winnerEl) winnerEl.classList.add('revealed');
+
+    // Play tier reveal sound
+    playSound('reveal_' + winningCone.tier);
+
+    // Show result
+    const resultName = winningCone.isTrail ? 'a Trail!' : winningCone.name;
+    $result.innerHTML = `You unboxed: <span class="result-name" style="color: ${color}; --result-color: ${color};">${resultName}</span>`;
+    $result.classList.add('show');
+
+    // Tier celebrations
+    if (winningCone.tier === 'gold') {
+      celebrateGold(color);
+    } else if (winningCone.tier === 'covert') {
+      celebrateRed(color);
+    } else if (winningCone.tier === 'classified') {
+      celebratePink(color);
+    }
+
+    // Hold result
+    await wait(3000);
+
+    // Hide overlay
+    await hideOverlay();
+
+    // Schedule unboxfinished emit (same timing as original)
+    // Tell server animation is done (server validates the unboxId and sends chat message)
+    console.log('[Overlay] Emitting unboxfinished:', unboxId);
+    socket.emit('unboxfinished', unboxId);
+
+    // Allow next unbox
+    isAnimating = false;
+    checkPendingRefresh();
+    processQueue();
+  }
+
+  // ─── QUEUE ───
+  function queueUnbox(skin, userName, unboxId) {
+    console.log('[Overlay] Queueing unbox:', { skin, userName, unboxId });
+    unboxQueue.push({ skin, userName, unboxId });
+    processQueue();
+  }
+
+  async function processQueue() {
+    if (!isAnimating && unboxQueue.length > 0) {
+      const next = unboxQueue.shift();
+      isAnimating = true;
+      await unboxAnimation(next.skin, next.userName, next.unboxId);
+    }
+  }
+
+  function checkPendingRefresh() {
+    if (pendingRefresh && !isAnimating && unboxQueue.length === 0) {
+      pendingRefresh = false;
+      loadConesConfigurationAsync();
+    }
+  }
+
+  // ─── UTIL ───
+  function wait(ms) {
+    return new Promise(r => setTimeout(r, ms));
+  }
+
+})();
+</script>
 </body>
 </html>

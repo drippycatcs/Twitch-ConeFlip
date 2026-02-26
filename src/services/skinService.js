@@ -14,11 +14,11 @@ class SkinService {
 
         // Fixed tier percentages
         this.tierOdds = {
-            'gold': 3.5,        // 3.5% for gold (trail unbox ONLY)
+            'gold': 2,          // 2% for gold (trail unbox ONLY)
             'covert': 3.5,      // 3.5% for red (covert)
             'classified': 10.5, // 10.5% for pink (classified)
             'restricted': 27.5, // 27.5% for purple (restricted)
-            'mil-spec': 55      // 55% for blue (mil-spec)
+            'mil-spec': 56.5    // 56.5% for blue (mil-spec)
         };
 
         this.trailService = null; // Injected later for trail unboxing

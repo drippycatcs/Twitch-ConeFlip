@@ -844,7 +844,7 @@ class TwitchService {
 
         if (!result) {
             // No match at all - send link to skins page and ask to try again
-            const skinsUrl = `${config.BASE_URL}/skins-all`;
+            const skinsUrl = `${config.BASE_URL}skins`;
             await this.sendChatMessage(`@${username} Couldn't find a buyable cone matching "${input}". Browse all cones here: ${skinsUrl} - then type the name in chat!`);
             // Keep pending open for retry but don't reset (preserves single-purchase limit)
             const pending = this.pendingBuyCone.get(username);

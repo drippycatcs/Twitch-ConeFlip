@@ -91,4 +91,47 @@ router.get('/info', asyncHandler(async (req, res) => {
     }
 }));
 
+// GET /api/public/avatar/:username
+// Returns the best avatar for a user (tries 7TV via GraphQL first, falls back to Twitch profile pic)
+router.get('/avatar/:username', asyncHandler(async (req, res) => {
+    try {
+        const username = req.params.username.toLowerCase().trim();
+        if (!username) {
+            return res.json({ avatar_url: null });
+        }
+
+        // Try 7TV avatar first (uses GraphQL search by username - same as profile.html/paint endpoint)
+        try {
+            const paintData = await TwitchService.getUser7TVPaint(username);
+            if (paintData && paintData.avatar_url) {
+                const url = paintData.avatar_url.startsWith('/') ? 'https:' + paintData.avatar_url : paintData.avatar_url;
+                return res.json({ avatar_url: url });
+            }
+        } catch (e) {
+            // 7TV failed, fall through to Twitch
+        }
+
+        // Fallback: Twitch profile picture
+        const twitchId = await TwitchService.getTwitchId(username);
+        if (!twitchId) {
+            return res.json({ avatar_url: null });
+        }
+
+        const axios = require('axios');
+        const response = await axios.get('https://api.twitch.tv/helix/users', {
+            params: { id: twitchId },
+            headers: {
+                'Client-ID': config.TWITCH.CLIENT_ID,
+                'Authorization': `Bearer ${config.TWITCH.STREAMER_ACCESS_TOKEN}`
+            }
+        });
+
+        const user = response.data?.data?.[0];
+        res.json({ avatar_url: user?.profile_image_url || null });
+    } catch (error) {
+        logger.error('Avatar endpoint error:', error.message);
+        res.json({ avatar_url: null });
+    }
+}));
+
 module.exports = router;

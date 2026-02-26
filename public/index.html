@@ -1498,11 +1498,21 @@
             ${shape.styles}
           `;
           
+          // Apply random initial rotation if effects.rotate is set
+          // rotate: true = fully random, rotate: 90 = random multiple of 90 (0, 90, 180, 270)
+          const effects = visualConfig.effects || {};
+          if (effects.rotate) {
+            const step = typeof effects.rotate === 'number' ? effects.rotate : 360;
+            const steps = Math.floor(360 / step);
+            const angle = Math.floor(Math.random() * steps) * step;
+            particle.style.transform = `rotate(${angle}deg)`;
+          }
+
           // Add shape content (SVG, emoji, or styled div)
           if (shape.content) {
             particle.innerHTML = shape.content;
           }
-          
+
           // Add to container
           this.particleContainer.appendChild(particle);
           
@@ -1651,11 +1661,12 @@
                break;
               
             default:
-              // Standard animation
+              // Standard animation - preserve any initial rotation
+              const initialRotation = particle.style.transform || '';
               particle.style.transition = `transform ${lifetime}ms ease-out, opacity ${lifetime}ms ease-in-out`;
               setTimeout(() => {
                 const finalY = velY + (gravity * lifetime / 12);
-                particle.style.transform = `translate(${velX}px, ${finalY}px)`;
+                particle.style.transform = `translate(${velX}px, ${finalY}px) ${initialRotation}`;
                 particle.style.opacity = '0';
               }, animationDelay);
           }
@@ -1701,7 +1712,10 @@
           if (visualConfig.image) {
             const images = Array.isArray(visualConfig.image) ? visualConfig.image : [visualConfig.image];
             const imageUrl = images[particleIndex % images.length];
-            
+            const effects = visualConfig.effects || {};
+            const hasGlow = effects.glow !== false;
+            const glowIntensity = effects.glowIntensity || (size/3);
+
             return {
               styles: `
                 background-image: url('${imageUrl}');
@@ -1709,7 +1723,7 @@
                 background-repeat: no-repeat;
                 background-position: center;
                 background-color: transparent;
-                filter: drop-shadow(0 0 ${size/3}px ${color});
+                ${hasGlow ? `filter: drop-shadow(0 0 ${glowIntensity}px ${color});` : ''}
               `,
               content: ''
             };

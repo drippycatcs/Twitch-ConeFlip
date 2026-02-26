@@ -14,6 +14,7 @@ class GameService {
         this.duelQueue = [];
         this.isProcessing = false;
         this._previousTopLevelPlayer = null;
+        this.pendingUnboxes = new Map(); // unboxId -> { message, playerName, skin, fallbackTimer }
     }
 
     async initialize() {
@@ -421,25 +422,60 @@ class GameService {
                 throw new Error('GameService not initialized');
             }
 
-            this.io.emit('unboxSkinAnim', skin, playerName, message);
+            // Generate unique unbox ID
+            const unboxId = `unbox_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 
-            logger.gameEvent('unbox_animation', { player: playerName, skin, message });
-
-            // Send chat message after animation delay (6 seconds to account for stream delay)
-            setTimeout(async () => {
-                try {
-                    await TwitchService.sendChatMessage(message);
-                    logger.info(`Unbox chat message sent: ${message}`);
-                } catch (chatError) {
-                    logger.warn(`Failed to send unbox chat message: ${chatError.message}`);
+            // Fallback: send chat message after 30s if client never confirms
+            const fallbackTimer = setTimeout(async () => {
+                const pending = this.pendingUnboxes.get(unboxId);
+                if (pending) {
+                    this.pendingUnboxes.delete(unboxId);
+                    logger.warn(`Unbox fallback triggered for ${playerName} (${unboxId}) - client never confirmed`);
+                    try {
+                        await TwitchService.sendChatMessage(message);
+                    } catch (chatError) {
+                        logger.warn(`Failed to send fallback unbox chat message: ${chatError.message}`);
+                    }
                 }
-            }, 6000);
+            }, 30000);
 
-            return { action: 'unbox_animation', player: playerName, skin, message };
+            // Store pending unbox server-side
+            this.pendingUnboxes.set(unboxId, { message, playerName, skin, fallbackTimer });
+
+            // Emit animation event with unboxId (message is NOT sent to client)
+            this.io.emit('unboxSkinAnim', skin, playerName, unboxId);
+
+            logger.gameEvent('unbox_animation', { player: playerName, skin, unboxId });
+
+            return { action: 'unbox_animation', player: playerName, skin, unboxId };
         } catch (error) {
             logger.error(`Failed to trigger unbox animation for ${playerName}:`, error);
             throw error;
         }
+    }
+
+    async completeUnbox(unboxId) {
+        const pending = this.pendingUnboxes.get(unboxId);
+        if (!pending) {
+            logger.warn(`Unbox complete rejected - unknown unboxId: ${unboxId}`);
+            return false;
+        }
+
+        // Clear the fallback timer
+        clearTimeout(pending.fallbackTimer);
+        this.pendingUnboxes.delete(unboxId);
+
+        // Send chat message 2 seconds after animation finishes
+        setTimeout(async () => {
+            try {
+                await TwitchService.sendChatMessage(pending.message);
+                logger.info(`Unbox chat message sent for ${pending.playerName}: ${pending.message}`);
+            } catch (chatError) {
+                logger.warn(`Failed to send unbox chat message: ${chatError.message}`);
+            }
+        }, 2000);
+
+        return true;
     }
 
     async restart() {
